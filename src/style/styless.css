@@ -1,5 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
+/* Global reset for welcome screen */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
 /* General Styles */
 body {
   background-color: #0A081B;
@@ -4606,3 +4614,684 @@ text-align: center;
 .button-icon {
     width: 10px;
     height: 10px;}
+
+/* Welcome Screen Styles */
+.welcome-screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0A081B;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'DM Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.welcome-main-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+
+/* Background line images */
+.welcome-bg-lines-left {
+  position: absolute;
+  left: 0;
+  bottom: 25%;
+  width: 40%;
+  max-width: 300px;
+  height: auto;
+  z-index: 1;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.welcome-bg-lines-right {
+  position: absolute;
+  right: 0;
+  bottom: 25%;
+  width: 40%;
+  max-width: 300px;
+  height: auto;
+  z-index: 1;
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .welcome-bg-lines-left,
+  .welcome-bg-lines-right {
+    width: 30%;
+    max-width: 200px;
+  }
+  
+  .welcome-title {
+    font-size: 2rem;
+  }
+  
+  .welcome-instructions {
+    font-size: 1rem;
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-bg-lines-left,
+  .welcome-bg-lines-right {
+    width: 35%;
+    max-width: 150px;
+  }
+  
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+  
+  .welcome-instructions {
+    font-size: 0.9rem;
+    padding: 0 15px;
+  }
+  
+  .welcome-header {
+    padding: 20px 15px;
+  }
+}
+
+/* Header */
+.welcome-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  position: relative;
+}
+
+.welcome-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.welcome-logo img {
+  width: 24px;
+  height: 24px;
+}
+
+.welcome-help {
+  position: absolute;
+  top: 22px;
+  left: 685px;
+  width: 91px;
+  height: 18px;
+  display: flex;
+  align-items: center;  
+  gap: 2px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  opacity: 1;
+}
+
+.welcome-help:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.welcome-help img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+/* Main content */
+.welcome-content {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 10;
+  width: 100%;
+  max-width: 600px;
+  padding: 0 40px;
+}
+
+.welcome-title {
+  font-family: DM Sans;
+font-weight: 400;
+font-style: 9pt Regular;
+font-size: 20px;
+line-height: 100%;
+letter-spacing: -3%;
+
+}
+
+.welcome-title-highlight {
+  font-family: DM Sans;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.6px;
+  color: #59AAFB;
+
+}
+
+.welcome-instructions {
+  font-family: DM Sans;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 500px;
+  margin: 20px 0 30px 0;
+  opacity: 1;
+}
+
+.welcome-authorize-btn {
+  position: absolute;
+  background: #262E84;
+  width: 122px;
+  height: 28px;
+  top: 111%;
+  left:40%;
+  opacity: 1;
+  gap: 8px;
+  padding: 10px 51px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-authorize-btn:hover {
+  background: #7A6BFF;
+  transform: translateY(-2px);
+}
+
+/* Setup Step Component Styles */
+.setup-step-screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'DM Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+   background-color: rgba(29, 26, 51, 0.32);
+   backdrop-filter: blur(10px);
+
+}
+
+.setup-main-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+}
+
+/* Central Interactive Section */
+.setup-central-section {
+  display: flex;
+  position: absolute;
+  top: 121px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 40px;
+}
+
+.setup-icon {
+  position: absolute;
+
+  left: 379px;
+  width: 42px;
+  height: 42px;
+  background: transparent;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setup-icon img {
+  width:100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+/* Confirmation Checkbox */
+.setup-confirmation {
+  position: absolute;
+  top: 77px;
+  left: 150px;
+  width: 500px;
+  height: 20px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.setup-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+}
+
+.setup-checkbox-label {
+  display: flex;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+}
+
+.setup-checkbox {
+  display: none;
+
+}
+
+.setup-checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(140, 121, 255, 0.5);
+  border-radius: 4px;
+  position: relative;
+  background: transparent;
+  transition: all 0.3s ease;
+  color: 6E669D;
+}
+
+.setup-checkbox:checked + .setup-checkmark {
+  background: transparent;
+  border-color:6E669D;
+  border: 6E669D;
+}
+
+.setup-checkbox:checked + .setup-checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: 6E669D;
+  font-size: 14px;
+  font-weight: bold;
+  border: 6E669D;
+    color: #6E669D;
+
+}
+
+.setup-checkbox-text {
+  font-weight: 400;
+  line-height: 1.4;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+}
+
+/* Navigation Buttons */
+.setup-navigation {
+position: absolute;
+  top: -110px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.setup-back-btn {
+  position: absolute;
+  top: 266px;
+  left: 190px;
+  width:80px;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -0.42px;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.setup-back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.setup-back-btn img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+  transform: rotate(180deg);
+}
+
+.setup-proceed-btn {
+  position: absolute;
+  top: 262px;
+  left: 430px;
+  width: 177px;
+  height: 28px;
+  background: rgba(134, 132, 135, .3);
+  color: rgba(255, 255, 255, .25);
+  border: none;
+  padding: 10px 51px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: rotate(0deg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 25px
+}
+
+.setup-proceed-btn:hover:not(:disabled) {
+  background: #7A6BFF;
+  transform: translateY(-2px);
+}
+
+.setup-proceed-btn:disabled {
+  background: rgba(38, 46, 132, 0.5);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Information Cards */
+.setup-info-cards {
+  position: absolute;
+  left: 25px;
+top: auto;
+   width: -webkit-fill-available;
+   
+    bottom: 8%;
+    height: 120px;
+  display: flex;
+  gap: 24px;
+ display: flex;
+ flex-direction: row;
+ gap: 11px;
+
+}
+
+.setup-card {
+border: 1px solid #262E84;
+    width: 250px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  padding:12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+}
+
+.setup-card-info{
+  background: linear-gradient(135deg, #2C2840 0%, #403A60 100%);
+  border :1px #000000;
+  width : 80%;
+  border-radius:12px;
+  margin-right: 25px;
+}
+
+.setup-card-top{
+  display: flex;
+  flex-direction: column;
+
+}
+
+
+
+
+.setup-card-title {
+ color: #bc79ff;
+font-family: 'DM Sans', sans-serif;
+font-weight: 400;
+font-size: 12px;
+line-height: 100%;
+letter-spacing: -0.36px;
+}
+
+.setup-card-content {
+  font-family: 'DM Sans', sans-serif;
+  font-weight:300;
+  line-height: 10px;
+  letter-spacing: -3%;
+  font-size: 12px;
+  line-height: 100%;
+  color: #ffffff  ;
+  margin: 5px 0!important;
+
+  
+}
+.setup-card-bottom{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap:4px;
+  justify-content: space-between;
+  margin-top: auto;
+}
+.setup-card-help{
+  display: flex;
+  flex-direction: row;
+  width:100px;
+  height: 16px;
+  font-size: 12px;
+  font-weight: 300;
+  gap: 2px;
+
+}
+.setup-card-img{
+  width: 16px;
+  height: 16px;
+}
+
+/* Tutorial Card */
+
+.setup-card-youtube-thumbnail{
+      position: absolute;
+    width: 96px;
+    height: 53px;
+    border-radius: 8px;
+    overflow: hidden;
+    top: 62px;
+    left: 123px;
+}
+.setup-video-thumbnail {
+ width: 100%;
+  height: 100%;
+
+}
+.setup-card-info{
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+.setup-card-info-title{
+  font-family: DM Sans;
+font-weight: 400;
+font-style: 9pt ;
+font-size: 12px;
+line-height: 100%;
+letter-spacing: -3%;
+
+}
+
+.setup-card-info-icon{
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+  margin-right: 4px;
+}
+.setup-card-info-subtitle{
+  font-family: DM Sans;
+font-weight: 400;
+font-style: 9pt Regular;
+font-size: 12px;
+line-height: 100%;
+letter-spacing: -3%;
+
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #262E84;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.setup-help-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: auto;
+  transition: color 0.3s ease;
+}
+
+.setup-help-link:hover {
+  color: #8C79FF;
+}
+
+.setup-help-link img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+/* Documentation Card */
+.setup-docs-card {
+  position: absolute;
+  top: 415px;
+  left: 286px;
+  width: 490px;
+  height: 115px;
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transform: rotate(0deg);
+  border: 1px solid #000000;
+}
+
+.setup-card-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.setup-card-icon {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(200deg);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.setup-docs-link {
+  position: absolute;
+  top: 502px;
+  left: 336px;
+  width: 145.5px;
+  height: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8C79FF;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.setup-docs-link:hover {
+  color: #7A6BFF;
+  transform: translateX(4px);
+}
+
+.setup-docs-link img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) sepia(1) saturate(5) hue-rotate(200deg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .setup-main-content {
+    padding: 20px;
+  }
+  
+  .setup-navigation {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .setup-info-cards {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .setup-card {
+    padding: 20px;
+  }
+}
