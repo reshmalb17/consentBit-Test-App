@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./style/styless.css";
 import WelcomeScreen from "./components/WelcomeScreen";
 import SetupStep from "./components/SetupStep";
-
+import WelcomeScipt from "./components/WelcomeScript";
 const App: React.FC = () => {
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
   const [showSetupStep, setShowSetupStep] = useState(true);
@@ -32,7 +32,7 @@ const App: React.FC = () => {
   return (
     <div className="app">
       {showWelcomeScreen ? (
-        <WelcomeScreen 
+        <WelcomeScipt 
           onAuthorize={handleWelcomeAuthorize}
           onNeedHelp={handleWelcomeNeedHelp}
         />

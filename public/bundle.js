@@ -5043,8 +5043,9 @@ position: absolute;
   left: 430px;
   width: 177px;
   height: 28px;
-  background: rgba(134, 132, 135, .3);
-  color: rgba(255, 255, 255, .25);
+  background: #262E84;
+
+  color: white;
   border: none;
   padding: 10px 51px;
   border-radius: 3px;
@@ -5066,7 +5067,8 @@ position: absolute;
 }
 
 .setup-proceed-btn:disabled {
-  background: rgba(38, 46, 132, 0.5);
+  background:#8684874D;
+  color: rgba(255, 255, 255, .5);
   cursor: not-allowed;
   transform: none;
 }
@@ -5087,6 +5089,7 @@ top: auto;
  gap: 11px;
 
 }
+
 
 .setup-card {
 border: 1px solid #262E84;
@@ -5170,7 +5173,7 @@ letter-spacing: -0.36px;
     border-radius: 8px;
     overflow: hidden;
     top: 62px;
-    left: 123px;
+    left: 120px;
 }
 .setup-video-thumbnail {
  width: 100%;
@@ -5181,34 +5184,46 @@ letter-spacing: -0.36px;
   display: flex;
   flex-direction: row;
   gap: 4px;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  padding:12px;
+  background-color: #8C79FF;
   border-radius: 8px;
 }
 .setup-card-info-title{
-  font-family: DM Sans;
+  font-family: DM Sans,sans-serif;
 font-weight: 400;
 font-style: 9pt ;
 font-size: 12px;
-line-height: 100%;
 letter-spacing: -3%;
 
 }
-
-.setup-card-info-icon{
+.setup-card-info-logo{
   width: 16px;
   height: 16px;
-  filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(200deg);
+  flex-shrink: 0;
   margin-right: 4px;
 }
+.setup-card-info-icon{
+  margin-top: 15px;
+  width: 100%;
+  height: 100%;  
+  margin-right: 4px;
+  color: #8C79FF;
+}
 .setup-card-info-subtitle{
-  font-family: DM Sans;
-font-weight: 400;
-font-style: 9pt Regular;
+  font-family: DM Sans,sans-serif;
+font-weight: 300;
+font-style: 9pt;
 font-size: 12px;
-line-height: 100%;
 letter-spacing: -3%;
+color: #ffffff;
+  opacity: 0.6;;
 
+}
+.subscribe.help{
+  font-size: 12px;
+  font-weight: 300;
+  color:#8C79FF !important;
 }
 
 .video-placeholder {
@@ -5302,6 +5317,69 @@ letter-spacing: -3%;
   width: 16px;
   height: 16px;
   filter: brightness(0) sepia(1) saturate(5) hue-rotate(200deg);
+}
+
+.welcome-script-actions{
+  position: relative;
+  bottom: 8%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  left: 54%;
+  top: 10%;
+}
+.welcome-script-actions-container{
+  position: absolute;
+  width:91%;
+  left: 5px;
+  top: 0;
+}
+.welcome-screen.script{
+  position: relative; 
+  width: 100vw;
+  height: 100vh;
+  padding: 25px
+}
+.setup-info-cards.welcome-script{
+  position: relative;
+  height: 120px;
+  display: flex;
+  gap: 24px;
+  display: flex;
+ flex-direction: row;
+ gap: 11px;
+ top: 40px;
+ left: 11px;
+ bottom: 20px;;
+ right: 20px;
+ padding-left: 25px;
+  padding-right: 25px;
+  
+
+}
+.next-step-section{
+  width: 91%;
+  height: 50px;
+  position: relative;
+  bottom: 20px;
+  left: 50px;
+  right: 20px;
+  top: 11%;
+  display: flex;
+  flex-direction: row;
+  right: 20px;
+  gap: 16px;
+}
+.welcome-script-buttons{
+  position: absolute;
+  display: flex;
+  right: 20px;
+  gap: 16px;
+  align-items: center;
+}
+.welcome-script-title{
+  position: absolute;
+  font-size: 20px;
 }
 
 /* Responsive Design */
@@ -40591,8 +40669,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _style_styless_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./style/styless.css */ "./src/style/styless.css");
-/* harmony import */ var _components_WelcomeScreen__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/WelcomeScreen */ "./src/components/WelcomeScreen.tsx");
-/* harmony import */ var _components_SetupStep__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/SetupStep */ "./src/components/SetupStep.tsx");
+/* harmony import */ var _components_SetupStep__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/SetupStep */ "./src/components/SetupStep.tsx");
+/* harmony import */ var _components_WelcomeScript__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/WelcomeScript */ "./src/components/WelcomeScript.tsx");
 
 
 
@@ -40618,12 +40696,658 @@ const App = () => {
         setShowSetupStep(false);
         // Add logic for next step here
     };
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "app" }, showWelcomeScreen ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_WelcomeScreen__WEBPACK_IMPORTED_MODULE_2__["default"], { onAuthorize: handleWelcomeAuthorize, onNeedHelp: handleWelcomeNeedHelp })) : showSetupStep ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_SetupStep__WEBPACK_IMPORTED_MODULE_3__["default"], { onGoBack: handleSetupGoBack, onProceed: handleSetupProceed })) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "main-app" },
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "app" }, showWelcomeScreen ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_WelcomeScript__WEBPACK_IMPORTED_MODULE_3__["default"], { onAuthorize: handleWelcomeAuthorize, onNeedHelp: handleWelcomeNeedHelp })) : showSetupStep ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_SetupStep__WEBPACK_IMPORTED_MODULE_2__["default"], { onGoBack: handleSetupGoBack, onProceed: handleSetupProceed })) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "main-app" },
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", null, "Main App Interface"),
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Welcome to the main application!"),
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { onClick: () => setShowWelcomeScreen(true) }, "Back to Welcome Screen")))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (App);
+
+
+/***/ }),
+
+/***/ "./src/components/PulseAnimation.tsx":
+/*!*******************************************!*\
+  !*** ./src/components/PulseAnimation.tsx ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _util_optimized_images__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/optimized-images */ "./src/util/optimized-images.ts");
+/* harmony import */ var _style_styless_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../style/styless.css */ "./src/style/styless.css");
+
+
+
+const PulseAnimation = () => {
+    const [stage, setStage] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0);
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        const timings = [0, 200, 400, 700, 1000, 1300];
+        let timeouts = [];
+        const startSequence = () => {
+            timings.forEach((time, index) => {
+                const timeout = setTimeout(() => setStage(index), time);
+                timeouts.push(timeout);
+            });
+            const resetTimeout = setTimeout(() => {
+                setStage(0);
+                startSequence();
+            }, 2000 + timings[timings.length - 1]);
+            timeouts.push(resetTimeout);
+        };
+        startSequence();
+        return () => {
+            timeouts.forEach(clearTimeout);
+        };
+    }, []);
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "pulse-wrapper" },
+        stage === 0 && react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: _util_optimized_images__WEBPACK_IMPORTED_MODULE_1__.animationIcons.circle, className: "pulse-stage stage-circle" }),
+        stage >= 1 && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: _util_optimized_images__WEBPACK_IMPORTED_MODULE_1__.animationIcons.blob, className: `pulse-stage stage-blob ${stage >= 2 ? 'rotate' : ''}` })),
+        stage >= 2 && stage < 4 && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: _util_optimized_images__WEBPACK_IMPORTED_MODULE_1__.animationIcons.dots, className: "pulse-stage stage-dots" })),
+        stage === 4 && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: _util_optimized_images__WEBPACK_IMPORTED_MODULE_1__.animationIcons.dots, className: "pulse-stage stage-dots fade-out-dots" })),
+        stage === 5 && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "pulse-stage consentbit-logos" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: _util_optimized_images__WEBPACK_IMPORTED_MODULE_1__.animationIcons.logo, alt: "ConsentBit Logo" })))));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PulseAnimation);
+
+
+/***/ }),
+
+/***/ "./src/components/Script.tsx":
+/*!***********************************!*\
+  !*** ./src/components/Script.tsx ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _style_styless_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../style/styless.css */ "./src/style/styless.css");
+/* harmony import */ var _services_api__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/api */ "./src/services/api.ts");
+/* harmony import */ var _context_ScriptContext__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../context/ScriptContext */ "./src/context/ScriptContext.tsx");
+/* harmony import */ var _PulseAnimation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./PulseAnimation */ "./src/components/PulseAnimation.tsx");
+/* harmony import */ var _hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../hooks/usePersistentState */ "./src/hooks/usePersistentState.ts");
+/* harmony import */ var _types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../types/webflowtypes */ "./src/types/webflowtypes.ts");
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+
+
+
+
+const questionmark = new URL(/* asset import */ __webpack_require__(/*! ../assets/blue question.svg */ "./src/assets/blue question.svg"), __webpack_require__.b).href;
+const settings = new URL(/* asset import */ __webpack_require__(/*! ../assets/setting-2.svg */ "./src/assets/setting-2.svg"), __webpack_require__.b).href;
+const tickmark = new URL(/* asset import */ __webpack_require__(/*! ../assets/implement correctly.svg */ "./src/assets/implement correctly.svg"), __webpack_require__.b).href;
+const edit = new URL(/* asset import */ __webpack_require__(/*! ../assets/edit.svg */ "./src/assets/edit.svg"), __webpack_require__.b).href;
+const explain = new URL(/* asset import */ __webpack_require__(/*! ../assets/catogery.svg */ "./src/assets/catogery.svg"), __webpack_require__.b).href;
+const sheild = new URL(/* asset import */ __webpack_require__(/*! ../assets/sheild.svg */ "./src/assets/sheild.svg"), __webpack_require__.b).href;
+const line = new URL(/* asset import */ __webpack_require__(/*! ../assets/Line 6.svg */ "./src/assets/Line 6.svg"), __webpack_require__.b).href;
+const dismiss = new URL(/* asset import */ __webpack_require__(/*! ../assets/Vector.svg */ "./src/assets/Vector.svg"), __webpack_require__.b).href;
+const Active = new URL(/* asset import */ __webpack_require__(/*! ../assets/active.svg */ "./src/assets/active.svg"), __webpack_require__.b).href;
+const search = new URL(/* asset import */ __webpack_require__(/*! ../assets/search.svg */ "./src/assets/search.svg"), __webpack_require__.b).href;
+const uparrow = new URL(/* asset import */ __webpack_require__(/*! ../assets/blue up arrow.svg */ "./src/assets/blue up arrow.svg"), __webpack_require__.b).href;
+const line2 = new URL(/* asset import */ __webpack_require__(/*! ../assets/line.svg */ "./src/assets/line.svg"), __webpack_require__.b).href;
+const copyScript = new URL(/* asset import */ __webpack_require__(/*! ../assets/copy script.svg */ "./src/assets/copy script.svg"), __webpack_require__.b).href;
+const tickmarkcopy = new URL(/* asset import */ __webpack_require__(/*! ../assets/Vector 23.svg */ "./src/assets/Vector 23.svg"), __webpack_require__.b).href;
+const Script = ({ fetchScripts, setFetchScripts, isWelcome }) => {
+    const { scripts, setScripts } = (0,_context_ScriptContext__WEBPACK_IMPORTED_MODULE_3__.useScriptContext)();
+    // Debug scripts state changes
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        // Removed console.log for production
+    }, [scripts]);
+    const [isSaving, setIsSaving] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+    const [saveStatus, setSaveStatus] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const categories = ["Essential", "Personalization", "Analytics", "Marketing"];
+    const userinfo = localStorage.getItem("wf_hybrid_user");
+    const [showPopup, setShowPopup] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+    const [isLoading, setIsLoading] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+    const [showAuthPopup, setShowAuthPopup] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+    const [copiedScriptIndex, setCopiedScriptIndex] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const [siteInfo, setSiteInfo] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_5__["default"])("siteInfo", null);
+    // Fetch site info when component mounts
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        const fetchSiteInfo = () => __awaiter(void 0, void 0, void 0, function* () {
+            try {
+                const siteInfo = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].getSiteInfo();
+                setSiteInfo(siteInfo);
+            }
+            catch (error) {
+            }
+        });
+        if (!siteInfo) {
+            fetchSiteInfo();
+        }
+    }, [siteInfo, setSiteInfo]);
+    // Debug logs for siteInfo
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    }, [siteInfo]);
+    const getScriptIdentifier = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((script) => {
+        var _a;
+        return script.src || ((_a = script.fullTag) === null || _a === void 0 ? void 0 : _a.replace(/\s*data-category\s*=\s*"[^"]*"/i, '')) || null;
+    }, []);
+    const fetchScriptData = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        setIsLoading(true);
+        try {
+            const userInfo = JSON.parse(userinfo || "{}");
+            const tokens = userInfo === null || userInfo === void 0 ? void 0 : userInfo.sessionToken;
+            if (!tokens) {
+                setIsLoading(false);
+                return;
+            }
+            // Log token for debugging (remove in production)
+            const result = yield _services_api__WEBPACK_IMPORTED_MODULE_2__.customCodeApi.analyticsScript(tokens);
+            if (!result) {
+                throw new Error('No response from API');
+            }
+            if (!result.success) {
+                throw new Error(result.error || 'API request failed');
+            }
+            if (!result.data) {
+                throw new Error('No data in API response');
+            }
+            const scriptsResponse = (_a = result.data.analyticsScripts) !== null && _a !== void 0 ? _a : [];
+            const validScripts = scriptsResponse.filter(script => { var _a; return ((_a = script.fullTag) === null || _a === void 0 ? void 0 : _a.trim()) !== ""; });
+            const formattedScripts = validScripts.map(script => {
+                // Add or update type attribute in the script tag
+                let modifiedTag = script.fullTag || '';
+                const tagRegex = /<script\b([^>]*)>/i;
+                const match = modifiedTag.match(tagRegex);
+                // Parse existing data-category attribute to set selectedCategories (only if it exists)
+                let existingCategories = [];
+                let hasDataCategoryAttribute = false;
+                if (script.fullTag) {
+                    const categoryMatch = script.fullTag.match(/data-category\s*=\s*"([^"]*)"/i);
+                    if (categoryMatch && categoryMatch[1]) {
+                        hasDataCategoryAttribute = true;
+                        // Split by comma and clean up the categories (include Essential now)
+                        existingCategories = categoryMatch[1]
+                            .split(',')
+                            .map(cat => cat.trim())
+                            .filter(cat => cat.length > 0); // Don't exclude Essential anymore
+                    }
+                }
+                if (match) {
+                    let attrs = match[1];
+                    // Remove consent-related attributes
+                    attrs = attrs.replace(/\s*data-cb-consent[^"'\s]*\s*/g, '');
+                    // Update or add type attribute
+                    if (attrs.includes('type=')) {
+                        attrs = attrs.replace(/type\s*=\s*"[^"]*"/i, 'type="text/plain"');
+                    }
+                    else {
+                        attrs += ' type="text/plain"';
+                    }
+                    const newTag = `<script${attrs}>`;
+                    modifiedTag = modifiedTag.replace(tagRegex, newTag);
+                }
+                return Object.assign({ identifier: getScriptIdentifier(script), url: script.src || null, script: modifiedTag || null, fullTag: modifiedTag || null, isDismissed: false, isSaved: false, selectedCategories: hasDataCategoryAttribute ? existingCategories : [], hasAutoDetectedCategories: hasDataCategoryAttribute && existingCategories.length > 0, group: script.category || 'Other' }, script);
+            });
+            // For custom scripts and single-instance scripts, keep them separate. For other scripts, group by category
+            const groupedScripts = [];
+            // Separate custom scripts and single-instance scripts
+            const customScripts = formattedScripts.filter(script => script.group === 'custom');
+            const singleInstanceScripts = formattedScripts.filter(script => script.group === 'Heap' ||
+                script.group === 'Umami' ||
+                script.group === 'PostHog');
+            const otherScripts = formattedScripts.filter(script => script.group !== 'custom' &&
+                script.group !== 'Heap' &&
+                script.group !== 'Umami' &&
+                script.group !== 'PostHog');
+            // Add each custom script as a separate block
+            customScripts.forEach((script, index) => {
+                groupedScripts.push({
+                    identifier: `custom-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+                    id: `custom-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+                    url: script.url || null,
+                    script: script.script,
+                    fullTag: script.fullTag,
+                    isDismissed: false,
+                    isSaved: false,
+                    selectedCategories: script.selectedCategories,
+                    hasAutoDetectedCategories: script.hasAutoDetectedCategories,
+                    group: 'custom',
+                    groupScripts: [script],
+                    category: 'Custom',
+                    src: script.src || null,
+                    content: script.content,
+                    type: script.type || null,
+                    async: script.async || false,
+                    defer: script.defer || false,
+                    crossorigin: script.crossorigin || null,
+                });
+            });
+            // Add each single-instance script as a separate block
+            singleInstanceScripts.forEach((script, index) => {
+                groupedScripts.push({
+                    identifier: `${script.group.toLowerCase()}-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+                    id: `${script.group.toLowerCase()}-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+                    url: script.url || null,
+                    script: script.script,
+                    fullTag: script.fullTag,
+                    isDismissed: false,
+                    isSaved: false,
+                    selectedCategories: script.selectedCategories,
+                    hasAutoDetectedCategories: script.hasAutoDetectedCategories,
+                    group: script.group.toLowerCase(),
+                    groupScripts: [script],
+                    category: script.group,
+                    src: script.src || null,
+                    content: script.content,
+                    type: script.type || null,
+                    async: script.async || false,
+                    defer: script.defer || false,
+                    crossorigin: script.crossorigin || null,
+                });
+            });
+            // Group other scripts by their group name
+            const scriptGroups = new Map();
+            otherScripts.forEach(script => {
+                const groupName = script.group || 'Other';
+                if (!scriptGroups.has(groupName)) {
+                    scriptGroups.set(groupName, []);
+                }
+                scriptGroups.get(groupName).push(script);
+            });
+            // Create grouped scripts for non-custom scripts
+            Array.from(scriptGroups.entries()).forEach(([groupName, scripts]) => {
+                var _a, _b, _c, _d, _e, _f;
+                // Combine all scripts in the group
+                const combinedFullTag = scripts.map(s => s.fullTag).filter(Boolean).join('\n');
+                const combinedScript = scripts.map(s => s.script).filter(Boolean).join('\n');
+                // Don't merge categories - use categories only if all scripts in group have the same categories
+                let groupCategories = [];
+                let hasAutoDetected = false;
+                // Check if all scripts have the same categories (only if they have data-category attributes)
+                const scriptsWithCategories = scripts.filter(s => s.hasAutoDetectedCategories);
+                if (scriptsWithCategories.length > 0) {
+                    const firstScriptCategories = scriptsWithCategories[0].selectedCategories.sort().join(',');
+                    const allSameCategories = scriptsWithCategories.every(s => s.selectedCategories.sort().join(',') === firstScriptCategories);
+                    if (allSameCategories) {
+                        groupCategories = scriptsWithCategories[0].selectedCategories;
+                        hasAutoDetected = true;
+                    }
+                }
+                groupedScripts.push({
+                    identifier: `${groupName}-group-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    id: `${groupName}-group-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    url: ((_a = scripts[0]) === null || _a === void 0 ? void 0 : _a.url) || null,
+                    script: combinedScript,
+                    fullTag: combinedFullTag,
+                    isDismissed: false,
+                    isSaved: false,
+                    selectedCategories: groupCategories, // Only use if all scripts have same categories
+                    hasAutoDetectedCategories: hasAutoDetected,
+                    group: groupName,
+                    groupScripts: scripts, // Store individual scripts for reference
+                    category: groupName, // Use group name as category for display
+                    // Add other properties from first script but don't override our combined content
+                    src: ((_b = scripts[0]) === null || _b === void 0 ? void 0 : _b.src) || null,
+                    content: combinedScript,
+                    type: ((_c = scripts[0]) === null || _c === void 0 ? void 0 : _c.type) || null,
+                    async: ((_d = scripts[0]) === null || _d === void 0 ? void 0 : _d.async) || false,
+                    defer: ((_e = scripts[0]) === null || _e === void 0 ? void 0 : _e.defer) || false,
+                    crossorigin: ((_f = scripts[0]) === null || _f === void 0 ? void 0 : _f.crossorigin) || null,
+                });
+            });
+            setScripts(prevScripts => {
+                const existingScriptsMap = new Map(prevScripts.map(script => [script.identifier, script]));
+                const mergedScripts = groupedScripts.map(newScript => {
+                    const existingScript = existingScriptsMap.get(newScript.identifier);
+                    if (existingScript) {
+                        // For existing scripts, keep user selections unless the script has a different data-category attribute
+                        // Check if the new script has different categories from data-category attribute
+                        const hasNewCategories = newScript.selectedCategories.length > 0 &&
+                            JSON.stringify(newScript.selectedCategories.sort()) !== JSON.stringify(existingScript.selectedCategories.sort());
+                        return Object.assign(Object.assign({}, newScript), { isSaved: existingScript.isSaved, selectedCategories: hasNewCategories ? newScript.selectedCategories : existingScript.selectedCategories, isDismissed: existingScript.isDismissed, hasAutoDetectedCategories: hasNewCategories ? newScript.hasAutoDetectedCategories : existingScript.hasAutoDetectedCategories });
+                    }
+                    // For new scripts, use the categories parsed from data-category attribute
+                    return newScript;
+                });
+                setIsLoading(false);
+                return mergedScripts.filter(script => script.identifier !== null);
+            });
+        }
+        catch (error) {
+            setSaveStatus({
+                success: false,
+                message: error instanceof Error ? error.message : "Failed to fetch scripts",
+            });
+            setIsLoading(false);
+        }
+    }), [setScripts, userinfo, getScriptIdentifier, siteInfo]);
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        if (fetchScripts) {
+            fetchScriptData();
+            setFetchScripts(false);
+        }
+    }, [fetchScripts, fetchScriptData, setFetchScripts]);
+    const handleSaveAll = () => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        setIsSaving(true);
+        setSaveStatus(null);
+        try {
+            const tokens = (_a = JSON.parse(userinfo || "{}")) === null || _a === void 0 ? void 0 : _a.sessionToken;
+            if (!tokens) {
+                return;
+            }
+            const scriptsToSave = scripts
+                .filter(script => script.identifier !== null && (script.fullTag || "").includes("data-category="))
+                .map(script => ({
+                src: script.src || script.url || null,
+                content: script.fullTag || script.script || null,
+                categories: script.selectedCategories,
+            }));
+            if (scriptsToSave.length === 0) {
+                setSaveStatus({
+                    success: false,
+                    message: "No scripts with selected categories to save.",
+                });
+                return;
+            }
+            const result = yield _services_api__WEBPACK_IMPORTED_MODULE_2__.customCodeApi.saveScriptCategorizations(tokens, scriptsToSave);
+            if (result.success) {
+                setSaveStatus({
+                    success: true,
+                    message: "Script categories saved successfully!",
+                });
+                // Update the local state: mark the currently saved scripts as 'isSaved: true',
+                // and keep the 'isSaved' status of other scripts as they were.
+                setScripts(prevScripts => prevScripts.map(script => {
+                    if (!script.identifier) {
+                        return script;
+                    }
+                    const wasJustSaved = scriptsToSave.some(savedScript => savedScript.content === (script.fullTag || script.script) &&
+                        savedScript.src === (script.src || script.url));
+                    // Debug logging for save process
+                    if (wasJustSaved) {
+                    }
+                    return Object.assign(Object.assign({}, script), { isSaved: script.isSaved || wasJustSaved });
+                }));
+            }
+            else {
+                throw new Error(result.error || "Failed to save categories");
+            }
+        }
+        catch (error) {
+            setSaveStatus({
+                success: false,
+                message: error instanceof Error ? error.message : "Failed to save categories",
+            });
+        }
+        finally {
+            setIsSaving(false);
+        }
+    });
+    const handleToggleEdit = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((index) => {
+        setScripts(prevScripts => prevScripts.map((script, i) => {
+            if (i === index) {
+                return Object.assign(Object.assign({}, script), { isSaved: false });
+            }
+            return script;
+        }));
+    }, [setScripts]);
+    // ... existing code ...
+    const handleToggle = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((category, scriptIndex) => {
+        // Remove the Essential restriction - allow Essential to be toggled like other categories
+        setScripts(prevScripts => prevScripts.map((script, index) => {
+            if (index === scriptIndex && script.identifier) {
+                let updatedCategories = script.selectedCategories.includes(category)
+                    ? script.selectedCategories.filter(c => c !== category)
+                    : [...script.selectedCategories, category];
+                // Update all individual scripts in the group
+                let updatedGroupScripts = script.groupScripts;
+                if (updatedGroupScripts) {
+                    updatedGroupScripts = updatedGroupScripts.map(groupScript => {
+                        let updatedTag = groupScript.fullTag || '';
+                        const tagRegex = /<script\b([^>]*)>/i;
+                        const match = updatedTag.match(tagRegex);
+                        if (match) {
+                            let attrs = match[1];
+                            // Remove consent-related attributes and data-category
+                            attrs = attrs.replace(/\s*data-cb-consent[^"'\s]*\s*/g, '');
+                            attrs = attrs.replace(/\s*data-category\s*=\s*"[^"]*"/i, '');
+                            // Update or add type attribute
+                            if (attrs.includes('type=')) {
+                                attrs = attrs.replace(/type\s*=\s*"[^"]*"/i, 'type="text/plain"');
+                            }
+                            else {
+                                attrs += ' type="text/plain"';
+                            }
+                            // Add category attribute if needed (including Essential)
+                            const categoryAttr = updatedCategories.length > 0
+                                ? ` data-category="${updatedCategories.join(',')}"`
+                                : '';
+                            const newTag = `<script${attrs}${categoryAttr}>`;
+                            updatedTag = updatedTag.replace(tagRegex, newTag);
+                        }
+                        return Object.assign(Object.assign({}, groupScript), { selectedCategories: updatedCategories, fullTag: updatedTag, script: updatedTag });
+                    });
+                }
+                // Update the combined script tag for the group
+                let updatedCombinedTag = script.fullTag || '';
+                if (updatedGroupScripts) {
+                    updatedCombinedTag = updatedGroupScripts.map(s => s.fullTag).filter(Boolean).join('\n');
+                }
+                return Object.assign(Object.assign({}, script), { selectedCategories: updatedCategories, fullTag: updatedCombinedTag, script: updatedCombinedTag, groupScripts: updatedGroupScripts });
+            }
+            return script;
+        }));
+    }, [setScripts]);
+    const handleDismiss = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((scriptIndex) => {
+        // Start fade-out animation
+        setScripts(prev => prev.map((s, i) => {
+            if (i === scriptIndex) {
+                // Clean up the script tag
+                let originalTag = s.fullTag || '';
+                const tagRegex = /<script\b([^>]*)>/i;
+                const match = originalTag.match(tagRegex);
+                if (match) {
+                    let attrs = match[1];
+                    // Remove all consent-related attributes and type
+                    attrs = attrs.replace(/\s*data-cb-consent[^"'\s]*\s*/g, '');
+                    attrs = attrs.replace(/\s*data-category\s*=\s*"[^"]*"/gi, '');
+                    attrs = attrs.replace(/\s*type\s*=\s*"[^"]*"/gi, '');
+                    // Create clean script tag
+                    originalTag = originalTag.replace(tagRegex, `<script${attrs}>`);
+                }
+                return Object.assign(Object.assign({}, s), { fullTag: originalTag, script: originalTag, selectedCategories: [], transitionState: 'fade-out' });
+            }
+            return s;
+        }));
+        // After animation, hide script
+        setTimeout(() => {
+            setScripts(prev => prev.map((s, i) => i === scriptIndex ? Object.assign(Object.assign({}, s), { isDismissed: true, transitionState: '' }) : s));
+        }, 300); // must match CSS transition time
+    }, [setScripts]);
+    const handleActivate = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((scriptIndex) => {
+        // Instantly show script, then fade it in
+        setScripts(prev => prev.map((s, i) => i === scriptIndex ? Object.assign(Object.assign({}, s), { isDismissed: false, transitionState: 'fade-in' }) : s));
+        setTimeout(() => {
+            setScripts(prev => prev.map((s, i) => i === scriptIndex ? Object.assign(Object.assign({}, s), { transitionState: '' }) : s));
+        }, 300);
+    }, [setScripts]);
+    // Add copy functionality
+    const handleCopyScript = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((script, index) => {
+        var _a;
+        if (!script) {
+            return;
+        }
+        // Clean up the script tag before copying
+        const tagRegex = /<script\b([^>]*)>/i;
+        const match = script.match(tagRegex);
+        let cleanScript = script;
+        if (match) {
+            let attrs = match[1];
+            // Remove all existing type and consent-related attributes
+            attrs = attrs.replace(/\s*type\s*=\s*"[^"]*"/gi, '');
+            attrs = attrs.replace(/\s*data-cb-consent[^"'\s]*\s*/g, '');
+            // Remove any existing data-category attributes
+            attrs = attrs.replace(/\s*data-category\s*=\s*"[^"]*"/gi, '');
+            // Add type attribute
+            attrs += ' type="text/plain"';
+            // Get the categories from the script's selectedCategories (including Essential)
+            const scriptObj = scripts[index];
+            if (((_a = scriptObj === null || scriptObj === void 0 ? void 0 : scriptObj.selectedCategories) === null || _a === void 0 ? void 0 : _a.length) > 0) {
+                // Add all selected categories including Essential
+                attrs += ` data-category="${scriptObj.selectedCategories.join(',')}"`;
+            }
+            // Create clean script tag
+            cleanScript = script.replace(tagRegex, `<script${attrs}>`);
+        }
+        // Use the Clipboard API
+        navigator.clipboard.writeText(cleanScript)
+            .then(() => {
+            setCopiedScriptIndex(index);
+            // Reset the copied state after 1 second
+            setTimeout(() => {
+                setCopiedScriptIndex(null);
+            }, 1000);
+        })
+            .catch(err => {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = cleanScript;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setCopiedScriptIndex(index);
+                setTimeout(() => {
+                    setCopiedScriptIndex(null);
+                }, 1000);
+            }
+            catch (err) {
+            }
+            document.body.removeChild(textArea);
+        });
+    }, [scripts]);
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        if (saveStatus) {
+            setShowPopup(true);
+            const timer = setTimeout(() => {
+                setShowPopup(false);
+                setTimeout(() => {
+                    setSaveStatus(null);
+                }, 200);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [saveStatus]);
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "container-script" },
+        !isWelcome && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "section back-color" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "flexings" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: sheild, alt: "catogery image" })),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "header" },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", null, "Scan your project for any scripts that set cookies."))),
+                    saveStatus && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: `popup-overlays ${showPopup ? 'fade-in' : 'fade-out'}` },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: `popup-boxs ${saveStatus.success ? 'success' : 'error'}` },
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, saveStatus.message)))),
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Organize and replace them using our recommended snippet, and refer to our tutorial for a streamlined setup."),
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", { href: "https://www.consentbit.com/help-document", target: "_blank" },
+                        "Need help? See the docs ",
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("i", null,
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: uparrow, alt: "uparrow" }))))))),
+        scripts.length > 0 && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "line" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: line2, alt: "line2" }))),
+        scripts.length > 0 && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "save-btn-container" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "save-all-btn", onClick: handleSaveAll, disabled: isSaving }, isSaving ? "Saving..." : "Save Categories"))),
+        (() => { return null; })(),
+        isLoading ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "pulse-overlays" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_PulseAnimation__WEBPACK_IMPORTED_MODULE_4__["default"], null))) : scripts.length === 0 ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "sections" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: search, alt: "search" }),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Click 'Scan Project' to analyze your project."))) : ((() => {
+            const filteredScripts = scripts.filter(script => script.identifier !== null);
+            return filteredScripts;
+        })()
+            .map((script, index) => {
+            return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { key: script.identifier || index, className: `section-script script-container ${script.transitionState || ''}` }, script.isSaved && !script.isDismissed ? (
+            // --- EDIT CONFIRMATION VIEW ---
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "flexing" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: tickmark, alt: "checkmark", className: "flex-image" })),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "editdiv" },
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "editname" },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h4", { className: "heading-text" },
+                            script.category.charAt(0).toUpperCase() + script.category.slice(1) || 'Script',
+                            " is implemented correctly.")),
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "bottom-row" },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "category-text" },
+                            "Categories: ",
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "category-highlight" }, script.selectedCategories.join(', '))),
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "edit-flex", onClick: () => handleToggleEdit(index), style: { cursor: 'pointer' } },
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { className: "editimage", src: edit, alt: "edit icon" }),
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "edit-text" }, "Edit")))))) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, script.isDismissed ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "dismissed-message" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null,
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", null, script.category
+                        ? script.category.charAt(0).toUpperCase() + script.category.slice(1)
+                        : script.src
+                            ? script.src.charAt(0).toUpperCase() + script.src.slice(1)
+                            : 'Unknown'),
+                    ' ',
+                    "Script is Dismissed!"),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "dismiss-btn", onClick: () => handleActivate(index) },
+                    " ",
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: Active, alt: "activate icon", style: { marginRight: '8px', width: "14px", height: "14px" } }),
+                    "Activate"))) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null,
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "flexings" },
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { style: { paddingTop: "6px" } },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: explain, alt: "catogery image" })),
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "width-100" },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "header" },
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
+                                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "text-[12px] font-bold" }, script.category
+                                    ? `Update the ${script.category.charAt(0).toUpperCase() + script.category.slice(1)} Script`
+                                    : 'Unknown Script')),
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "flex" },
+                                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: settings, alt: "settingsimage" }),
+                                (siteInfo === null || siteInfo === void 0 ? void 0 : siteInfo.shortName) ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", { href: `https://webflow.com/dashboard/sites/${siteInfo.shortName}/custom-code`, target: "_blank", rel: "noopener noreferrer", className: "font-14 light", style: { cursor: 'pointer' } }, "Site Settings > Custom Code")) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "font-14 light" }, "Site Settings > Custom Code"))),
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "dismiss-btn", onClick: () => handleDismiss(index) },
+                                "  ",
+                                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: dismiss, alt: "Dismiss icon", style: { marginRight: '8px' } }),
+                                "Dismiss")),
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Select a category for this script, remove the current script, and add the updated script to the Site head:"),
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: line, alt: "lineimage" })),
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "category-code-block" },
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "category" },
+                                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", null, "Category:"),
+                                categories.map((category) => {
+                                    const isChecked = script.selectedCategories.includes(category);
+                                    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", { key: category, className: "toggle-switch" },
+                                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", { type: "checkbox", value: category, checked: isChecked, onChange: () => handleToggle(category, index) }),
+                                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "slider" }),
+                                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "category-label" }, category),
+                                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "tooltip-containers" },
+                                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: questionmark, alt: "info", className: "tooltip-icon" }),
+                                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "tooltip-text" }, "Categorize this script based on its purpose."))));
+                                })),
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "code-block" },
+                                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "script-header" },
+                                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("textarea", { value: script.fullTag || '', readOnly: true, className: `script-input ${copiedScriptIndex === index ? 'copied' : ''}`, rows: 8, placeholder: "Script content..." }),
+                                    copiedScriptIndex === index ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: tickmarkcopy, className: "copy-button", alt: "Copy icon" })) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: copyScript, className: "copy-button", onClick: () => handleCopyScript(script.fullTag || '', index), alt: "Copy icon" })))))))))))));
+        }))));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Script);
 
 
 /***/ }),
@@ -40649,7 +41373,7 @@ const arrowLeft = new URL(/* asset import */ __webpack_require__(/*! ../assets/a
 const arrowRight = new URL(/* asset import */ __webpack_require__(/*! ../assets/up arrow.svg */ "./src/assets/up arrow.svg"), __webpack_require__.b).href;
 const exclamationIcon = new URL(/* asset import */ __webpack_require__(/*! ../assets/warning-2.svg */ "./src/assets/warning-2.svg"), __webpack_require__.b).href;
 const SetupStep = ({ onGoBack, onProceed }) => {
-    const [isConfirmed, setIsConfirmed] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
+    const [isConfirmed, setIsConfirmed] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     // Asset imports
     const logo = new URL(/* asset import */ __webpack_require__(/*! ../assets/icon.svg */ "./src/assets/icon.svg"), __webpack_require__.b).href;
     const questionmark = new URL(/* asset import */ __webpack_require__(/*! ../assets/question.svg */ "./src/assets/question.svg"), __webpack_require__.b).href;
@@ -40691,19 +41415,22 @@ const SetupStep = ({ onGoBack, onProceed }) => {
                     react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-info-logo" },
                         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: infologo, alt: "Info", className: "setup-card-info-icon" })),
                     react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-info-text" },
-                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "setup-card-info-title" }, "Update the scripts in your project that handle cookie creation"),
-                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "setup-card-info-subtitle" }, "Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow."),
-                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
-                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", { href: "https://www.consentbit.com/docs", target: "_blank", rel: "noopener noreferrer", className: "setup-docs-link" }, "Need help? See the docs"))))))));
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "setup-card-info-title" }, "Update the scripts in your project that handle cookie creation"),
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "setup-card-info-subtitle" }, "Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow."),
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "subscribe help" },
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", { className: "link", href: "#" },
+                                "Need help? See the docs ",
+                                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("i", null,
+                                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: "https://67c7218243770a3d2c39fb20.webflow-ext.com/689d09e47269fe2b0de4ee70/58620d0d66fe581478f9.svg", alt: "" }))))))))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SetupStep);
 
 
 /***/ }),
 
-/***/ "./src/components/WelcomeScreen.tsx":
+/***/ "./src/components/WelcomeScript.tsx":
 /*!******************************************!*\
-  !*** ./src/components/WelcomeScreen.tsx ***!
+  !*** ./src/components/WelcomeScript.tsx ***!
   \******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -40714,30 +41441,50 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _style_styless_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../style/styless.css */ "./src/style/styless.css");
+/* harmony import */ var _Script__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Script */ "./src/components/Script.tsx");
 
 
-// Asset imports
-const logo = new URL(/* asset import */ __webpack_require__(/*! ../assets/icon.svg */ "./src/assets/icon.svg"), __webpack_require__.b).href;
+
+
+const youtubethumbnail = new URL(/* asset import */ __webpack_require__(/*! ../assets/youtube-thumbnail.svg */ "./src/assets/youtube-thumbnail.svg"), __webpack_require__.b).href;
+const infologo = new URL(/* asset import */ __webpack_require__(/*! ../assets/info-logo.svg */ "./src/assets/info-logo.svg"), __webpack_require__.b).href;
 const questionmark = new URL(/* asset import */ __webpack_require__(/*! ../assets/question.svg */ "./src/assets/question.svg"), __webpack_require__.b).href;
-const leftLines = new URL(/* asset import */ __webpack_require__(/*! ../assets/leftlines.svg */ "./src/assets/leftlines.svg"), __webpack_require__.b).href;
-const rightLines = new URL(/* asset import */ __webpack_require__(/*! ../assets/rightlines.svg */ "./src/assets/rightlines.svg"), __webpack_require__.b).href;
-const WelcomeScreen = ({ onAuthorize, onNeedHelp }) => {
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-screen" },
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-main-content" },
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: leftLines, alt: "", className: "welcome-bg-lines-left" }),
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: rightLines, alt: "", className: "welcome-bg-lines-right" }),
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-header" },
-                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-help", onClick: onNeedHelp },
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: questionmark, alt: "Need help?" }),
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", null, "Need help?"))),
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-content" },
-                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", { className: "welcome-title" },
-                    "Welcome to ",
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "welcome-title-highlight" }, "Consentbit")),
-                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "welcome-instructions" }, "Scan your Webflow site, review detected scripts, add them to the backend, and publish when you're ready."),
-                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "welcome-authorize-btn", onClick: onAuthorize }, "Authorize")))));
+const WelcomeScipt = ({ onAuthorize, onNeedHelp }) => {
+    const [fetchScripts, setFetchScripts] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-screen script" },
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-info-cards welcome-script" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-top" },
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-title" }, "Facing any issues?"),
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-content" }, "Check our tutorial video to help yourself")),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-bottom" },
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-help", onClick: onNeedHelp },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-img" },
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: questionmark, alt: "Need help?", style: { width: "100%", height: "100%" } })),
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "need-help-text" }, "Need help?")),
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-youtube-thumbnail" },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: youtubethumbnail, alt: "Tutorial Video", className: "setup-video-thumbnail" })))),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-info" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-info-logo" },
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: infologo, alt: "Info", className: "setup-card-info-icon" })),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "setup-card-info-text" },
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "setup-card-info-title" }, "Update the scripts in your project that handle cookie creation"),
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "setup-card-info-subtitle" }, "Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow."),
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "subscribe help" },
+                        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", { className: "link", href: "#" },
+                            "Need help? See the docs ",
+                            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("i", null,
+                                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: "https://67c7218243770a3d2c39fb20.webflow-ext.com/689d09e47269fe2b0de4ee70/58620d0d66fe581478f9.svg", alt: "" }))))))),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "next-step-section" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-script-title" }, "List of scripts to update"),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-script-buttons" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "publish-buttons" }, "Scan Project"),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "publish-buttons" }, "Next"))),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-script-actions" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "welcome-script-actions-container" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Script__WEBPACK_IMPORTED_MODULE_2__["default"], { fetchScripts: fetchScripts, setFetchScripts: setFetchScripts, isWelcome: true })))));
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WelcomeScreen);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WelcomeScipt);
 
 
 /***/ }),
@@ -40771,6 +41518,675 @@ const useScriptContext = () => {
 
 /***/ }),
 
+/***/ "./src/hooks/usePersistentState.ts":
+/*!*****************************************!*\
+  !*** ./src/hooks/usePersistentState.ts ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+function usePersistentState(key, defaultValue) {
+    const [state, setState] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(() => {
+        try {
+            const savedState = localStorage.getItem(key);
+            if (!savedState || savedState === "undefined")
+                return defaultValue;
+            return JSON.parse(savedState);
+        }
+        catch (e) {
+            return defaultValue;
+        }
+    });
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        localStorage.setItem(key, JSON.stringify(state));
+    }, [key, state]);
+    return [state, setState];
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (usePersistentState);
+
+
+/***/ }),
+
+/***/ "./src/services/api.ts":
+/*!*****************************!*\
+  !*** ./src/services/api.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   customCodeApi: () => (/* binding */ customCodeApi)
+/* harmony export */ });
+/* harmony import */ var _script_categorization_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./script-categorization-service */ "./src/services/script-categorization-service.ts");
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+const base_url = "https://cb-server.web-8fb.workers.dev";
+
+const customCodeApi = {
+    // Register a new script
+    registerScript: (params, token) => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield fetch(`${base_url}/api/custom-code/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(params),
+        });
+        return response.json();
+    }),
+    //blocking script registration
+    registerAnalyticsBlockingScript: (token) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`${base_url}/api/custom-code/apply-custom-code`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+            if (!response.ok) {
+                const errorText = yield response.text();
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = yield response.json();
+            return data;
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+    exportCSV: (token) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`${base_url}/api/export-consent-csv`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            // FIXED: Use .text() for CSV data, not .json()
+            const csvData = yield response.text();
+            const result = {
+                csvData,
+                response
+            };
+            return result;
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+    exportCSVAdvanced: (token) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`${base_url}/api/v2/export-consent-csv`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            // FIXED: Use .text() for CSV data, not .json()
+            const csvData = yield response.text();
+            const result = {
+                csvData,
+                response
+            };
+            return result;
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+    saveBannerStyles: (token, appData) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`${base_url}/api/app-data`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appData: appData,
+                })
+            });
+            if (!response.ok) {
+                const errorText = yield response.text();
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = yield response.json();
+            return data;
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+    getBannerStyles: (token) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`${base_url}/api/app-details`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            if (!response.ok) {
+                const errorText = yield response.text();
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = yield response.json();
+            return data;
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+    //save categorized script
+    saveScriptCategorizations: (token, categorizations) => __awaiter(void 0, void 0, void 0, function* () {
+        return _script_categorization_service__WEBPACK_IMPORTED_MODULE_0__.scriptCategorizationService.saveScriptCategorizations(token, categorizations);
+    }),
+    updateScriptCategorizations: (siteId, token, newCategorizations) => __awaiter(void 0, void 0, void 0, function* () {
+        return _script_categorization_service__WEBPACK_IMPORTED_MODULE_0__.scriptCategorizationService.updateScriptCategorizations(token, newCategorizations);
+    }),
+    getScripts: (siteId, token) => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield fetch(`${base_url}/api/custom-code/register?siteId=${siteId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.json();
+    }),
+    // Apply script to site or page
+    applyScript: (params, token) => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield fetch(`${base_url}/api/custom-code/apply`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(params),
+        });
+        return response.json();
+    }),
+    applyV2Script: (params, token) => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield fetch(`${base_url}/api/v2/apply-v2-custom-code`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(params),
+        });
+        return response.json();
+    }),
+    // src/services/api.ts
+    analyticsScript: (token) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            if (!token) {
+                throw new Error("Token is required");
+            }
+            const url = `${base_url}/api/analytics`;
+            const response = yield fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errorData = yield response.json();
+                throw new Error(errorData.error || "Failed to fetch analytics");
+            }
+            const data = yield response.json();
+            return Object.assign({ success: true }, data);
+        }
+        catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : "Unknown error occurred",
+                data: null
+            };
+        }
+    }),
+    //   getVisitorsData: async (token: string, siteName: string, year?: number) => {
+    //   try {
+    //     const url = year 
+    //       ? `${base_url}/api/v2/consent-data/${siteName}/visitors?year=${year}`
+    //       : `${base_url}/api/v2/consent-data/${siteName}/visitors`;
+    //     const response = await fetch(url, {
+    //       method: 'GET',
+    //       headers: {
+    //         'Authorization': `Bearer ${token}`,
+    //         'Content-Type': 'application/json',
+    //       },
+    //     });
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error! status: ${response.status}`);
+    //     }
+    //     const data = await response.json();
+    //     return data;
+    //   } catch (error) {
+    //     throw error;
+    //   }
+    // },
+    getVisitorsData: (token, siteName, year, month) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const params = new URLSearchParams();
+            if (year) {
+                params.append('year', year.toString());
+            }
+            if (month !== undefined && month !== null) {
+                // Convert month from 0-11 to 1-12 format
+                const monthNumber = month + 1;
+                params.append('month', monthNumber.toString());
+            }
+            const queryString = params.toString();
+            const url = queryString
+                ? `${base_url}/api/v2/consent-data/${siteName}/visitors?${queryString}`
+                : `${base_url}/api/v2/consent-data/${siteName}/visitors`;
+            const response = yield fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = yield response.json();
+            /* eslint-disable */ console.log(...oo_oo(`3567245971_290_4_290_50_4`, 'getVisitorsData response:', data));
+            return data;
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+    downloadPDFFromUrl: (token, pdfUrl, filename) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(pdfUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const pdfBlob = yield response.blob();
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            return { success: true };
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+    // Register a new v2 custom code script
+    registerV2CustomCode: (token) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`${base_url}/api/v2/register-v2-custom-code`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return yield response.json();
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+    registerV2BannerCustomCode: (token) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`${base_url}/api/v2/register-v2-banner`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return yield response.json();
+        }
+        catch (error) {
+            throw error;
+        }
+    }),
+};
+/* istanbul ignore next */ /* c8 ignore start */ /* eslint-disable */ ;
+function oo_cm() { try {
+    return (0, eval)("globalThis._console_ninja") || (0, eval)("/* https://github.com/wallabyjs/console-ninja#how-does-it-work */'use strict';var _0x306708=_0x57eb;(function(_0x2bb52b,_0xc34b72){var _0x530621=_0x57eb,_0xc55af5=_0x2bb52b();while(!![]){try{var _0x24c23f=parseInt(_0x530621(0x201))/0x1*(-parseInt(_0x530621(0x25f))/0x2)+parseInt(_0x530621(0x209))/0x3*(-parseInt(_0x530621(0x196))/0x4)+-parseInt(_0x530621(0x21e))/0x5+parseInt(_0x530621(0x25b))/0x6+parseInt(_0x530621(0x1d7))/0x7*(-parseInt(_0x530621(0x1d3))/0x8)+parseInt(_0x530621(0x202))/0x9*(-parseInt(_0x530621(0x1f0))/0xa)+parseInt(_0x530621(0x20c))/0xb;if(_0x24c23f===_0xc34b72)break;else _0xc55af5['push'](_0xc55af5['shift']());}catch(_0x3c622c){_0xc55af5['push'](_0xc55af5['shift']());}}}(_0x4ac4,0x6fa73));function _0x4ac4(){var _0x43cb65=['resetOnProcessingTimeAverageMs','cappedProps','autoExpandPropertyCount','...','date','https://tinyurl.com/37x8b79t','origin','autoExpandLimit','autoExpand','host','coverage','_getOwnPropertySymbols','1','sortProps','capped','_p_','then','_additionalMetadata','_setNodeExpandableState','Set','unknown','number','defineProperty','\\x20server','isExpressionToEvaluate','_p_name','length','test','autoExpandMaxDepth','HTMLAllCollection','console',{\"resolveGetters\":false,\"defaultLimits\":{\"props\":100,\"elements\":100,\"strLength\":51200,\"totalStrLength\":51200,\"autoExpandLimit\":5000,\"autoExpandMaxDepth\":10},\"reducedLimits\":{\"props\":5,\"elements\":5,\"strLength\":256,\"totalStrLength\":768,\"autoExpandLimit\":30,\"autoExpandMaxDepth\":2},\"reducePolicy\":{\"perLogpoint\":{\"reduceOnCount\":50,\"reduceOnAccumulatedProcessingTimeMs\":100,\"resetWhenQuietMs\":500,\"resetOnProcessingTimeAverageMs\":100},\"global\":{\"reduceOnCount\":1000,\"reduceOnAccumulatedProcessingTimeMs\":300,\"resetWhenQuietMs\":50,\"resetOnProcessingTimeAverageMs\":100}}},'_sendErrorMessage','_console_ninja','global','hostname','_reconnectTimeout','_treeNodePropertiesBeforeFullValue','String','Console\\x20Ninja\\x20failed\\x20to\\x20send\\x20logs,\\x20restarting\\x20the\\x20process\\x20may\\x20help;\\x20also\\x20see\\x20','unref','_inNextEdge','send','totalStrLength','nodeModules','getPrototypeOf','elapsed','autoExpandPreviousObjects','_connectAttemptCount','reducedLimits','setter','endsWith','_setNodeLabel','cappedElements','onclose','8wFqTbY','_addFunctionsNode','_numberRegExp','count','144781QBgSlB','NEXT_RUNTIME','null','_ninjaIgnoreNextError','create','symbol','reload','strLength','nan','expressionsToEvaluate','map','_hasSetOnItsPath','string','remix','_allowedToConnectOnSend','rootExpression','_capIfString','get','reduceOnAccumulatedProcessingTimeMs','_disposeWebsocket','_keyStrRegExp','Map','toLowerCase','array','webpack','838570VmfIKn','reduceLimits','getOwnPropertyDescriptor','_treeNodePropertiesAfterFullValue','match','background:\\x20rgb(30,30,30);\\x20color:\\x20rgb(255,213,92)','_isUndefined','_maxConnectAttemptCount','resetWhenQuietMs','_Symbol','function','now','negativeInfinity','_sortProps','depth','env','allStrLength','1JzERwx','63wQTjHb','message','fromCharCode','_getOwnPropertyNames','object','resolveGetters','readyState','6EUSimZ','undefined','_addProperty','25659007VFMgxT','_propertyName','_type','_isPrimitiveType','url','index','_isArray','angular','_connected','_objectToString','onopen','stack','_quotedRegExp','dockerizedApp','call','pop','disabledLog','type','2784920reJBoY','_allowedToSend','replace','_extendedWarning','_inBrowser','defaultLimits','indexOf','getWebSocketClass','warn','_attemptToReconnectShortly','NEGATIVE_INFINITY','name','_setNodeExpressionPath','join','disabledTrace','forEach','timeStamp','astro','bigint','[object\\x20Date]','Number','level','_addObjectProperty','getter','POSITIVE_INFINITY','reduceOnCount','toUpperCase','positiveInfinity','[object\\x20Map]','args','_property','isArray','_setNodeQueryPath','default','catch','includes','Error','_addLoadNode','RegExp','serialize','constructor','logger\\x20failed\\x20to\\x20connect\\x20to\\x20host','failed\\x20to\\x20find\\x20and\\x20load\\x20WebSocket','_isMap','root_exp_id','performance','_HTMLAllCollection','_console_ninja_session','__es'+'Module','current','Boolean','logger\\x20failed\\x20to\\x20connect\\x20to\\x20host,\\x20see\\x20','toString','_hasSymbolPropertyOnItsPath','_WebSocketClass','trace','concat','hits','_socket','reducePolicy','next.js','5053704ydudrA','[object\\x20BigInt]','WebSocket','process','1742492lNZmIA','_setNodePermissions','Buffer','enumerable','versions','%c\\x20Console\\x20Ninja\\x20extension\\x20is\\x20connected\\x20to\\x20','_regExpToString','_WebSocket','_blacklistedProperty','_undefined','prototype','time','method','_ws','_isPrimitiveWrapperType','push','perf_hooks','_cleanNode','[object\\x20Set]','boolean','getOwnPropertyNames','127.0.0.1','slice','elements','port','see\\x20https://tinyurl.com/2vt8jxzw\\x20for\\x20more\\x20info.','logger\\x20websocket\\x20error','_consoleNinjaAllowedToStart','path','_p_length','failed\\x20to\\x20connect\\x20to\\x20host:\\x20','noFunctions','expId',[\"localhost\",\"127.0.0.1\",\"example.cypress.io\",\"Aadvik_Reshma\",\"192.168.0.103\"],'negativeZero','_getOwnPropertyDescriptor','_dateToString','_processTreeNodeResult','split','location','_connectToHostNow','ws/index.js','stringify','_setNodeId','eventReceivedCallback','Console\\x20Ninja\\x20failed\\x20to\\x20send\\x20logs,\\x20refreshing\\x20the\\x20page\\x20may\\x20help;\\x20also\\x20see\\x20','value','edge','log','gateway.docker.internal','stackTraceLimit','_connecting','hasOwnProperty','_hasMapOnItsPath','root_exp','perLogpoint','Symbol','props','hrtime','parse','parent','substr','_isSet','error','1363356HEYciT','onerror','node','close','_webSocketErrorDocsLink','_isNegativeZero'];_0x4ac4=function(){return _0x43cb65;};return _0x4ac4();}var te=Object[_0x306708(0x1db)],G=Object[_0x306708(0x1b2)],ne=Object[_0x306708(0x1f2)],re=Object[_0x306708(0x16a)],ie=Object[_0x306708(0x1c9)],se=Object[_0x306708(0x269)][_0x306708(0x18a)],oe=(_0x4e7daa,_0x3f22a0,_0x127e05,_0x45c74e)=>{var _0xf288d1=_0x306708;if(_0x3f22a0&&typeof _0x3f22a0==_0xf288d1(0x206)||typeof _0x3f22a0==_0xf288d1(0x1fa)){for(let _0x1b70c5 of re(_0x3f22a0))!se[_0xf288d1(0x21a)](_0x4e7daa,_0x1b70c5)&&_0x1b70c5!==_0x127e05&&G(_0x4e7daa,_0x1b70c5,{'get':()=>_0x3f22a0[_0x1b70c5],'enumerable':!(_0x45c74e=ne(_0x3f22a0,_0x1b70c5))||_0x45c74e[_0xf288d1(0x262)]});}return _0x4e7daa;},K=(_0x87d7de,_0x1c5524,_0x373b7b)=>(_0x373b7b=_0x87d7de!=null?te(ie(_0x87d7de)):{},oe(_0x1c5524||!_0x87d7de||!_0x87d7de[_0x306708(0x24e)]?G(_0x373b7b,_0x306708(0x23f),{'value':_0x87d7de,'enumerable':!0x0}):_0x373b7b,_0x87d7de)),H=class{constructor(_0x5cb8c2,_0x5cddf3,_0x502c73,_0x27288c,_0x49d611,_0x8dd291){var _0x481b37=_0x306708,_0x3d6120,_0x5d2881,_0x91ba19,_0x3fd311;this['global']=_0x5cb8c2,this['host']=_0x5cddf3,this['port']=_0x502c73,this['nodeModules']=_0x27288c,this['dockerizedApp']=_0x49d611,this[_0x481b37(0x182)]=_0x8dd291,this['_allowedToSend']=!0x0,this[_0x481b37(0x1e5)]=!0x0,this[_0x481b37(0x214)]=!0x1,this[_0x481b37(0x189)]=!0x1,this[_0x481b37(0x1c5)]=((_0x5d2881=(_0x3d6120=_0x5cb8c2['process'])==null?void 0x0:_0x3d6120['env'])==null?void 0x0:_0x5d2881[_0x481b37(0x1d8)])===_0x481b37(0x185),this[_0x481b37(0x222)]=!((_0x3fd311=(_0x91ba19=this[_0x481b37(0x1be)]['process'])==null?void 0x0:_0x91ba19[_0x481b37(0x263)])!=null&&_0x3fd311[_0x481b37(0x198)])&&!this[_0x481b37(0x1c5)],this[_0x481b37(0x254)]=null,this['_connectAttemptCount']=0x0,this['_maxConnectAttemptCount']=0x14,this[_0x481b37(0x19a)]=_0x481b37(0x1a1),this['_sendErrorMessage']=(this[_0x481b37(0x222)]?_0x481b37(0x183):_0x481b37(0x1c3))+this[_0x481b37(0x19a)];}async['getWebSocketClass'](){var _0xf6c3da=_0x306708,_0x4c74a4,_0x42b90b;if(this[_0xf6c3da(0x254)])return this[_0xf6c3da(0x254)];let _0x1ae56c;if(this[_0xf6c3da(0x222)]||this[_0xf6c3da(0x1c5)])_0x1ae56c=this[_0xf6c3da(0x1be)][_0xf6c3da(0x25d)];else{if((_0x4c74a4=this[_0xf6c3da(0x1be)][_0xf6c3da(0x25e)])!=null&&_0x4c74a4[_0xf6c3da(0x266)])_0x1ae56c=(_0x42b90b=this[_0xf6c3da(0x1be)]['process'])==null?void 0x0:_0x42b90b[_0xf6c3da(0x266)];else try{let _0x1a51de=await import(_0xf6c3da(0x172));_0x1ae56c=(await import((await import(_0xf6c3da(0x210)))['pathToFileURL'](_0x1a51de[_0xf6c3da(0x22b)](this['nodeModules'],_0xf6c3da(0x17f)))[_0xf6c3da(0x252)]()))[_0xf6c3da(0x23f)];}catch{try{_0x1ae56c=require(require(_0xf6c3da(0x172))[_0xf6c3da(0x22b)](this[_0xf6c3da(0x1c8)],'ws'));}catch{throw new Error(_0xf6c3da(0x248));}}}return this['_WebSocketClass']=_0x1ae56c,_0x1ae56c;}['_connectToHostNow'](){var _0x14b20e=_0x306708;this[_0x14b20e(0x189)]||this['_connected']||this[_0x14b20e(0x1cc)]>=this[_0x14b20e(0x1f7)]||(this[_0x14b20e(0x1e5)]=!0x1,this[_0x14b20e(0x189)]=!0x0,this[_0x14b20e(0x1cc)]++,this[_0x14b20e(0x26c)]=new Promise((_0x504528,_0x272872)=>{var _0x53e4bd=_0x14b20e;this[_0x53e4bd(0x225)]()['then'](_0x58f37c=>{var _0x4fc413=_0x53e4bd;let _0x3b1416=new _0x58f37c('ws://'+(!this[_0x4fc413(0x222)]&&this[_0x4fc413(0x219)]?_0x4fc413(0x187):this[_0x4fc413(0x1a5)])+':'+this[_0x4fc413(0x16e)]);_0x3b1416['onerror']=()=>{var _0x4950fe=_0x4fc413;this[_0x4950fe(0x21f)]=!0x1,this[_0x4950fe(0x1ea)](_0x3b1416),this[_0x4950fe(0x227)](),_0x272872(new Error(_0x4950fe(0x170)));},_0x3b1416[_0x4fc413(0x216)]=()=>{var _0x1a2bb5=_0x4fc413;this[_0x1a2bb5(0x222)]||_0x3b1416[_0x1a2bb5(0x258)]&&_0x3b1416[_0x1a2bb5(0x258)][_0x1a2bb5(0x1c4)]&&_0x3b1416[_0x1a2bb5(0x258)][_0x1a2bb5(0x1c4)](),_0x504528(_0x3b1416);},_0x3b1416[_0x4fc413(0x1d2)]=()=>{var _0x4e6dc4=_0x4fc413;this[_0x4e6dc4(0x1e5)]=!0x0,this['_disposeWebsocket'](_0x3b1416),this[_0x4e6dc4(0x227)]();},_0x3b1416['onmessage']=_0xe37bc=>{var _0x2b587b=_0x4fc413;try{if(!(_0xe37bc!=null&&_0xe37bc['data'])||!this[_0x2b587b(0x182)])return;let _0x118da=JSON[_0x2b587b(0x191)](_0xe37bc['data']);this[_0x2b587b(0x182)](_0x118da[_0x2b587b(0x26b)],_0x118da[_0x2b587b(0x23b)],this[_0x2b587b(0x1be)],this[_0x2b587b(0x222)]);}catch{}};})[_0x53e4bd(0x1ac)](_0x321927=>(this[_0x53e4bd(0x214)]=!0x0,this['_connecting']=!0x1,this[_0x53e4bd(0x1e5)]=!0x1,this['_allowedToSend']=!0x0,this['_connectAttemptCount']=0x0,_0x321927))[_0x53e4bd(0x240)](_0x369a11=>(this[_0x53e4bd(0x214)]=!0x1,this[_0x53e4bd(0x189)]=!0x1,console[_0x53e4bd(0x226)](_0x53e4bd(0x251)+this['_webSocketErrorDocsLink']),_0x272872(new Error(_0x53e4bd(0x174)+(_0x369a11&&_0x369a11['message'])))));}));}[_0x306708(0x1ea)](_0x105214){var _0x110a37=_0x306708;this[_0x110a37(0x214)]=!0x1,this[_0x110a37(0x189)]=!0x1;try{_0x105214[_0x110a37(0x1d2)]=null,_0x105214[_0x110a37(0x197)]=null,_0x105214[_0x110a37(0x216)]=null;}catch{}try{_0x105214[_0x110a37(0x208)]<0x2&&_0x105214[_0x110a37(0x199)]();}catch{}}['_attemptToReconnectShortly'](){var _0x4578ee=_0x306708;clearTimeout(this[_0x4578ee(0x1c0)]),!(this['_connectAttemptCount']>=this[_0x4578ee(0x1f7)])&&(this[_0x4578ee(0x1c0)]=setTimeout(()=>{var _0x51f9fb=_0x4578ee,_0x2704fd;this['_connected']||this[_0x51f9fb(0x189)]||(this[_0x51f9fb(0x17e)](),(_0x2704fd=this[_0x51f9fb(0x26c)])==null||_0x2704fd[_0x51f9fb(0x240)](()=>this[_0x51f9fb(0x227)]()));},0x1f4),this[_0x4578ee(0x1c0)]['unref']&&this[_0x4578ee(0x1c0)]['unref']());}async[_0x306708(0x1c6)](_0x4ac647){var _0x5b6043=_0x306708;try{if(!this['_allowedToSend'])return;this[_0x5b6043(0x1e5)]&&this[_0x5b6043(0x17e)](),(await this[_0x5b6043(0x26c)])['send'](JSON[_0x5b6043(0x180)](_0x4ac647));}catch(_0x4af89c){this[_0x5b6043(0x221)]?console[_0x5b6043(0x226)](this['_sendErrorMessage']+':\\x20'+(_0x4af89c&&_0x4af89c[_0x5b6043(0x203)])):(this['_extendedWarning']=!0x0,console['warn'](this[_0x5b6043(0x1bc)]+':\\x20'+(_0x4af89c&&_0x4af89c['message']),_0x4ac647)),this['_allowedToSend']=!0x1,this[_0x5b6043(0x227)]();}}};function X(_0x59e9ed,_0x435000,_0x46a0b4,_0x387ea1,_0x3d0ee1,_0x388879,_0x3b442d,_0x3a7591=ae){var _0x316efd=_0x306708;let _0x5e24ec=_0x46a0b4[_0x316efd(0x17c)](',')['map'](_0x2205c0=>{var _0x2a4a71=_0x316efd,_0x289000,_0x38e841,_0x33274a,_0x1654bd;try{if(!_0x59e9ed[_0x2a4a71(0x24d)]){let _0x376a4e=((_0x38e841=(_0x289000=_0x59e9ed[_0x2a4a71(0x25e)])==null?void 0x0:_0x289000['versions'])==null?void 0x0:_0x38e841[_0x2a4a71(0x198)])||((_0x1654bd=(_0x33274a=_0x59e9ed[_0x2a4a71(0x25e)])==null?void 0x0:_0x33274a[_0x2a4a71(0x1ff)])==null?void 0x0:_0x1654bd[_0x2a4a71(0x1d8)])===_0x2a4a71(0x185);(_0x3d0ee1==='next.js'||_0x3d0ee1===_0x2a4a71(0x1e4)||_0x3d0ee1===_0x2a4a71(0x22f)||_0x3d0ee1===_0x2a4a71(0x213))&&(_0x3d0ee1+=_0x376a4e?_0x2a4a71(0x1b3):'\\x20browser'),_0x59e9ed[_0x2a4a71(0x24d)]={'id':+new Date(),'tool':_0x3d0ee1},_0x3b442d&&_0x3d0ee1&&!_0x376a4e&&console['log'](_0x2a4a71(0x264)+(_0x3d0ee1['charAt'](0x0)[_0x2a4a71(0x238)]()+_0x3d0ee1[_0x2a4a71(0x193)](0x1))+',',_0x2a4a71(0x1f5),_0x2a4a71(0x16f));}let _0x3065a6=new H(_0x59e9ed,_0x435000,_0x2205c0,_0x387ea1,_0x388879,_0x3a7591);return _0x3065a6[_0x2a4a71(0x1c6)]['bind'](_0x3065a6);}catch(_0x5cbdc5){return console['warn'](_0x2a4a71(0x247),_0x5cbdc5&&_0x5cbdc5['message']),()=>{};}});return _0x59f8b9=>_0x5e24ec[_0x316efd(0x22d)](_0x5155f2=>_0x5155f2(_0x59f8b9));}function ae(_0x32c035,_0x386228,_0x1ba55a,_0x3db203){var _0xcccd91=_0x306708;_0x3db203&&_0x32c035===_0xcccd91(0x1dd)&&_0x1ba55a[_0xcccd91(0x17d)]['reload']();}function _0x57eb(_0x55b34c,_0x3b16e9){var _0x4ac419=_0x4ac4();return _0x57eb=function(_0x57eb0e,_0x21c986){_0x57eb0e=_0x57eb0e-0x167;var _0x1c6b34=_0x4ac419[_0x57eb0e];return _0x1c6b34;},_0x57eb(_0x55b34c,_0x3b16e9);}function B(_0x3d2273){var _0x4c09a6=_0x306708,_0x1bd3ca,_0x70cdff;let _0x3131bb=function(_0x4828d9,_0x331191){return _0x331191-_0x4828d9;},_0x121f61;if(_0x3d2273[_0x4c09a6(0x24b)])_0x121f61=function(){var _0x29e0e2=_0x4c09a6;return _0x3d2273[_0x29e0e2(0x24b)][_0x29e0e2(0x1fb)]();};else{if(_0x3d2273[_0x4c09a6(0x25e)]&&_0x3d2273[_0x4c09a6(0x25e)][_0x4c09a6(0x190)]&&((_0x70cdff=(_0x1bd3ca=_0x3d2273[_0x4c09a6(0x25e)])==null?void 0x0:_0x1bd3ca['env'])==null?void 0x0:_0x70cdff[_0x4c09a6(0x1d8)])!==_0x4c09a6(0x185))_0x121f61=function(){var _0x5b8216=_0x4c09a6;return _0x3d2273[_0x5b8216(0x25e)]['hrtime']();},_0x3131bb=function(_0x174a25,_0x4a360c){return 0x3e8*(_0x4a360c[0x0]-_0x174a25[0x0])+(_0x4a360c[0x1]-_0x174a25[0x1])/0xf4240;};else try{let {performance:_0x1423c5}=require(_0x4c09a6(0x26f));_0x121f61=function(){var _0x322a81=_0x4c09a6;return _0x1423c5[_0x322a81(0x1fb)]();};}catch{_0x121f61=function(){return+new Date();};}}return{'elapsed':_0x3131bb,'timeStamp':_0x121f61,'now':()=>Date[_0x4c09a6(0x1fb)]()};}function J(_0x42b318,_0x19743b,_0x2fa843){var _0x48a4a0=_0x306708,_0x164059,_0x17f315,_0x43da7c,_0x1142c4,_0x943066;if(_0x42b318[_0x48a4a0(0x171)]!==void 0x0)return _0x42b318[_0x48a4a0(0x171)];let _0x242317=((_0x17f315=(_0x164059=_0x42b318[_0x48a4a0(0x25e)])==null?void 0x0:_0x164059[_0x48a4a0(0x263)])==null?void 0x0:_0x17f315[_0x48a4a0(0x198)])||((_0x1142c4=(_0x43da7c=_0x42b318[_0x48a4a0(0x25e)])==null?void 0x0:_0x43da7c[_0x48a4a0(0x1ff)])==null?void 0x0:_0x1142c4[_0x48a4a0(0x1d8)])==='edge';function _0x1a94f0(_0x586890){var _0x1f649e=_0x48a4a0;if(_0x586890['startsWith']('/')&&_0x586890[_0x1f649e(0x1cf)]('/')){let _0x3e6dd8=new RegExp(_0x586890['slice'](0x1,-0x1));return _0x594d13=>_0x3e6dd8[_0x1f649e(0x1b7)](_0x594d13);}else{if(_0x586890[_0x1f649e(0x241)]('*')||_0x586890[_0x1f649e(0x241)]('?')){let _0x2ebcb8=new RegExp('^'+_0x586890[_0x1f649e(0x220)](/\\./g,String[_0x1f649e(0x204)](0x5c)+'.')[_0x1f649e(0x220)](/\\*/g,'.*')[_0x1f649e(0x220)](/\\?/g,'.')+String[_0x1f649e(0x204)](0x24));return _0x5dcdaa=>_0x2ebcb8[_0x1f649e(0x1b7)](_0x5dcdaa);}else return _0x135db6=>_0x135db6===_0x586890;}}let _0xe3393d=_0x19743b[_0x48a4a0(0x1e1)](_0x1a94f0);return _0x42b318[_0x48a4a0(0x171)]=_0x242317||!_0x19743b,!_0x42b318[_0x48a4a0(0x171)]&&((_0x943066=_0x42b318[_0x48a4a0(0x17d)])==null?void 0x0:_0x943066[_0x48a4a0(0x1bf)])&&(_0x42b318[_0x48a4a0(0x171)]=_0xe3393d['some'](_0x548db0=>_0x548db0(_0x42b318[_0x48a4a0(0x17d)]['hostname']))),_0x42b318[_0x48a4a0(0x171)];}function Y(_0x3fa09f,_0x44ab87,_0x12e5a6,_0x24945e,_0x3b9fc4){var _0x1a0229=_0x306708;_0x3fa09f=_0x3fa09f,_0x44ab87=_0x44ab87,_0x12e5a6=_0x12e5a6,_0x24945e=_0x24945e,_0x3b9fc4=_0x3b9fc4,_0x3b9fc4=_0x3b9fc4||{},_0x3b9fc4['defaultLimits']=_0x3b9fc4[_0x1a0229(0x223)]||{},_0x3b9fc4['reducedLimits']=_0x3b9fc4[_0x1a0229(0x1cd)]||{},_0x3b9fc4[_0x1a0229(0x259)]=_0x3b9fc4[_0x1a0229(0x259)]||{},_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)]=_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)]||{},_0x3b9fc4[_0x1a0229(0x259)]['global']=_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)]||{};let _0x151ea4={'perLogpoint':{'reduceOnCount':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x237)]||0x32,'reduceOnAccumulatedProcessingTimeMs':_0x3b9fc4[_0x1a0229(0x259)]['perLogpoint']['reduceOnAccumulatedProcessingTimeMs']||0x64,'resetWhenQuietMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x1f8)]||0x1f4,'resetOnProcessingTimeAverageMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x19c)]||0x64},'global':{'reduceOnCount':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x237)]||0x3e8,'reduceOnAccumulatedProcessingTimeMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x1e9)]||0x12c,'resetWhenQuietMs':_0x3b9fc4['reducePolicy'][_0x1a0229(0x1be)][_0x1a0229(0x1f8)]||0x32,'resetOnProcessingTimeAverageMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x19c)]||0x64}},_0x2633ed=B(_0x3fa09f),_0x3e3008=_0x2633ed[_0x1a0229(0x1ca)],_0xac187d=_0x2633ed[_0x1a0229(0x22e)];class _0x111409{constructor(){var _0x179f3c=_0x1a0229;this[_0x179f3c(0x1eb)]=/^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\\xA0-\\uFFFF]*$/,this[_0x179f3c(0x1d5)]=/^(0|[1-9][0-9]*)$/,this[_0x179f3c(0x218)]=/'([^\\\\']|\\\\')*'/,this[_0x179f3c(0x268)]=_0x3fa09f[_0x179f3c(0x20a)],this[_0x179f3c(0x24c)]=_0x3fa09f['HTMLAllCollection'],this[_0x179f3c(0x179)]=Object[_0x179f3c(0x1f2)],this[_0x179f3c(0x205)]=Object['getOwnPropertyNames'],this['_Symbol']=_0x3fa09f[_0x179f3c(0x18e)],this[_0x179f3c(0x265)]=RegExp[_0x179f3c(0x269)]['toString'],this[_0x179f3c(0x17a)]=Date['prototype'][_0x179f3c(0x252)];}['serialize'](_0x40d6a8,_0x554cac,_0x52039e,_0xacf72f){var _0x57ff23=_0x1a0229,_0x27498f=this,_0x3d1269=_0x52039e[_0x57ff23(0x1a4)];function _0x352c7e(_0x319167,_0x1cb4b8,_0x46d708){var _0x25615d=_0x57ff23;_0x1cb4b8[_0x25615d(0x21d)]='unknown',_0x1cb4b8[_0x25615d(0x195)]=_0x319167['message'],_0x3294e4=_0x46d708[_0x25615d(0x198)][_0x25615d(0x24f)],_0x46d708[_0x25615d(0x198)][_0x25615d(0x24f)]=_0x1cb4b8,_0x27498f[_0x25615d(0x1c1)](_0x1cb4b8,_0x46d708);}let _0x203bc0;_0x3fa09f[_0x57ff23(0x1ba)]&&(_0x203bc0=_0x3fa09f[_0x57ff23(0x1ba)]['error'],_0x203bc0&&(_0x3fa09f[_0x57ff23(0x1ba)][_0x57ff23(0x195)]=function(){}));try{try{_0x52039e[_0x57ff23(0x233)]++,_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x1cb)]['push'](_0x554cac);var _0x507685,_0x2b5a2a,_0x5a02a3,_0x5cc2d1,_0x191590=[],_0x5d6631=[],_0xeb0b4,_0x430667=this[_0x57ff23(0x20e)](_0x554cac),_0x5ec1b1=_0x430667===_0x57ff23(0x1ee),_0x9c9d40=!0x1,_0x359db7=_0x430667===_0x57ff23(0x1fa),_0x55f196=this[_0x57ff23(0x20f)](_0x430667),_0x1c958d=this[_0x57ff23(0x26d)](_0x430667),_0x26f774=_0x55f196||_0x1c958d,_0x28c67b={},_0x34603f=0x0,_0x22ac07=!0x1,_0x3294e4,_0x468afa=/^(([1-9]{1}[0-9]*)|0)$/;if(_0x52039e['depth']){if(_0x5ec1b1){if(_0x2b5a2a=_0x554cac[_0x57ff23(0x1b6)],_0x2b5a2a>_0x52039e[_0x57ff23(0x16d)]){for(_0x5a02a3=0x0,_0x5cc2d1=_0x52039e[_0x57ff23(0x16d)],_0x507685=_0x5a02a3;_0x507685<_0x5cc2d1;_0x507685++)_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x20b)](_0x191590,_0x554cac,_0x430667,_0x507685,_0x52039e));_0x40d6a8[_0x57ff23(0x1d1)]=!0x0;}else{for(_0x5a02a3=0x0,_0x5cc2d1=_0x2b5a2a,_0x507685=_0x5a02a3;_0x507685<_0x5cc2d1;_0x507685++)_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x20b)](_0x191590,_0x554cac,_0x430667,_0x507685,_0x52039e));}_0x52039e[_0x57ff23(0x19e)]+=_0x5d6631[_0x57ff23(0x1b6)];}if(!(_0x430667===_0x57ff23(0x1d9)||_0x430667===_0x57ff23(0x20a))&&!_0x55f196&&_0x430667!=='String'&&_0x430667!==_0x57ff23(0x261)&&_0x430667!==_0x57ff23(0x230)){var _0x48cb10=_0xacf72f[_0x57ff23(0x18f)]||_0x52039e['props'];if(this[_0x57ff23(0x194)](_0x554cac)?(_0x507685=0x0,_0x554cac[_0x57ff23(0x22d)](function(_0x5e3879){var _0x4028da=_0x57ff23;if(_0x34603f++,_0x52039e[_0x4028da(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;return;}if(!_0x52039e[_0x4028da(0x1b4)]&&_0x52039e['autoExpand']&&_0x52039e[_0x4028da(0x19e)]>_0x52039e[_0x4028da(0x1a3)]){_0x22ac07=!0x0;return;}_0x5d6631['push'](_0x27498f[_0x4028da(0x20b)](_0x191590,_0x554cac,'Set',_0x507685++,_0x52039e,function(_0x326cff){return function(){return _0x326cff;};}(_0x5e3879)));})):this['_isMap'](_0x554cac)&&_0x554cac[_0x57ff23(0x22d)](function(_0x21d5e9,_0x1bbf3a){var _0x572ec4=_0x57ff23;if(_0x34603f++,_0x52039e[_0x572ec4(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;return;}if(!_0x52039e[_0x572ec4(0x1b4)]&&_0x52039e[_0x572ec4(0x1a4)]&&_0x52039e['autoExpandPropertyCount']>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;return;}var _0x1e13a8=_0x1bbf3a[_0x572ec4(0x252)]();_0x1e13a8[_0x572ec4(0x1b6)]>0x64&&(_0x1e13a8=_0x1e13a8[_0x572ec4(0x16c)](0x0,0x64)+_0x572ec4(0x19f)),_0x5d6631[_0x572ec4(0x26e)](_0x27498f[_0x572ec4(0x20b)](_0x191590,_0x554cac,'Map',_0x1e13a8,_0x52039e,function(_0x5e237b){return function(){return _0x5e237b;};}(_0x21d5e9)));}),!_0x9c9d40){try{for(_0xeb0b4 in _0x554cac)if(!(_0x5ec1b1&&_0x468afa[_0x57ff23(0x1b7)](_0xeb0b4))&&!this[_0x57ff23(0x267)](_0x554cac,_0xeb0b4,_0x52039e)){if(_0x34603f++,_0x52039e[_0x57ff23(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;break;}if(!_0x52039e[_0x57ff23(0x1b4)]&&_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e['autoExpandPropertyCount']>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;break;}_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x234)](_0x191590,_0x28c67b,_0x554cac,_0x430667,_0xeb0b4,_0x52039e));}}catch{}if(_0x28c67b[_0x57ff23(0x173)]=!0x0,_0x359db7&&(_0x28c67b[_0x57ff23(0x1b5)]=!0x0),!_0x22ac07){var _0xb9ad21=[][_0x57ff23(0x256)](this[_0x57ff23(0x205)](_0x554cac))[_0x57ff23(0x256)](this['_getOwnPropertySymbols'](_0x554cac));for(_0x507685=0x0,_0x2b5a2a=_0xb9ad21[_0x57ff23(0x1b6)];_0x507685<_0x2b5a2a;_0x507685++)if(_0xeb0b4=_0xb9ad21[_0x507685],!(_0x5ec1b1&&_0x468afa[_0x57ff23(0x1b7)](_0xeb0b4[_0x57ff23(0x252)]()))&&!this[_0x57ff23(0x267)](_0x554cac,_0xeb0b4,_0x52039e)&&!_0x28c67b[_0x57ff23(0x1ab)+_0xeb0b4[_0x57ff23(0x252)]()]){if(_0x34603f++,_0x52039e[_0x57ff23(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;break;}if(!_0x52039e[_0x57ff23(0x1b4)]&&_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x19e)]>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;break;}_0x5d6631['push'](_0x27498f['_addObjectProperty'](_0x191590,_0x28c67b,_0x554cac,_0x430667,_0xeb0b4,_0x52039e));}}}}}if(_0x40d6a8['type']=_0x430667,_0x26f774?(_0x40d6a8[_0x57ff23(0x184)]=_0x554cac['valueOf'](),this[_0x57ff23(0x1e7)](_0x430667,_0x40d6a8,_0x52039e,_0xacf72f)):_0x430667==='date'?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x17a)][_0x57ff23(0x21a)](_0x554cac):_0x430667===_0x57ff23(0x230)?_0x40d6a8[_0x57ff23(0x184)]=_0x554cac[_0x57ff23(0x252)]():_0x430667===_0x57ff23(0x244)?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x265)][_0x57ff23(0x21a)](_0x554cac):_0x430667===_0x57ff23(0x1dc)&&this['_Symbol']?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x1f9)]['prototype'][_0x57ff23(0x252)][_0x57ff23(0x21a)](_0x554cac):!_0x52039e[_0x57ff23(0x1fe)]&&!(_0x430667===_0x57ff23(0x1d9)||_0x430667==='undefined')&&(delete _0x40d6a8[_0x57ff23(0x184)],_0x40d6a8[_0x57ff23(0x1aa)]=!0x0),_0x22ac07&&(_0x40d6a8[_0x57ff23(0x19d)]=!0x0),_0x3294e4=_0x52039e['node'][_0x57ff23(0x24f)],_0x52039e['node'][_0x57ff23(0x24f)]=_0x40d6a8,this[_0x57ff23(0x1c1)](_0x40d6a8,_0x52039e),_0x5d6631[_0x57ff23(0x1b6)]){for(_0x507685=0x0,_0x2b5a2a=_0x5d6631[_0x57ff23(0x1b6)];_0x507685<_0x2b5a2a;_0x507685++)_0x5d6631[_0x507685](_0x507685);}_0x191590[_0x57ff23(0x1b6)]&&(_0x40d6a8[_0x57ff23(0x18f)]=_0x191590);}catch(_0x3e590f){_0x352c7e(_0x3e590f,_0x40d6a8,_0x52039e);}this[_0x57ff23(0x1ad)](_0x554cac,_0x40d6a8),this[_0x57ff23(0x1f3)](_0x40d6a8,_0x52039e),_0x52039e[_0x57ff23(0x198)][_0x57ff23(0x24f)]=_0x3294e4,_0x52039e[_0x57ff23(0x233)]--,_0x52039e[_0x57ff23(0x1a4)]=_0x3d1269,_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x1cb)][_0x57ff23(0x21b)]();}finally{_0x203bc0&&(_0x3fa09f[_0x57ff23(0x1ba)][_0x57ff23(0x195)]=_0x203bc0);}return _0x40d6a8;}[_0x1a0229(0x1a7)](_0x5bc7aa){return Object['getOwnPropertySymbols']?Object['getOwnPropertySymbols'](_0x5bc7aa):[];}['_isSet'](_0x2b9132){var _0x64ad7f=_0x1a0229;return!!(_0x2b9132&&_0x3fa09f[_0x64ad7f(0x1af)]&&this[_0x64ad7f(0x215)](_0x2b9132)===_0x64ad7f(0x168)&&_0x2b9132[_0x64ad7f(0x22d)]);}['_blacklistedProperty'](_0x6da349,_0x27887d,_0x3ab798){var _0x15f72a=_0x1a0229;if(!_0x3ab798[_0x15f72a(0x207)]){let _0x4b858a=this[_0x15f72a(0x179)](_0x6da349,_0x27887d);if(_0x4b858a&&_0x4b858a[_0x15f72a(0x1e8)])return!0x0;}return _0x3ab798['noFunctions']?typeof _0x6da349[_0x27887d]==_0x15f72a(0x1fa):!0x1;}[_0x1a0229(0x20e)](_0x46e341){var _0xed104=_0x1a0229,_0x842a19='';return _0x842a19=typeof _0x46e341,_0x842a19==='object'?this[_0xed104(0x215)](_0x46e341)==='[object\\x20Array]'?_0x842a19='array':this[_0xed104(0x215)](_0x46e341)===_0xed104(0x231)?_0x842a19=_0xed104(0x1a0):this[_0xed104(0x215)](_0x46e341)===_0xed104(0x25c)?_0x842a19='bigint':_0x46e341===null?_0x842a19='null':_0x46e341['constructor']&&(_0x842a19=_0x46e341[_0xed104(0x246)][_0xed104(0x229)]||_0x842a19):_0x842a19===_0xed104(0x20a)&&this[_0xed104(0x24c)]&&_0x46e341 instanceof this['_HTMLAllCollection']&&(_0x842a19=_0xed104(0x1b9)),_0x842a19;}[_0x1a0229(0x215)](_0x3a4a42){var _0x52978d=_0x1a0229;return Object[_0x52978d(0x269)][_0x52978d(0x252)][_0x52978d(0x21a)](_0x3a4a42);}[_0x1a0229(0x20f)](_0x344afd){var _0x18ea96=_0x1a0229;return _0x344afd===_0x18ea96(0x169)||_0x344afd===_0x18ea96(0x1e3)||_0x344afd===_0x18ea96(0x1b1);}[_0x1a0229(0x26d)](_0x268fb2){var _0x30d14e=_0x1a0229;return _0x268fb2===_0x30d14e(0x250)||_0x268fb2===_0x30d14e(0x1c2)||_0x268fb2===_0x30d14e(0x232);}[_0x1a0229(0x20b)](_0x5a4048,_0xed6d73,_0x496d2d,_0x5200b2,_0x2ad9ae,_0x2ae99d){var _0x3ea8a2=this;return function(_0x5147f2){var _0x5c347b=_0x57eb,_0x5a16fe=_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x24f)],_0x344d27=_0x2ad9ae['node'][_0x5c347b(0x211)],_0x4187de=_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x192)];_0x2ad9ae['node']['parent']=_0x5a16fe,_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x211)]=typeof _0x5200b2==_0x5c347b(0x1b1)?_0x5200b2:_0x5147f2,_0x5a4048[_0x5c347b(0x26e)](_0x3ea8a2['_property'](_0xed6d73,_0x496d2d,_0x5200b2,_0x2ad9ae,_0x2ae99d)),_0x2ad9ae['node'][_0x5c347b(0x192)]=_0x4187de,_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x211)]=_0x344d27;};}[_0x1a0229(0x234)](_0x3e1fde,_0x3d8d61,_0x475fe8,_0x5aec1a,_0x4ff186,_0x21a460,_0x5c688a){var _0x547a69=_0x1a0229,_0x5e16c3=this;return _0x3d8d61['_p_'+_0x4ff186[_0x547a69(0x252)]()]=!0x0,function(_0x176a2d){var _0x5d8009=_0x547a69,_0x5cf964=_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x24f)],_0x3bc9c4=_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)],_0x30229a=_0x21a460['node'][_0x5d8009(0x192)];_0x21a460[_0x5d8009(0x198)]['parent']=_0x5cf964,_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)]=_0x176a2d,_0x3e1fde['push'](_0x5e16c3[_0x5d8009(0x23c)](_0x475fe8,_0x5aec1a,_0x4ff186,_0x21a460,_0x5c688a)),_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x192)]=_0x30229a,_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)]=_0x3bc9c4;};}[_0x1a0229(0x23c)](_0x1354ea,_0x549fc8,_0x34c184,_0x3ea67a,_0x187926){var _0x54c1c6=_0x1a0229,_0x517077=this;_0x187926||(_0x187926=function(_0x560c04,_0x358223){return _0x560c04[_0x358223];});var _0x4b95cc=_0x34c184[_0x54c1c6(0x252)](),_0x2df5ee=_0x3ea67a[_0x54c1c6(0x1e0)]||{},_0x27230e=_0x3ea67a[_0x54c1c6(0x1fe)],_0x58094a=_0x3ea67a[_0x54c1c6(0x1b4)];try{var _0x551f2a=this[_0x54c1c6(0x249)](_0x1354ea),_0x258e78=_0x4b95cc;_0x551f2a&&_0x258e78[0x0]==='\\x27'&&(_0x258e78=_0x258e78[_0x54c1c6(0x193)](0x1,_0x258e78[_0x54c1c6(0x1b6)]-0x2));var _0x167185=_0x3ea67a[_0x54c1c6(0x1e0)]=_0x2df5ee[_0x54c1c6(0x1ab)+_0x258e78];_0x167185&&(_0x3ea67a[_0x54c1c6(0x1fe)]=_0x3ea67a['depth']+0x1),_0x3ea67a[_0x54c1c6(0x1b4)]=!!_0x167185;var _0x5bb1a9=typeof _0x34c184==_0x54c1c6(0x1dc),_0x4b5ab0={'name':_0x5bb1a9||_0x551f2a?_0x4b95cc:this[_0x54c1c6(0x20d)](_0x4b95cc)};if(_0x5bb1a9&&(_0x4b5ab0['symbol']=!0x0),!(_0x549fc8===_0x54c1c6(0x1ee)||_0x549fc8===_0x54c1c6(0x242))){var _0x12e894=this[_0x54c1c6(0x179)](_0x1354ea,_0x34c184);if(_0x12e894&&(_0x12e894['set']&&(_0x4b5ab0[_0x54c1c6(0x1ce)]=!0x0),_0x12e894[_0x54c1c6(0x1e8)]&&!_0x167185&&!_0x3ea67a[_0x54c1c6(0x207)]))return _0x4b5ab0[_0x54c1c6(0x235)]=!0x0,this[_0x54c1c6(0x17b)](_0x4b5ab0,_0x3ea67a),_0x4b5ab0;}var _0x117dac;try{_0x117dac=_0x187926(_0x1354ea,_0x34c184);}catch(_0x552030){return _0x4b5ab0={'name':_0x4b95cc,'type':_0x54c1c6(0x1b0),'error':_0x552030[_0x54c1c6(0x203)]},this['_processTreeNodeResult'](_0x4b5ab0,_0x3ea67a),_0x4b5ab0;}var _0x353809=this[_0x54c1c6(0x20e)](_0x117dac),_0x585700=this[_0x54c1c6(0x20f)](_0x353809);if(_0x4b5ab0[_0x54c1c6(0x21d)]=_0x353809,_0x585700)this[_0x54c1c6(0x17b)](_0x4b5ab0,_0x3ea67a,_0x117dac,function(){var _0x44f506=_0x54c1c6;_0x4b5ab0['value']=_0x117dac['valueOf'](),!_0x167185&&_0x517077[_0x44f506(0x1e7)](_0x353809,_0x4b5ab0,_0x3ea67a,{});});else{var _0x4920c5=_0x3ea67a[_0x54c1c6(0x1a4)]&&_0x3ea67a[_0x54c1c6(0x233)]<_0x3ea67a[_0x54c1c6(0x1b8)]&&_0x3ea67a[_0x54c1c6(0x1cb)][_0x54c1c6(0x224)](_0x117dac)<0x0&&_0x353809!==_0x54c1c6(0x1fa)&&_0x3ea67a[_0x54c1c6(0x19e)]<_0x3ea67a['autoExpandLimit'];_0x4920c5||_0x3ea67a[_0x54c1c6(0x233)]<_0x27230e||_0x167185?(this['serialize'](_0x4b5ab0,_0x117dac,_0x3ea67a,_0x167185||{}),this[_0x54c1c6(0x1ad)](_0x117dac,_0x4b5ab0)):this['_processTreeNodeResult'](_0x4b5ab0,_0x3ea67a,_0x117dac,function(){var _0x57d325=_0x54c1c6;_0x353809===_0x57d325(0x1d9)||_0x353809===_0x57d325(0x20a)||(delete _0x4b5ab0[_0x57d325(0x184)],_0x4b5ab0['capped']=!0x0);});}return _0x4b5ab0;}finally{_0x3ea67a[_0x54c1c6(0x1e0)]=_0x2df5ee,_0x3ea67a[_0x54c1c6(0x1fe)]=_0x27230e,_0x3ea67a[_0x54c1c6(0x1b4)]=_0x58094a;}}[_0x1a0229(0x1e7)](_0x56ea77,_0xe68ac4,_0x19079c,_0x151ab0){var _0x4ce5e3=_0x1a0229,_0x3ddd62=_0x151ab0[_0x4ce5e3(0x1de)]||_0x19079c[_0x4ce5e3(0x1de)];if((_0x56ea77===_0x4ce5e3(0x1e3)||_0x56ea77===_0x4ce5e3(0x1c2))&&_0xe68ac4['value']){let _0x1e81f3=_0xe68ac4[_0x4ce5e3(0x184)][_0x4ce5e3(0x1b6)];_0x19079c['allStrLength']+=_0x1e81f3,_0x19079c[_0x4ce5e3(0x200)]>_0x19079c[_0x4ce5e3(0x1c7)]?(_0xe68ac4[_0x4ce5e3(0x1aa)]='',delete _0xe68ac4[_0x4ce5e3(0x184)]):_0x1e81f3>_0x3ddd62&&(_0xe68ac4[_0x4ce5e3(0x1aa)]=_0xe68ac4[_0x4ce5e3(0x184)]['substr'](0x0,_0x3ddd62),delete _0xe68ac4['value']);}}[_0x1a0229(0x249)](_0x394563){var _0x5a0544=_0x1a0229;return!!(_0x394563&&_0x3fa09f[_0x5a0544(0x1ec)]&&this[_0x5a0544(0x215)](_0x394563)===_0x5a0544(0x23a)&&_0x394563[_0x5a0544(0x22d)]);}[_0x1a0229(0x20d)](_0x182c1e){var _0x45e012=_0x1a0229;if(_0x182c1e[_0x45e012(0x1f4)](/^\\d+$/))return _0x182c1e;var _0x3a5b42;try{_0x3a5b42=JSON['stringify'](''+_0x182c1e);}catch{_0x3a5b42='\\x22'+this[_0x45e012(0x215)](_0x182c1e)+'\\x22';}return _0x3a5b42['match'](/^\"([a-zA-Z_][a-zA-Z_0-9]*)\"$/)?_0x3a5b42=_0x3a5b42[_0x45e012(0x193)](0x1,_0x3a5b42[_0x45e012(0x1b6)]-0x2):_0x3a5b42=_0x3a5b42[_0x45e012(0x220)](/'/g,'\\x5c\\x27')['replace'](/\\\\\"/g,'\\x22')['replace'](/(^\"|\"$)/g,'\\x27'),_0x3a5b42;}[_0x1a0229(0x17b)](_0x42bdc4,_0x2913cb,_0x26c947,_0x1a1ce7){var _0x58d5f8=_0x1a0229;this[_0x58d5f8(0x1c1)](_0x42bdc4,_0x2913cb),_0x1a1ce7&&_0x1a1ce7(),this[_0x58d5f8(0x1ad)](_0x26c947,_0x42bdc4),this[_0x58d5f8(0x1f3)](_0x42bdc4,_0x2913cb);}[_0x1a0229(0x1c1)](_0x4e11a0,_0xbbeada){var _0x1a94cb=_0x1a0229;this[_0x1a94cb(0x181)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x23e)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x22a)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x260)](_0x4e11a0,_0xbbeada);}[_0x1a0229(0x181)](_0x19de26,_0x41a25d){}[_0x1a0229(0x23e)](_0x1356cd,_0x4a5fac){}[_0x1a0229(0x1d0)](_0x1cd658,_0x4a1747){}[_0x1a0229(0x1f6)](_0x3cb148){var _0x43c24f=_0x1a0229;return _0x3cb148===this[_0x43c24f(0x268)];}[_0x1a0229(0x1f3)](_0x283677,_0x5afa0e){var _0x7f88c3=_0x1a0229;this[_0x7f88c3(0x1d0)](_0x283677,_0x5afa0e),this['_setNodeExpandableState'](_0x283677),_0x5afa0e[_0x7f88c3(0x1a9)]&&this[_0x7f88c3(0x1fd)](_0x283677),this[_0x7f88c3(0x1d4)](_0x283677,_0x5afa0e),this['_addLoadNode'](_0x283677,_0x5afa0e),this[_0x7f88c3(0x167)](_0x283677);}[_0x1a0229(0x1ad)](_0x13930e,_0x569f4b){var _0x488226=_0x1a0229;try{_0x13930e&&typeof _0x13930e[_0x488226(0x1b6)]==_0x488226(0x1b1)&&(_0x569f4b[_0x488226(0x1b6)]=_0x13930e[_0x488226(0x1b6)]);}catch{}if(_0x569f4b['type']===_0x488226(0x1b1)||_0x569f4b[_0x488226(0x21d)]===_0x488226(0x232)){if(isNaN(_0x569f4b[_0x488226(0x184)]))_0x569f4b[_0x488226(0x1df)]=!0x0,delete _0x569f4b[_0x488226(0x184)];else switch(_0x569f4b[_0x488226(0x184)]){case Number[_0x488226(0x236)]:_0x569f4b[_0x488226(0x239)]=!0x0,delete _0x569f4b['value'];break;case Number[_0x488226(0x228)]:_0x569f4b[_0x488226(0x1fc)]=!0x0,delete _0x569f4b['value'];break;case 0x0:this[_0x488226(0x19b)](_0x569f4b[_0x488226(0x184)])&&(_0x569f4b[_0x488226(0x178)]=!0x0);break;}}else _0x569f4b[_0x488226(0x21d)]===_0x488226(0x1fa)&&typeof _0x13930e['name']==_0x488226(0x1e3)&&_0x13930e[_0x488226(0x229)]&&_0x569f4b[_0x488226(0x229)]&&_0x13930e['name']!==_0x569f4b['name']&&(_0x569f4b['funcName']=_0x13930e[_0x488226(0x229)]);}[_0x1a0229(0x19b)](_0x2e602c){var _0x3d950b=_0x1a0229;return 0x1/_0x2e602c===Number[_0x3d950b(0x228)];}[_0x1a0229(0x1fd)](_0x429dd2){var _0x312c75=_0x1a0229;!_0x429dd2[_0x312c75(0x18f)]||!_0x429dd2['props'][_0x312c75(0x1b6)]||_0x429dd2[_0x312c75(0x21d)]===_0x312c75(0x1ee)||_0x429dd2[_0x312c75(0x21d)]==='Map'||_0x429dd2[_0x312c75(0x21d)]===_0x312c75(0x1af)||_0x429dd2[_0x312c75(0x18f)]['sort'](function(_0x612321,_0x1df7f8){var _0x3c5dab=_0x312c75,_0x1fba1b=_0x612321[_0x3c5dab(0x229)][_0x3c5dab(0x1ed)](),_0x1143f9=_0x1df7f8[_0x3c5dab(0x229)][_0x3c5dab(0x1ed)]();return _0x1fba1b<_0x1143f9?-0x1:_0x1fba1b>_0x1143f9?0x1:0x0;});}[_0x1a0229(0x1d4)](_0x3895f9,_0x48aadd){var _0x351d89=_0x1a0229;if(!(_0x48aadd['noFunctions']||!_0x3895f9[_0x351d89(0x18f)]||!_0x3895f9['props'][_0x351d89(0x1b6)])){for(var _0x4d9e5c=[],_0x23eb96=[],_0xd62b75=0x0,_0x5a2dfe=_0x3895f9[_0x351d89(0x18f)][_0x351d89(0x1b6)];_0xd62b75<_0x5a2dfe;_0xd62b75++){var _0x4c17b7=_0x3895f9[_0x351d89(0x18f)][_0xd62b75];_0x4c17b7[_0x351d89(0x21d)]===_0x351d89(0x1fa)?_0x4d9e5c[_0x351d89(0x26e)](_0x4c17b7):_0x23eb96[_0x351d89(0x26e)](_0x4c17b7);}if(!(!_0x23eb96[_0x351d89(0x1b6)]||_0x4d9e5c[_0x351d89(0x1b6)]<=0x1)){_0x3895f9[_0x351d89(0x18f)]=_0x23eb96;var _0x2b33a7={'functionsNode':!0x0,'props':_0x4d9e5c};this[_0x351d89(0x181)](_0x2b33a7,_0x48aadd),this['_setNodeLabel'](_0x2b33a7,_0x48aadd),this[_0x351d89(0x1ae)](_0x2b33a7),this[_0x351d89(0x260)](_0x2b33a7,_0x48aadd),_0x2b33a7['id']+='\\x20f',_0x3895f9[_0x351d89(0x18f)]['unshift'](_0x2b33a7);}}}[_0x1a0229(0x243)](_0x4abe08,_0x5b7c75){}['_setNodeExpandableState'](_0x59678d){}[_0x1a0229(0x212)](_0xdf985c){var _0x2524e2=_0x1a0229;return Array[_0x2524e2(0x23d)](_0xdf985c)||typeof _0xdf985c==_0x2524e2(0x206)&&this[_0x2524e2(0x215)](_0xdf985c)==='[object\\x20Array]';}['_setNodePermissions'](_0x3fb9a6,_0x4e6343){}['_cleanNode'](_0x23c336){var _0x1d7070=_0x1a0229;delete _0x23c336[_0x1d7070(0x253)],delete _0x23c336[_0x1d7070(0x1e2)],delete _0x23c336[_0x1d7070(0x18b)];}[_0x1a0229(0x22a)](_0x1acfab,_0x4597d6){}}let _0x3c89ee=new _0x111409(),_0x5ec458={'props':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x18f)]||0x64,'elements':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x16d)]||0x64,'strLength':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1de)]||0x400*0x32,'totalStrLength':_0x3b9fc4['defaultLimits'][_0x1a0229(0x1c7)]||0x400*0x32,'autoExpandLimit':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1a3)]||0x1388,'autoExpandMaxDepth':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1b8)]||0xa},_0x3a09dd={'props':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x18f)]||0x5,'elements':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x16d)]||0x5,'strLength':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x1de)]||0x100,'totalStrLength':_0x3b9fc4['reducedLimits'][_0x1a0229(0x1c7)]||0x100*0x3,'autoExpandLimit':_0x3b9fc4['reducedLimits']['autoExpandLimit']||0x1e,'autoExpandMaxDepth':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x1b8)]||0x2};function _0x4b3a63(_0x205bfc,_0x18b986,_0x503f06,_0x274aab,_0x31f6c4,_0x454f1c){var _0x290454=_0x1a0229;let _0x2396c5,_0x2aa929;try{_0x2aa929=_0xac187d(),_0x2396c5=_0x12e5a6[_0x18b986],!_0x2396c5||_0x2aa929-_0x2396c5['ts']>_0x151ea4['perLogpoint'][_0x290454(0x1f8)]&&_0x2396c5[_0x290454(0x1d6)]&&_0x2396c5[_0x290454(0x26a)]/_0x2396c5[_0x290454(0x1d6)]<_0x151ea4[_0x290454(0x18d)]['resetOnProcessingTimeAverageMs']?(_0x12e5a6[_0x18b986]=_0x2396c5={'count':0x0,'time':0x0,'ts':_0x2aa929},_0x12e5a6[_0x290454(0x257)]={}):_0x2aa929-_0x12e5a6[_0x290454(0x257)]['ts']>_0x151ea4[_0x290454(0x1be)][_0x290454(0x1f8)]&&_0x12e5a6[_0x290454(0x257)][_0x290454(0x1d6)]&&_0x12e5a6['hits'][_0x290454(0x26a)]/_0x12e5a6['hits'][_0x290454(0x1d6)]<_0x151ea4['global'][_0x290454(0x19c)]&&(_0x12e5a6[_0x290454(0x257)]={});let _0x465570=[],_0x401ade=_0x2396c5['reduceLimits']||_0x12e5a6[_0x290454(0x257)][_0x290454(0x1f1)]?_0x3a09dd:_0x5ec458,_0x5527b0=_0x17275e=>{var _0x16c392=_0x290454;let _0x3d2b1a={};return _0x3d2b1a[_0x16c392(0x18f)]=_0x17275e[_0x16c392(0x18f)],_0x3d2b1a[_0x16c392(0x16d)]=_0x17275e[_0x16c392(0x16d)],_0x3d2b1a[_0x16c392(0x1de)]=_0x17275e[_0x16c392(0x1de)],_0x3d2b1a['totalStrLength']=_0x17275e[_0x16c392(0x1c7)],_0x3d2b1a['autoExpandLimit']=_0x17275e[_0x16c392(0x1a3)],_0x3d2b1a[_0x16c392(0x1b8)]=_0x17275e[_0x16c392(0x1b8)],_0x3d2b1a[_0x16c392(0x1a9)]=!0x1,_0x3d2b1a[_0x16c392(0x175)]=!_0x44ab87,_0x3d2b1a[_0x16c392(0x1fe)]=0x1,_0x3d2b1a[_0x16c392(0x233)]=0x0,_0x3d2b1a[_0x16c392(0x176)]=_0x16c392(0x24a),_0x3d2b1a[_0x16c392(0x1e6)]=_0x16c392(0x18c),_0x3d2b1a[_0x16c392(0x1a4)]=!0x0,_0x3d2b1a[_0x16c392(0x1cb)]=[],_0x3d2b1a[_0x16c392(0x19e)]=0x0,_0x3d2b1a[_0x16c392(0x207)]=_0x3b9fc4['resolveGetters'],_0x3d2b1a[_0x16c392(0x200)]=0x0,_0x3d2b1a[_0x16c392(0x198)]={'current':void 0x0,'parent':void 0x0,'index':0x0},_0x3d2b1a;};for(var _0x7c60bb=0x0;_0x7c60bb<_0x31f6c4[_0x290454(0x1b6)];_0x7c60bb++)_0x465570['push'](_0x3c89ee[_0x290454(0x245)]({'timeNode':_0x205bfc===_0x290454(0x26a)||void 0x0},_0x31f6c4[_0x7c60bb],_0x5527b0(_0x401ade),{}));if(_0x205bfc===_0x290454(0x255)||_0x205bfc===_0x290454(0x195)){let _0x37f42a=Error[_0x290454(0x188)];try{Error[_0x290454(0x188)]=0x1/0x0,_0x465570[_0x290454(0x26e)](_0x3c89ee[_0x290454(0x245)]({'stackNode':!0x0},new Error()[_0x290454(0x217)],_0x5527b0(_0x401ade),{'strLength':0x1/0x0}));}finally{Error[_0x290454(0x188)]=_0x37f42a;}}return{'method':_0x290454(0x186),'version':_0x24945e,'args':[{'ts':_0x503f06,'session':_0x274aab,'args':_0x465570,'id':_0x18b986,'context':_0x454f1c}]};}catch(_0x4d9d42){return{'method':'log','version':_0x24945e,'args':[{'ts':_0x503f06,'session':_0x274aab,'args':[{'type':'unknown','error':_0x4d9d42&&_0x4d9d42[_0x290454(0x203)]}],'id':_0x18b986,'context':_0x454f1c}]};}finally{try{if(_0x2396c5&&_0x2aa929){let _0x120976=_0xac187d();_0x2396c5[_0x290454(0x1d6)]++,_0x2396c5['time']+=_0x3e3008(_0x2aa929,_0x120976),_0x2396c5['ts']=_0x120976,_0x12e5a6['hits'][_0x290454(0x1d6)]++,_0x12e5a6['hits'][_0x290454(0x26a)]+=_0x3e3008(_0x2aa929,_0x120976),_0x12e5a6[_0x290454(0x257)]['ts']=_0x120976,(_0x2396c5[_0x290454(0x1d6)]>_0x151ea4[_0x290454(0x18d)][_0x290454(0x237)]||_0x2396c5['time']>_0x151ea4[_0x290454(0x18d)]['reduceOnAccumulatedProcessingTimeMs'])&&(_0x2396c5[_0x290454(0x1f1)]=!0x0),(_0x12e5a6[_0x290454(0x257)][_0x290454(0x1d6)]>_0x151ea4[_0x290454(0x1be)][_0x290454(0x237)]||_0x12e5a6[_0x290454(0x257)][_0x290454(0x26a)]>_0x151ea4[_0x290454(0x1be)][_0x290454(0x1e9)])&&(_0x12e5a6['hits'][_0x290454(0x1f1)]=!0x0);}}catch{}}}return _0x4b3a63;}((_0x128c8b,_0x130c59,_0x2d3050,_0xddf41c,_0x441d00,_0x1b84a8,_0x2217b2,_0x5b051f,_0x2b48ca,_0x490710,_0x5ab68a,_0xebfbce)=>{var _0x48efd0=_0x306708;if(_0x128c8b[_0x48efd0(0x1bd)])return _0x128c8b[_0x48efd0(0x1bd)];let _0x2831c5={'consoleLog':()=>{},'consoleTrace':()=>{},'consoleTime':()=>{},'consoleTimeEnd':()=>{},'autoLog':()=>{},'autoLogMany':()=>{},'autoTraceMany':()=>{},'coverage':()=>{},'autoTrace':()=>{},'autoTime':()=>{},'autoTimeEnd':()=>{}};if(!J(_0x128c8b,_0x5b051f,_0x441d00))return _0x128c8b[_0x48efd0(0x1bd)]=_0x2831c5,_0x128c8b[_0x48efd0(0x1bd)];let _0x363e28=B(_0x128c8b),_0x2309ed=_0x363e28['elapsed'],_0x2a1744=_0x363e28['timeStamp'],_0x50681b=_0x363e28[_0x48efd0(0x1fb)],_0x3b9026={'hits':{},'ts':{}},_0x194465=Y(_0x128c8b,_0x2b48ca,_0x3b9026,_0x1b84a8,_0xebfbce),_0x4462b9=(_0x4cfe49,_0x35915b,_0x58ab0e,_0x24999c,_0x16c273,_0x2d2fae)=>{var _0x10dcd2=_0x48efd0;let _0x25b8f1=_0x128c8b[_0x10dcd2(0x1bd)];try{return _0x128c8b['_console_ninja']=_0x2831c5,_0x194465(_0x4cfe49,_0x35915b,_0x58ab0e,_0x24999c,_0x16c273,_0x2d2fae);}finally{_0x128c8b[_0x10dcd2(0x1bd)]=_0x25b8f1;}},_0x45c9b2=_0xa045db=>{_0x3b9026['ts'][_0xa045db]=_0x2a1744();},_0x5dfe65=(_0x18fdeb,_0x1126f8)=>{let _0x42fddb=_0x3b9026['ts'][_0x1126f8];if(delete _0x3b9026['ts'][_0x1126f8],_0x42fddb){let _0x998f88=_0x2309ed(_0x42fddb,_0x2a1744());_0x246d72(_0x4462b9('time',_0x18fdeb,_0x50681b(),_0x26bea9,[_0x998f88],_0x1126f8));}},_0x10aede=_0x195925=>{var _0x5c4181=_0x48efd0,_0x425e04;return _0x441d00===_0x5c4181(0x25a)&&_0x128c8b['origin']&&((_0x425e04=_0x195925==null?void 0x0:_0x195925['args'])==null?void 0x0:_0x425e04[_0x5c4181(0x1b6)])&&(_0x195925[_0x5c4181(0x23b)][0x0]['origin']=_0x128c8b[_0x5c4181(0x1a2)]),_0x195925;};_0x128c8b[_0x48efd0(0x1bd)]={'consoleLog':(_0xda0a9f,_0x9190d7)=>{var _0x257b86=_0x48efd0;_0x128c8b[_0x257b86(0x1ba)][_0x257b86(0x186)][_0x257b86(0x229)]!==_0x257b86(0x21c)&&_0x246d72(_0x4462b9('log',_0xda0a9f,_0x50681b(),_0x26bea9,_0x9190d7));},'consoleTrace':(_0x28e90d,_0x115a45)=>{var _0x3f5b82=_0x48efd0,_0x59297f,_0x582cd0;_0x128c8b['console'][_0x3f5b82(0x186)][_0x3f5b82(0x229)]!==_0x3f5b82(0x22c)&&((_0x582cd0=(_0x59297f=_0x128c8b[_0x3f5b82(0x25e)])==null?void 0x0:_0x59297f[_0x3f5b82(0x263)])!=null&&_0x582cd0['node']&&(_0x128c8b[_0x3f5b82(0x1da)]=!0x0),_0x246d72(_0x10aede(_0x4462b9(_0x3f5b82(0x255),_0x28e90d,_0x50681b(),_0x26bea9,_0x115a45))));},'consoleError':(_0x1719a2,_0x50f700)=>{var _0x18be19=_0x48efd0;_0x128c8b[_0x18be19(0x1da)]=!0x0,_0x246d72(_0x10aede(_0x4462b9(_0x18be19(0x195),_0x1719a2,_0x50681b(),_0x26bea9,_0x50f700)));},'consoleTime':_0x1b91af=>{_0x45c9b2(_0x1b91af);},'consoleTimeEnd':(_0x5e3ece,_0x45fcba)=>{_0x5dfe65(_0x45fcba,_0x5e3ece);},'autoLog':(_0x396285,_0xaf0672)=>{_0x246d72(_0x4462b9('log',_0xaf0672,_0x50681b(),_0x26bea9,[_0x396285]));},'autoLogMany':(_0xa0fc0e,_0x3df880)=>{var _0x52d754=_0x48efd0;_0x246d72(_0x4462b9(_0x52d754(0x186),_0xa0fc0e,_0x50681b(),_0x26bea9,_0x3df880));},'autoTrace':(_0x5928c5,_0x5778f0)=>{var _0x3aca45=_0x48efd0;_0x246d72(_0x10aede(_0x4462b9(_0x3aca45(0x255),_0x5778f0,_0x50681b(),_0x26bea9,[_0x5928c5])));},'autoTraceMany':(_0x214c88,_0x10d946)=>{var _0x369ebf=_0x48efd0;_0x246d72(_0x10aede(_0x4462b9(_0x369ebf(0x255),_0x214c88,_0x50681b(),_0x26bea9,_0x10d946)));},'autoTime':(_0x168d5e,_0x59e4be,_0x3bcf2b)=>{_0x45c9b2(_0x3bcf2b);},'autoTimeEnd':(_0x17c08f,_0x347576,_0x4ac253)=>{_0x5dfe65(_0x347576,_0x4ac253);},'coverage':_0x269f7a=>{var _0x4a27b2=_0x48efd0;_0x246d72({'method':_0x4a27b2(0x1a6),'version':_0x1b84a8,'args':[{'id':_0x269f7a}]});}};let _0x246d72=X(_0x128c8b,_0x130c59,_0x2d3050,_0xddf41c,_0x441d00,_0x490710,_0x5ab68a),_0x26bea9=_0x128c8b[_0x48efd0(0x24d)];return _0x128c8b['_console_ninja'];})(globalThis,_0x306708(0x16b),'62341',\"c:\\\\Users\\\\reshm\\\\.vscode\\\\extensions\\\\wallabyjs.console-ninja-1.0.467\\\\node_modules\",_0x306708(0x1ef),'1.0.0','1755807626475',_0x306708(0x177),'','',_0x306708(0x1a8),_0x306708(0x1bb));");
+}
+catch (e) {
+    console.error(e);
+} }
+; /* istanbul ignore next */
+function oo_oo(i, ...v) { try {
+    oo_cm().consoleLog(i, v);
+}
+catch (e) { } return v; }
+;
+oo_oo; /* istanbul ignore next */
+function oo_tr(i, ...v) { try {
+    oo_cm().consoleTrace(i, v);
+}
+catch (e) { } return v; }
+;
+oo_tr; /* istanbul ignore next */
+function oo_tx(i, ...v) { try {
+    oo_cm().consoleError(i, v);
+}
+catch (e) { } return v; }
+;
+oo_tx; /* istanbul ignore next */
+function oo_ts(v) { try {
+    oo_cm().consoleTime(v);
+}
+catch (e) { } return v; }
+;
+oo_ts; /* istanbul ignore next */
+function oo_te(v, i) { try {
+    oo_cm().consoleTimeEnd(v, i);
+}
+catch (e) { } return v; }
+;
+oo_te; /*eslint unicorn/no-abusive-eslint-disable:,eslint-comments/disable-enable-pair:,eslint-comments/no-unlimited-disable:,eslint-comments/no-aggregating-enable:,eslint-comments/no-duplicate-disable:,eslint-comments/no-unused-disable:,eslint-comments/no-unused-enable:,*/
+
+
+/***/ }),
+
+/***/ "./src/services/script-categorization-service.ts":
+/*!*******************************************************!*\
+  !*** ./src/services/script-categorization-service.ts ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   scriptCategorizationService: () => (/* binding */ scriptCategorizationService)
+/* harmony export */ });
+/* harmony import */ var _util_Encryption_Utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/Encryption-Utils */ "./src/util/Encryption-Utils.ts");
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+const BASE_URL = "https://cb-server.web-8fb.workers.dev";
+const scriptCategorizationService = {
+    saveScriptCategorizations: (token, categorizations) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            // Generate encryption key and IV
+            const { key, iv } = yield _util_Encryption_Utils__WEBPACK_IMPORTED_MODULE_0__.EncryptionUtils.generateKey();
+            // Encrypt the categorizations data
+            const encryptedData = yield _util_Encryption_Utils__WEBPACK_IMPORTED_MODULE_0__.EncryptionUtils.encrypt(JSON.stringify({ scripts: categorizations }), key, iv);
+            // Export the key for transmission
+            const exportedKey = yield crypto.subtle.exportKey('raw', key);
+            const response = yield fetch(`${BASE_URL}/api/save-categories`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    scripts: encryptedData,
+                    key: Array.from(new Uint8Array(exportedKey)),
+                    iv: Array.from(iv)
+                })
+            });
+            const result = yield response.json();
+            return result;
+        }
+        catch (error) {
+            return {
+                data: null,
+                error: {
+                    message: error instanceof Error ? error.message : 'Failed to save script categorizations'
+                }
+            };
+        }
+    }),
+    updateScriptCategorizations: (token, newCategorizations) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            // Save new categorizations
+            yield scriptCategorizationService.saveScriptCategorizations(token, newCategorizations);
+            // Return success response
+            return {
+                success: true,
+                message: 'Script categorizations updated successfully'
+            };
+        }
+        catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to update script categorizations'
+            };
+        }
+    })
+};
+
+
+/***/ }),
+
+/***/ "./src/types/webflowtypes.ts":
+/*!***********************************!*\
+  !*** ./src/types/webflowtypes.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (webflow);
+
+
+/***/ }),
+
+/***/ "./src/util/Encryption-Utils.ts":
+/*!**************************************!*\
+  !*** ./src/util/Encryption-Utils.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EncryptionUtils: () => (/* binding */ EncryptionUtils)
+/* harmony export */ });
+/**
+ * Encryption Utilities for Consent Management Platform
+ * Provides secure encryption and decryption functions using the Web Crypto API
+ */
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+const EncryptionUtils = {
+    /**
+     * Generates a new encryption key and IV
+     * @returns {Promise<{key: CryptoKey, iv: Uint8Array}>}
+     */
+    generateKey() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const key = yield crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            return { key, iv };
+        });
+    },
+    /**
+     * Imports a raw key for encryption/decryption
+     * @param {Uint8Array} rawKey - The raw key bytes
+     * @param {KeyUsage[]} usages - Array of key usages ['encrypt', 'decrypt']
+     * @returns {Promise<CryptoKey>}
+     */
+    importKey(rawKey_1) {
+        return __awaiter(this, arguments, void 0, function* (rawKey, usages = ['encrypt', 'decrypt']) {
+            return yield crypto.subtle.importKey('raw', rawKey, { name: 'AES-GCM' }, false, usages);
+        });
+    },
+    /**
+     * Encrypts data using AES-GCM
+     * @param {string} data - The data to encrypt
+     * @param {CryptoKey} key - The encryption key
+     * @param {Uint8Array} iv - The initialization vector
+     * @returns {Promise<string>} - Base64 encoded encrypted data
+     */
+    encrypt(data, key, iv) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const encoder = new TextEncoder();
+            const encodedData = encoder.encode(data);
+            const encrypted = yield crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encodedData);
+            return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+        });
+    },
+    /**
+     * Decrypts data using AES-GCM
+     * @param {string} encryptedData - Base64 encoded encrypted data
+     * @param {CryptoKey} key - The decryption key
+     * @param {Uint8Array} iv - The initialization vector
+     * @returns {Promise<string>} - Decrypted data
+     */
+    decrypt(encryptedData, key, iv) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const encryptedBytes = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+            const decrypted = yield crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encryptedBytes);
+            return new TextDecoder().decode(decrypted);
+        });
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/util/optimized-images.ts":
+/*!**************************************!*\
+  !*** ./src/util/optimized-images.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   alignmentIcons: () => (/* binding */ alignmentIcons),
+/* harmony export */   animationIcons: () => (/* binding */ animationIcons),
+/* harmony export */   bannerStyleIcons: () => (/* binding */ bannerStyleIcons),
+/* harmony export */   getAlignmentIcon: () => (/* binding */ getAlignmentIcon),
+/* harmony export */   getBannerStyleIcon: () => (/* binding */ getBannerStyleIcon),
+/* harmony export */   otherIcons: () => (/* binding */ otherIcons),
+/* harmony export */   purchaseLine: () => (/* binding */ purchaseLine)
+/* harmony export */ });
+const alignmentIcons = {
+    // Left alignment icons
+    leftUnchecked: "data:image/svg+xml,%3Csvg width='55' height='40' viewBox='0 0 55 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='54' height='39' rx='3.5' fill='%231F1B34' stroke='%23393553'/%3E%3Crect x='4.5' y='28.5' width='31' height='7' rx='0.5' fill='%23393553' stroke='%23393553'/%3E%3C/svg%3E",
+    leftChecked: "data:image/svg+xml,%3Csvg width='55' height='40' viewBox='0 0 55 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.5 4C0.5 2.067 2.067 0.5 4 0.5H51C52.933 0.5 54.5 2.067 54.5 4V36C54.5 37.933 52.933 39.5 51 39.5H4C2.067 39.5 0.5 37.933 0.5 36V4Z' fill='%231F1B34' stroke='%238C79FF'/%3E%3Cpath d='M4.5 29C4.5 28.7239 4.72386 28.5 5 28.5H35C35.2761 28.5 35.5 28.7239 35.5 29V35C35.5 35.2761 35.2761 35.5 35 35.5H5C4.72386 35.5 4.5 35.2761 4.5 35V29Z' fill='%238C79FF' stroke='%238C79FF'/%3E%3C/svg%3E",
+    // Center alignment icons
+    centerUnchecked: "data:image/svg+xml,%3Csvg width='55' height='40' viewBox='0 0 55 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='-0.5' y='0.5' width='54' height='39' rx='5.5' transform='matrix(-1 0 0 1 54 0)' fill='%231F1B34' stroke='%23393553'/%3E%3Crect x='-0.5' y='0.5' width='40' height='5' rx='0.5' transform='matrix(-1 0 0 1 47 30)' fill='%23393553' stroke='%23393553'/%3E%3C/svg%3E",
+    centerChecked: "data:image/svg+xml,%3Csvg width='55' height='40' viewBox='0 0 55 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.5 4C54.5 2.067 52.933 0.5 51 0.5H4C2.067 0.5 0.5 2.067 0.5 4V36C0.5 37.933 2.067 39.5 4 39.5H51C52.933 39.5 54.5 37.933 54.5 36V4Z' fill='%231F1B34' stroke='%238C79FF'/%3E%3Cpath d='M47.5 31C47.5 30.7239 47.2761 30.5 47 30.5H8C7.72386 30.5 7.5 30.7239 7.5 31V35C7.5 35.2761 7.72386 35.5 8 35.5H47C47.2761 35.5 47.5 35.2761 47.5 35V31Z' fill='%238C79FF' stroke='%238C79FF'/%3E%3C/svg%3E",
+    // Right alignment icons
+    rightUnchecked: "data:image/svg+xml,%3Csvg width='55' height='40' viewBox='0 0 55 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.5 6C0.5 2.96243 2.96243 0.5 6 0.5H49C52.0376 0.5 54.5 2.96243 54.5 6V34C54.5 37.0376 52.0376 39.5 49 39.5H6C2.96243 39.5 0.5 37.0376 0.5 34V6Z' fill='%231F1B34' stroke='%23393553'/%3E%3Cpath d='M19.5 29C19.5 28.7239 19.7239 28.5 20 28.5H50C50.2761 28.5 50.5 28.7239 50.5 29V35C50.5 35.2761 50.2761 35.5 50 35.5H20C19.7239 35.5 19.5 35.2761 19.5 35V29Z' fill='%23393553' stroke='%23393553'/%3E%3C/svg%3E",
+    rightChecked: "data:image/svg+xml,%3Csvg width='55' height='40' viewBox='0 0 55 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='54' height='39' rx='3.5' fill='%231F1B34' stroke='%238C79FF'/%3E%3Crect x='19.5' y='28.5' width='31' height='7' rx='0.5' fill='%238C79FF' stroke='%238C79FF'/%3E%3C/svg%3E"
+};
+const bannerStyleIcons = {
+    // Normal banner style
+    normalBanner: "data:image/svg+xml,%3Csvg width='80' height='32' viewBox='0 0 80 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='79' height='31' rx='2.5' fill='white' stroke='%238C79FF'/%3E%3Crect x='53' y='21' width='24' height='8' rx='2' fill='%230777E6'/%3E%3Crect opacity='0.4' x='5.5' y='5.5' width='55' height='1' rx='0.5' fill='%23191728' stroke='%23AAAAAA'/%3E%3Crect opacity='0.4' x='5.5' y='10.5' width='37' height='1' rx='0.5' fill='%23191728' stroke='%23AAAAAA'/%3E%3Crect opacity='0.4' x='5.5' y='15.5' width='40' height='1' rx='0.5' fill='%23191728' stroke='%23AAAAAA'/%3E%3C/svg%3E",
+    // Double banner style
+    doubleBanner: "data:image/svg+xml,%3Csvg width='80' height='32' viewBox='0 0 80 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 3C0 1.34315 1.34315 0 3 0H77C78.6569 0 80 1.34315 80 3V29C80 30.6569 78.6569 32 77 32H3C1.34315 32 0 30.6569 0 29V3Z' fill='white'/%3E%3Cpath opacity='0.7' d='M50 0H77C78.6569 0 80 1.34315 80 3V29C80 30.6569 78.6569 32 77 32H50V0Z' fill='%23B9F3FF'/%3E%3Crect x='53' y='21' width='24' height='8' rx='2' fill='%230777E6'/%3E%3Cpath opacity='0.4' d='M6 5.5H60C60.2761 5.5 60.5 5.72386 60.5 6C60.5 6.27614 60.2761 6.5 60 6.5H6C5.72386 6.5 5.5 6.27614 5.5 6C5.5 5.72386 5.72386 5.5 6 5.5Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3Cpath opacity='0.4' d='M6 10.5H42C42.2761 10.5 42.5 10.7239 42.5 11C42.5 11.2761 42.2761 11.5 42 11.5H6C5.72386 11.5 5.5 11.2761 5.5 11C5.5 10.7239 5.72386 10.5 6 10.5Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3Cpath opacity='0.4' d='M6 15.5H45C45.2761 15.5 45.5 15.7239 45.5 16C45.5 16.2761 45.2761 16.5 45 16.5H6C5.72386 16.5 5.5 16.2761 5.5 16C5.5 15.7239 5.72386 15.5 6 15.5Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3C/svg%3E",
+    // Big banner style
+    bigBanner: "data:image/svg+xml,%3Csvg width='55' height='48' viewBox='0 0 55 48' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 3C0 1.34315 1.34315 0 3 0H52C53.6569 0 55 1.34315 55 3V45C55 46.6569 53.6569 48 52 48H3C1.34315 48 0 46.6569 0 45V3Z' fill='white'/%3E%3Cpath d='M33 39C33 37.8954 33.8954 37 35 37H50.4118C51.5163 37 52.4118 37.8954 52.4118 39V43C52.4118 44.1046 51.5163 45 50.4118 45H35C33.8954 45 33 44.1046 33 43V39Z' fill='%230777E6'/%3E%3Cpath opacity='0.4' d='M5.35303 6C5.35303 5.72386 5.57688 5.5 5.85303 5.5H45.853C46.1292 5.5 46.353 5.72386 46.353 6C46.353 6.27614 46.1292 6.5 45.853 6.5H5.85303C5.57689 6.5 5.35303 6.27614 5.35303 6Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3Cpath opacity='0.4' d='M5.35303 11C5.35303 10.7239 5.57688 10.5 5.85303 10.5H26.853C27.1292 10.5 27.353 10.7239 27.353 11C27.353 11.2761 27.1292 11.5 26.853 11.5H5.85303C5.57688 11.5 5.35303 11.2761 5.35303 11Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3Cpath opacity='0.4' d='M5.35303 16C5.35303 15.7239 5.57688 15.5 5.85303 15.5H36.853C37.1292 15.5 37.353 15.7239 37.353 16C37.353 16.2761 37.1292 16.5 36.853 16.5H5.85303C5.57688 16.5 5.35303 16.2761 5.35303 16Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3C/svg%3E",
+    // Center aligned banner style
+    centerAligned: "data:image/svg+xml,%3Csvg width='80' height='32' viewBox='0 0 80 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='32' rx='3' fill='white'/%3E%3Cpath d='M28 23C28 21.8954 28.8954 21 30 21H50C51.1046 21 52 21.8954 52 23V27C52 28.1046 51.1046 29 50 29H30C28.8954 29 28 28.1046 28 27V23Z' fill='%230777E6'/%3E%3Cpath opacity='0.4' d='M10.5 6C10.5 5.72386 10.7239 5.5 11 5.5H65C65.2761 5.5 65.5 5.72386 65.5 6C65.5 6.27614 65.2761 6.5 65 6.5H11C10.7239 6.5 10.5 6.27614 10.5 6Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3Cpath opacity='0.4' d='M21.5 11C21.5 10.7239 21.7239 10.5 22 10.5H54C54.2761 10.5 54.5 10.7239 54.5 11C54.5 11.2761 54.2761 11.5 54 11.5H22C21.7239 11.5 21.5 11.2761 21.5 11Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3Cpath opacity='0.4' d='M15.5 16C15.5 15.7239 15.7239 15.5 16 15.5H60C60.2761 15.5 60.5 15.7239 60.5 16C60.5 16.2761 60.2761 16.5 60 16.5H16C15.7239 16.5 15.5 16.2761 15.5 16Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3C/svg%3E",
+    // Full width banner style
+    fullWidth: "data:image/svg+xml,%3Csvg width='140' height='32' viewBox='0 0 140 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 3C0 1.34315 1.34315 0 3 0H137C138.657 0 140 1.34315 140 3V29C140 30.6569 138.657 32 137 32H3C1.34315 32 0 30.6569 0 29V3Z' fill='white'/%3E%3Cpath d='M92.75 14C92.75 12.8954 93.6454 12 94.75 12H132.75C133.855 12 134.75 12.8954 134.75 14V18C134.75 19.1046 133.855 20 132.75 20H94.75C93.6454 20 92.75 19.1046 92.75 18V14Z' fill='%230777E6'/%3E%3Cpath opacity='0.4' d='M9.75 12.5H36.75C37.0261 12.5 37.25 12.7239 37.25 13C37.25 13.2761 37.0261 13.5 36.75 13.5H9.75C9.47386 13.5 9.25 13.2761 9.25 13C9.25 12.7239 9.47386 12.5 9.75 12.5Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3Cpath opacity='0.4' d='M9.75 17.5H45.75C46.0261 17.5 46.25 17.7239 46.25 18C46.25 18.2761 46.0261 18.5 45.75 18.5H9.75C9.47386 18.5 9.25 18.2761 9.25 18C9.25 17.7239 9.47386 17.5 9.75 17.5Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3Cpath opacity='0.4' d='M9.75 22.5H33.75C34.0261 22.5 34.25 22.7239 34.25 23C34.25 23.2761 34.0261 23.5 33.75 23.5H9.75C9.47386 23.5 9.25 23.2761 9.25 23C9.25 22.7239 9.47386 22.5 9.75 22.5Z' fill='%23191728' stroke='%23AAAAAA'/%3E%3C/svg%3E"
+};
+const otherIcons = {
+    // Star icon
+    star: "data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='15' cy='15' r='15' fill='%232B2653'/%3E%3Cpath d='M16.1533 9.34001L17.3266 11.6867C17.4866 12.0133 17.9133 12.3267 18.2733 12.3867L20.3999 12.74C21.7599 12.9667 22.0799 13.9533 21.0999 14.9267L19.4466 16.58C19.1666 16.86 19.0133 17.4 19.0999 17.7867L19.5733 19.8333C19.9466 21.4533 19.0866 22.08 17.6533 21.2333L15.6599 20.0533C15.2999 19.84 14.7066 19.84 14.3399 20.0533L12.3466 21.2333C10.9199 22.08 10.0533 21.4467 10.4266 19.8333L10.8999 17.7867C10.9866 17.4 10.8333 16.86 10.5533 16.58L8.89994 14.9267C7.92661 13.9533 8.23994 12.9667 9.59994 12.74L11.7266 12.3867C12.0799 12.3267 12.5066 12.0133 12.6666 11.6867L13.8399 9.34001C14.4799 8.06668 15.5199 8.06668 16.1533 9.34001Z' stroke='%23798EFF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+};
+const animationIcons = {
+    // Round shape (circle)
+    circle: "data:image/svg+xml,%3Csvg width='90' height='90' viewBox='0 0 90 90' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='45' cy='45' r='45' fill='url(%23paint0_linear_44_73)'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_44_73' x1='45' y1='0' x2='45' y2='90' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%230777E6'/%3E%3Cstop offset='1' stop-color='%2369B4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E",
+    // Union (blob)
+    blob: "data:image/svg+xml,%3Csvg width='85' height='88' viewBox='0 0 85 88' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M42.2838 0C46.0968 0 49.7067 1.5625 52.7223 4.5C53.8473 5.59365 55.363 6.07811 56.9098 5.85938C61.0818 5.25008 64.9099 6.10944 68.0036 8.35938C71.0816 10.6094 73.0973 13.9845 73.8004 18.1406C74.0504 19.6719 75.0036 20.9688 76.3786 21.7031C80.1129 23.6562 82.7067 26.6094 83.8942 30.2344C85.066 33.8592 84.7067 37.7813 82.8317 41.5625C82.1442 42.9531 82.1442 44.5469 82.8317 45.9375C84.7066 49.7185 85.0661 53.6407 83.8942 57.2656C82.7066 60.8905 80.1129 63.8438 76.3786 65.7969C75.0036 66.5313 74.0504 67.8282 73.8004 69.3594C73.0973 73.5154 71.0816 76.8907 68.0036 79.1406C64.9097 81.3905 61.0815 82.2499 56.9098 81.6406C55.3785 81.4062 53.8473 81.9062 52.7223 83C49.7062 85.9375 46.0968 87.5 42.2838 87.5C38.471 87.5 34.8618 85.9372 31.8463 83C30.7214 81.9063 29.2056 81.4064 27.6588 81.6406C23.5023 82.25 19.6579 81.3906 16.5641 79.1406C13.4861 76.8907 11.4704 73.5154 10.7672 69.3594C10.5016 67.8281 9.56411 66.5313 8.18911 65.7969C4.45483 63.8438 1.861 60.8905 0.673484 57.2656C-0.498385 53.6408 -0.138885 49.7186 1.73598 45.9375C2.42348 44.5469 2.42348 42.9531 1.73598 41.5625C-0.138986 37.7815 -0.498349 33.8593 0.673484 30.2344C1.86095 26.6095 4.45486 23.6562 8.18911 21.7031C9.56409 20.9687 10.5016 19.6718 10.7672 18.1406C11.4703 13.9845 13.4861 10.5938 16.5641 8.35938C19.6425 6.10938 23.4869 5.25 27.6588 5.85938C29.2056 6.09364 30.7214 5.59371 31.8463 4.5C34.8624 1.56265 38.471 3.08162e-05 42.2838 0Z' fill='url(%23paint0_linear_44_102)'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_44_102' x1='42.2838' y1='0' x2='42.2838' y2='87.5' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%230777E6'/%3E%3Cstop offset='1' stop-color='%2369B4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E",
+    // Dots for loading
+    dots: "data:image/svg+xml,%3Csvg width='54' height='54' viewBox='0 0 54 54' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='13' cy='11' r='11' fill='%230A081B'/%3E%3Ccircle cx='7' cy='31' r='7' fill='%230A081B'/%3E%3Ccircle cx='22' cy='28' r='5' fill='%230A081B'/%3E%3Ccircle cx='47' cy='19' r='7' fill='%230A081B'/%3E%3Ccircle cx='30' cy='47' r='7' fill='%230A081B'/%3E%3Ccircle cx='44' cy='40' r='5' fill='%230A081B'/%3E%3C/svg%3E",
+    // ConsentBit logo
+    logo: "data:image/svg+xml,%3Csvg width='60' height='54' viewBox='0 0 60 54' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19.752 52.9132C19.3075 53.3593 18.5869 53.3593 18.1424 52.9132L5.09642 39.8202C-1.69881 33.0005 -1.69881 21.9436 5.09642 15.1239C5.41248 14.8067 5.92491 14.8067 6.24097 15.1239L31.0186 39.9907C31.463 40.4368 31.463 41.16 31.0186 41.606L19.752 52.9132Z' fill='%230A081B'/%3E%3Cpath d='M21.4377 26.1631C21.124 25.8436 21.1277 25.3293 21.446 25.0144L46.4028 0.328703C46.8504 -0.114105 47.571 -0.108857 48.0122 0.340424L59.1968 11.7293C59.638 12.1786 59.6328 12.9018 59.1851 13.3446L46.0448 26.3423C39.2004 33.1123 28.1835 33.0321 21.4377 26.1631Z' fill='%230A081B'/%3E%3C/svg%3E"
+};
+const purchaseLine = "data:image/svg+xml,%3Csvg width='494' height='1' viewBox='0 0 494 1' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect opacity='0.25' width='184' height='1' fill='url(%23paint0_linear_294_346)'/%3E%3Crect opacity='0.25' width='183' height='1' transform='matrix(1 0 0 -1 311 1)' fill='url(%23paint1_linear_294_346)'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_294_346' x1='0' y1='0.5' x2='184' y2='0.5' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='white' stop-opacity='0'/%3E%3Cstop offset='0.25' stop-color='white'/%3E%3Cstop offset='0.75' stop-color='white'/%3E%3Cstop offset='1' stop-color='white' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint1_linear_294_346' x1='0' y1='0.5' x2='183' y2='0.5' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='white' stop-opacity='0'/%3E%3Cstop offset='0.25' stop-color='white'/%3E%3Cstop offset='0.75' stop-color='white'/%3E%3Cstop offset='1' stop-color='white' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E";
+// Helper function to get alignment icon based on position and state
+const getAlignmentIcon = (position, isSelected) => {
+    const icons = {
+        left: isSelected ? alignmentIcons.leftChecked : alignmentIcons.leftUnchecked,
+        center: isSelected ? alignmentIcons.centerChecked : alignmentIcons.centerUnchecked,
+        right: isSelected ? alignmentIcons.rightChecked : alignmentIcons.rightUnchecked
+    };
+    return icons[position];
+};
+// Helper function to get banner style icon
+const getBannerStyleIcon = (style) => {
+    const icons = {
+        align: bannerStyleIcons.normalBanner,
+        alignstyle: bannerStyleIcons.doubleBanner,
+        bigstyle: bannerStyleIcons.bigBanner,
+        centeralign: bannerStyleIcons.centerAligned,
+        fullwidth: bannerStyleIcons.fullWidth
+    };
+    return icons[style] || bannerStyleIcons.normalBanner;
+};
+
+
+/***/ }),
+
+/***/ "./src/assets/Line 6.svg":
+/*!*******************************!*\
+  !*** ./src/assets/Line 6.svg ***!
+  \*******************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "13cad2e5bd21013b37aa.svg";
+
+/***/ }),
+
 /***/ "./src/assets/Purchase line.svg":
 /*!**************************************!*\
   !*** ./src/assets/Purchase line.svg ***!
@@ -40778,6 +42194,36 @@ const useScriptContext = () => {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = __webpack_require__.p + "18d7b8ead08de4b9d6fc.svg";
+
+/***/ }),
+
+/***/ "./src/assets/Vector 23.svg":
+/*!**********************************!*\
+  !*** ./src/assets/Vector 23.svg ***!
+  \**********************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "d5f61684a471e2b25a4f.svg";
+
+/***/ }),
+
+/***/ "./src/assets/Vector.svg":
+/*!*******************************!*\
+  !*** ./src/assets/Vector.svg ***!
+  \*******************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "d3d7bc09c46a0e480f78.svg";
+
+/***/ }),
+
+/***/ "./src/assets/active.svg":
+/*!*******************************!*\
+  !*** ./src/assets/active.svg ***!
+  \*******************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "fd0a8c224e96a3c81042.svg";
 
 /***/ }),
 
@@ -40801,6 +42247,36 @@ module.exports = __webpack_require__.p + "49e7c849a21e181b4911.svg";
 
 /***/ }),
 
+/***/ "./src/assets/blue question.svg":
+/*!**************************************!*\
+  !*** ./src/assets/blue question.svg ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "ec959e55309d1d891823.svg";
+
+/***/ }),
+
+/***/ "./src/assets/blue up arrow.svg":
+/*!**************************************!*\
+  !*** ./src/assets/blue up arrow.svg ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "57074fb5a63be192a9a7.svg";
+
+/***/ }),
+
+/***/ "./src/assets/catogery.svg":
+/*!*********************************!*\
+  !*** ./src/assets/catogery.svg ***!
+  \*********************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "733d477b39069e27d1d9.svg";
+
+/***/ }),
+
 /***/ "./src/assets/confirmicon.svg":
 /*!************************************!*\
   !*** ./src/assets/confirmicon.svg ***!
@@ -40811,6 +42287,26 @@ module.exports = __webpack_require__.p + "61b26412b8a301f65ca6.svg";
 
 /***/ }),
 
+/***/ "./src/assets/copy script.svg":
+/*!************************************!*\
+  !*** ./src/assets/copy script.svg ***!
+  \************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "13953747e650a72d075e.svg";
+
+/***/ }),
+
+/***/ "./src/assets/edit.svg":
+/*!*****************************!*\
+  !*** ./src/assets/edit.svg ***!
+  \*****************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "1132f44d760ec279b4ed.svg";
+
+/***/ }),
+
 /***/ "./src/assets/icon.svg":
 /*!*****************************!*\
   !*** ./src/assets/icon.svg ***!
@@ -40818,6 +42314,16 @@ module.exports = __webpack_require__.p + "61b26412b8a301f65ca6.svg";
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = __webpack_require__.p + "df8cabaa7faec986acb4.svg";
+
+/***/ }),
+
+/***/ "./src/assets/implement correctly.svg":
+/*!********************************************!*\
+  !*** ./src/assets/implement correctly.svg ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "020f7028ee30a97ff82d.svg";
 
 /***/ }),
 
@@ -40841,6 +42347,16 @@ module.exports = __webpack_require__.p + "aafa401d2434affcd89c.svg";
 
 /***/ }),
 
+/***/ "./src/assets/line.svg":
+/*!*****************************!*\
+  !*** ./src/assets/line.svg ***!
+  \*****************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "b37deeb8922f788d592d.svg";
+
+/***/ }),
+
 /***/ "./src/assets/question.svg":
 /*!*********************************!*\
   !*** ./src/assets/question.svg ***!
@@ -40858,6 +42374,36 @@ module.exports = __webpack_require__.p + "9571f28f9eeffb637931.svg";
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = __webpack_require__.p + "f99f50c93a35e8e90629.svg";
+
+/***/ }),
+
+/***/ "./src/assets/search.svg":
+/*!*******************************!*\
+  !*** ./src/assets/search.svg ***!
+  \*******************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "e2d5fd3670292c603fbe.svg";
+
+/***/ }),
+
+/***/ "./src/assets/setting-2.svg":
+/*!**********************************!*\
+  !*** ./src/assets/setting-2.svg ***!
+  \**********************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "f9b7c2beb00fc6e59c62.svg";
+
+/***/ }),
+
+/***/ "./src/assets/sheild.svg":
+/*!*******************************!*\
+  !*** ./src/assets/sheild.svg ***!
+  \*******************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__.p + "56a01b7a6a5dd5f6f771.svg";
 
 /***/ }),
 

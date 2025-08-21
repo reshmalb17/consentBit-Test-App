@@ -26,7 +26,8 @@ const tickmarkcopy = new URL("../assets/Vector 23.svg", import.meta.url).href;
 const Script: React.FC<{
     fetchScripts: boolean;
     setFetchScripts: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ fetchScripts, setFetchScripts }) => {
+    isWelcome?: boolean;
+}> = ({ fetchScripts, setFetchScripts ,isWelcome}) => {
     const { scripts, setScripts } = useScriptContext();
     
     // Debug scripts state changes
@@ -597,7 +598,7 @@ const Script: React.FC<{
 
     return (
         <div className="container-script">
-            <div className="section back-color">
+          {!isWelcome && (   <div className="section back-color">
                 <div className="flexings">
                     <div>
                         <img src={sheild} alt="catogery image" />
@@ -619,7 +620,7 @@ const Script: React.FC<{
                         <a href="https://www.consentbit.com/help-document" target="_blank">Need help? See the docs <i><img src={uparrow} alt="uparrow" /></i></a>
                     </div>
                 </div>
-            </div>
+            </div>)}
 
             {scripts.length > 0 && (
                 <div className="line">

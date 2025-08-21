@@ -13,7 +13,7 @@ type SetupStepProps = {
 };
 
 const SetupStep: React.FC<SetupStepProps> = ({ onGoBack, onProceed }) => {
-  const [isConfirmed, setIsConfirmed] = useState(true);
+  const [isConfirmed, setIsConfirmed] = useState(false);
   // Asset imports
 const logo = new URL("../assets/icon.svg", import.meta.url).href;
 const questionmark = new URL("../assets/question.svg", import.meta.url).href;
@@ -109,19 +109,11 @@ const onNeedHelp = () => {
                </div>
 
               <div className="setup-card-info-text">
-                <span className="setup-card-info-title">Update the scripts in your project that handle cookie creation</span>
-                <span className="setup-card-info-subtitle">Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow.</span>
-                <div>
-                  <a
-                    href="https://www.consentbit.com/docs"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="setup-docs-link"
-                  >
-                    Need help? See the docs
-                  </a>
-                  </div>
-                </div>
+                <p className="setup-card-info-title">Update the scripts in your project that handle cookie creation</p>
+                <p className="setup-card-info-subtitle">Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow.</p>
+
+            <div className="subscribe help"><a className="link" href="#">Need help? See the docs <i><img src="https://67c7218243770a3d2c39fb20.webflow-ext.com/689d09e47269fe2b0de4ee70/58620d0d66fe581478f9.svg" alt=""/></i></a></div>
+               </div>
                </div>
         
          

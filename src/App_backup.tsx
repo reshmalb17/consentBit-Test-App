@@ -2575,7 +2575,7 @@ const App: React.FC = ({ onAuth }: { onAuth: () => void }) => {
             />
           )}
 
-          {activeTab === "Script" && <Script fetchScripts={fetchScripts} setFetchScripts={setFetchScripts} />}
+          {activeTab === "Script" && <Script fetchScripts={fetchScripts} setFetchScripts={setFetchScripts} isWelcome={false} />}
         </div>
       </div>
       <DonotShare
