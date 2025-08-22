@@ -1,6 +1,7 @@
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { jwtDecode } from "jwt-decode";
 import { User, DecodedToken } from "../types/types";
+import webflow from "../types/webflowtypes";
 
 const base_url = "https://cb-server.web-8fb.workers.dev";
 

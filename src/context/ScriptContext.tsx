@@ -10,6 +10,8 @@ type ScriptContextType = {
 
 const ScriptContext = createContext<ScriptContextType | undefined>(undefined);
 
+export { ScriptContext };
+
 export const ScriptProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [scripts, setScripts] = useState<ExtendedScriptType[]>([]);
 
@@ -25,3 +27,5 @@ export const useScriptContext = () => {
   if (!context) throw new Error("useScriptContext must be used within a ScriptProvider");
   return context;
 };
+
+export default ScriptContext;

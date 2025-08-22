@@ -4,7 +4,7 @@ import { ScriptCategory } from "../types/types";
 import { customCodeApi } from "../services/api";
 import { useScriptContext } from "../context/ScriptContext";
 import PulseAnimation from './PulseAnimation';
-import usePersistentState from '../hooks/usePersistentState';
+import { usePersistentState } from '../hooks/usePersistentState';
 import webflow from '../types/webflowtypes';
 
 const questionmark = new URL("../assets/blue question.svg", import.meta.url).href;
@@ -24,7 +24,8 @@ const line2 = new URL("../assets/line.svg", import.meta.url).href;
 const Script: React.FC<{
     fetchScripts: boolean;
     setFetchScripts: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ fetchScripts, setFetchScripts }) => {
+    isWelcome?: boolean;
+}> = ({ fetchScripts, setFetchScripts, isWelcome }) => {
     const { scripts, setScripts } = useScriptContext();
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<{ success: boolean; message: string } | null>(null);
@@ -284,10 +285,16 @@ const Script: React.FC<{
 
     useEffect(() => {
         if (fetchScripts) {
-            fetchScriptData();
-            setFetchScripts(false);
+            const fetchDataAndResetFlag = async () => {
+                await fetchScriptData();
+                // Only reset the flag if not in welcome mode
+                if (!isWelcome) {
+                    setFetchScripts(false);
+                }
+            };
+            fetchDataAndResetFlag();
         }
-    }, [fetchScripts, fetchScriptData, setFetchScripts]);
+    }, [fetchScripts, fetchScriptData, setFetchScripts, isWelcome]);
 
     const handleSaveAll = async () => {
         setIsSaving(true);

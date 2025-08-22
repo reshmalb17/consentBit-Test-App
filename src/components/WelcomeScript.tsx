@@ -2,18 +2,46 @@ import React from "react";
 import { useState } from "react";
 import "../style/styless.css";
 import Script from "./Script";
+import { useAppState } from "../hooks/useAppState";
+import { s } from "framer-motion/dist/types.d-6pKw1mTI";
+import SetupStep from "./SetupStep";
 const youtubethumbnail=new URL("../assets/youtube-thumbnail.svg", import.meta.url).href;
 const infologo = new URL("../assets/info-logo.svg", import.meta.url).href;
 const questionmark = new URL("../assets/question.svg", import.meta.url).href;
 
 type WelcomeScriptProps = {
-  onAuthorize: () => void;
-  onNeedHelp: () => void;
+isFetchScripts: boolean;
+setFetchScripts: (value: boolean) => void;
 };
 
-const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ onAuthorize, onNeedHelp }) => {
+const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ isFetchScripts,setFetchScripts }) => {
+  console.log("isFetchScripts prop in WelcomeScript:", isFetchScripts);
+    const {
+        colors,
+        ui,
+        config,
+        booleans,
+        popups,
+        tooltips,
+        data,
+        buttons,
+        animation,
+        localStorage: localStorageData
+      } = useAppState();
 
-      const [fetchScripts, setFetchScripts] = useState<boolean>(true);
+  const handleNextButton = () => {
+   popups.setShowPopupWelcomeSetup(true);
+  }
+
+  const handleGoBack = () => {
+   popups.setShowPopupWelcomeSetup(false);
+  }
+
+  const handleProceed = () => {
+   popups.setShowPopupWelcomeSetup(false);
+   popups.setShowSetUpStep(true);
+  } 
+
   return (
     <div className="welcome-screen script">     
               {/* Bottom information cards */}
@@ -28,7 +56,7 @@ const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ onAuthorize, onNeedHelp })
                 </div>
                 </div>
                 <div className="setup-card-bottom">
-             <div className="setup-card-help" onClick={onNeedHelp}  >
+             <div className="setup-card-help"  >
               <div className="setup-card-img">
               <img src={questionmark} alt="Need help?" style={{width:"100%", height:"100%"}}  />
               </div>
@@ -67,22 +95,30 @@ const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ onAuthorize, onNeedHelp })
                 List of scripts to update                 
           </div>
           <div className="welcome-script-buttons">
-            <button className="publish-buttons">Scan Project</button>
-            <button className="publish-buttons" >Next</button>
+            <button className="publish-buttons"  onClick={handleNextButton}>Next</button>
 
             </div>
          </div>
          <div className="welcome-script-actions">
             <div className="welcome-script-actions-container">
-                 <Script fetchScripts={fetchScripts}
-             setFetchScripts={setFetchScripts}
-             isWelcome={true} />
+                 <Script fetchScripts={isFetchScripts}
+                 setFetchScripts={setFetchScripts} 
+                 isWelcome={true} />
 
             </div>
            
            
          </div>
-   
+           {popups.showPopupWelcomeSetup && (
+        <div className="popup">
+          <div className="popup-loading-content">
+             <SetupStep 
+              onGoBack={handleGoBack}
+              onProceed={handleProceed}  
+              />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

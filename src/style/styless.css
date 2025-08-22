@@ -4803,10 +4803,10 @@ letter-spacing: -3%;
 .welcome-authorize-btn {
   position: absolute;
   background: #262E84;
-  width: 122px;
+  width: 200px;
   height: 28px;
   top: 111%;
-  left:40%;
+  left:35%;
   opacity: 1;
   gap: 8px;
   padding: 10px 51px;
@@ -4824,6 +4824,10 @@ letter-spacing: -3%;
   justify-content: center;
 }
 
+.welcome-authorize-btn.scan-project{
+  width:200px;
+  left:35%;
+}
 .welcome-authorize-btn:hover {
   background: #7A6BFF;
   transform: translateY(-2px);
@@ -5296,13 +5300,13 @@ color: #ffffff;
   transform: translateX(-50%);
   display: flex;
   gap: 16px;
-  left: 54%;
+  left: 52%;
   top: 10%;
 }
 .welcome-script-actions-container{
   position: absolute;
-  width:91%;
-  left: 5px;
+  width:96%;
+  left: -14px!important;
   top: 0;
 }
 .welcome-screen.script{
