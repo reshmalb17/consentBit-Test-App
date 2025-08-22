@@ -272,30 +272,33 @@ const Script: React.FC<{
                 });
             });
 
-            setScripts(prevScripts => {
-                const existingScriptsMap = new Map(prevScripts.map(script => [script.identifier, script]));
-                const mergedScripts = groupedScripts.map(newScript => {
-                    const existingScript = existingScriptsMap.get(newScript.identifier);
-                    if (existingScript) {
-                        // For existing scripts, keep user selections unless the script has a different data-category attribute
-                        // Check if the new script has different categories from data-category attribute
-                        const hasNewCategories = newScript.selectedCategories.length > 0 && 
-                            JSON.stringify(newScript.selectedCategories.sort()) !== JSON.stringify(existingScript.selectedCategories.sort());
-                        
-                        return {
-                            ...newScript,
-                            isSaved: existingScript.isSaved,
-                            selectedCategories: hasNewCategories ? newScript.selectedCategories : existingScript.selectedCategories,
-                            isDismissed: existingScript.isDismissed,
-                            hasAutoDetectedCategories: hasNewCategories ? newScript.hasAutoDetectedCategories : existingScript.hasAutoDetectedCategories,
-                        };
-                    }
-                    // For new scripts, use the categories parsed from data-category attribute
-                    return newScript;
+            // Use setTimeout to defer the state update and avoid the render warning
+            setTimeout(() => {
+                setScripts(prevScripts => {
+                    const existingScriptsMap = new Map(prevScripts.map(script => [script.identifier, script]));
+                    const mergedScripts = groupedScripts.map(newScript => {
+                        const existingScript = existingScriptsMap.get(newScript.identifier);
+                        if (existingScript) {
+                            // For existing scripts, keep user selections unless the script has a different data-category attribute
+                            // Check if the new script has different categories from data-category attribute
+                            const hasNewCategories = newScript.selectedCategories.length > 0 && 
+                                JSON.stringify(newScript.selectedCategories.sort()) !== JSON.stringify(existingScript.selectedCategories.sort());
+                            
+                            return {
+                                ...newScript,
+                                isSaved: existingScript.isSaved,
+                                selectedCategories: hasNewCategories ? newScript.selectedCategories : existingScript.selectedCategories,
+                                isDismissed: existingScript.isDismissed,
+                                hasAutoDetectedCategories: hasNewCategories ? newScript.hasAutoDetectedCategories : existingScript.hasAutoDetectedCategories,
+                            };
+                        }
+                        // For new scripts, use the categories parsed from data-category attribute
+                        return newScript;
+                    });
+                    setIsLoading(false);
+                    return mergedScripts.filter(script => script.identifier !== null);
                 });
-                setIsLoading(false);
-                return mergedScripts.filter(script => script.identifier !== null);
-            });
+            }, 0);
         } catch (error) {
             setSaveStatus({
                 success: false,
@@ -310,10 +313,18 @@ const Script: React.FC<{
     useEffect(() => {
         if (fetchScripts) {
             const fetchDataAndResetFlag = async () => {
-                await fetchScriptData();
-                // Only reset the flag if not in welcome mode
-                if (!isWelcome) {
-                    setFetchScripts(false);
+                try {
+                    await fetchScriptData();
+                    // Only reset the flag if not in welcome mode
+                    if (!isWelcome) {
+                        setFetchScripts(false);
+                    }
+                } catch (error) {
+                    console.error("Error fetching script data:", error);
+                    // Reset flag even on error if not in welcome mode
+                    if (!isWelcome) {
+                        setFetchScripts(false);
+                    }
                 }
             };
             fetchDataAndResetFlag();
