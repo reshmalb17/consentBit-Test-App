@@ -70,7 +70,7 @@ const DonotShare: React.FC<ChoosePlanProps> = ({ onClose, toggleStates, handleTo
                       onClick={(event) => {
                         navigator.clipboard.writeText("consentbit-data-donotshare")
                           .then(() => {
-                            console.log('Text copied to clipboard');
+                    
                             const img = event?.target as HTMLImageElement;
                             if (img) {
                               img.style.opacity = "1";
@@ -122,7 +122,7 @@ const DonotShare: React.FC<ChoosePlanProps> = ({ onClose, toggleStates, handleTo
                       onClick={(event) => {
                         navigator.clipboard.writeText("consentbit-link-donotshare")
                           .then(() => {
-                            console.log('Data-link copied to clipboard');
+                    
                             const img = event?.target as HTMLImageElement;
                             if (img) {
                               img.style.opacity = "1";

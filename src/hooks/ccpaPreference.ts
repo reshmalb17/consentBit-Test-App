@@ -68,33 +68,25 @@ type BreakpointAndPseudo = {
 
 const createCookieccpaPreferences = async (language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", disableScroll: boolean, _closebutton: boolean = false, skipCommonDiv: boolean = false, Font: string
 ) => {
-    console.log("=== createCookieccpaPreferences START ===");
-    console.log("CCPA Parameters received:", { language, color, btnColor, headColor, paraColor, secondcolor, buttonRadius, animation, primaryButtonText, secondbuttontext, disableScroll, _closebutton, skipCommonDiv, Font });
+    
     
     // Add overall timeout for the entire function
     const overallTimeout = setTimeout(() => {
-        console.error("createCookieccpaPreferences overall timeout after 30 seconds");
     }, 30000);
     
     try {
 
-        console.log("Getting selected element for CCPA...");
         const selectedElement = await webflow.getSelectedElement();
         if (!selectedElement) {
-            console.error("No element selected in the Designer for CCPA.");
             webflow.notify({ type: "error", message: "No element selected in the Designer." });
             return;
         }
-        console.log("Selected element retrieved successfully for CCPA");
 
-        console.log("Creating newDiv for CCPA...");
         const newDiv = await selectedElement.before(webflow.elementPresets.DivBlock);
         if (!newDiv) {
-            console.error("Failed to create div for CCPA.");
             webflow.notify({ type: "error", message: "Failed to create div." });
             return;
         }
-        console.log("newDiv created successfully for CCPA");
 
         if ((newDiv as any).setDomId) {
             await (newDiv as any).setDomId("main-consent-banner"); // Type assertion
@@ -120,28 +112,21 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
             closebutton: 'consent-close'
         };
 
-        console.log("Creating CCPA styles...");
         const styles = await Promise.all(
             Object.values(styleNames).map(async (name) => {
-                console.log(`Creating CCPA style: ${name}`);
                 try {
                     const existingStyle = await webflow.getStyleByName(name);
                     if (existingStyle) {
-                        console.log(`Found existing style: ${name}`);
                         return existingStyle;
                     } else {
-                        console.log(`Creating new style: ${name}`);
                         const newStyle = await webflow.createStyle(name);
-                        console.log(`Created new style: ${name}`);
                         return newStyle;
                     }
                 } catch (error) {
-                    console.error(`Error creating style ${name}:`, error);
                     throw error;
                 }
             })
         );
-        console.log("All CCPA styles created successfully");
 
         const [divStyle, paragraphStyle, formBlockStyle, prefrenceDiv, togglediv, buttonContainerStyle, prefrenceButtons, changepre, buttonStyle, declinebutton, headingStyle, checkbosstyle, closebutton] = styles;
 
@@ -319,36 +304,20 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
         };
 
 
-        console.log("Setting CCPA style properties...");
-        console.log("Setting divStyle properties...");
         await divStyle.setProperties(divPropertyMap);
-        console.log("Setting divStyle responsive properties...");
         await divStyle.setProperties(responsivePropertyMap, responsiveOptions);
-        console.log("Setting paragraphStyle properties...");
         await paragraphStyle.setProperties(paragraphPropertyMap);
-        console.log("Setting prefrenceDiv properties...");
         await prefrenceDiv.setProperties(prefrencePropertyMap);
-        console.log("Setting togglediv properties...");
         await togglediv.setProperties(setTooglePropertyMap);
-        console.log("Setting formBlockStyle properties...");
         await formBlockStyle.setProperties(formPropertyMap);
-        console.log("Setting buttonContainerStyle properties...");
         await buttonContainerStyle.setProperties(buttonContainerPropertyMap);
-        console.log("Setting buttonStyle properties...");
         await buttonStyle.setProperties(buttonPropertyMap);
-        console.log("Setting changepre properties...");
         await changepre.setProperties(changepreferencePropertyMap);
-        console.log("Setting declinebutton properties...");
         await declinebutton.setProperties(declineButtonPropertyMap);
-        console.log("Setting prefrenceButtons properties...");
         await prefrenceButtons.setProperties(declineButtonPropertyMap);
-        console.log("Setting checkbosstyle properties...");
         await checkbosstyle.setProperties(checkboxStyleMap);
-        console.log("Setting headingStyle properties...");
         await headingStyle.setProperties(headingPropertyMap);
-        console.log("Setting closebutton properties...");
         await closebutton.setProperties(CloseButtonPropertyMap);
-        console.log("All CCPA style properties set successfully");
 
 
         if (newDiv.setStyles) {
@@ -356,40 +325,29 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
         }
 
                  if (newDiv.setCustomAttribute) {
-             console.log("Setting CCPA data-animation attribute:", animationAttribute);
              try {
                  const animationPromise = newDiv.setCustomAttribute("data-animation", animationAttribute);
                  const animationTimeout = new Promise((_, reject) => 
                      setTimeout(() => reject(new Error("CCPA animation attribute timeout")), 5000)
                  );
                  await Promise.race([animationPromise, animationTimeout]);
-                 console.log("CCPA data-animation attribute set successfully");
              } catch (error) {
-                 console.error("Error setting CCPA data-animation attribute:", error);
                  throw error;
              }
              
-             console.log("Setting CCPA data-cookie-banner attribute:", disableScroll ? "true" : "false");
              try {
                  const cookieBannerPromise = newDiv.setCustomAttribute("data-cookie-banner", disableScroll ? "true" : "false");
                  const cookieBannerTimeout = new Promise((_, reject) => 
                      setTimeout(() => reject(new Error("CCPA cookie banner attribute timeout")), 5000)
                  );
                  await Promise.race([cookieBannerPromise, cookieBannerTimeout]);
-                 console.log("CCPA data-cookie-banner attribute set successfully");
              } catch (error) {
-                 console.error("Error setting CCPA data-cookie-banner attribute:", error);
                  throw error;
              }
-         } else {
-             console.error("❌ setCustomAttribute method not available on newDiv element");
          }
 
-        console.log("=== CCPA ELEMENT CREATION PHASE START ===");
-        try {
-            console.log("Creating tempHeading for CCPA...");
-            const tempHeading = await selectedElement.before(webflow.elementPresets.Heading);
-            console.log("tempHeading created:", tempHeading);
+                 try {
+             const tempHeading = await selectedElement.before(webflow.elementPresets.Heading);
             if (!tempHeading) {
                 throw new Error("Failed to create heading");
             }
@@ -440,39 +398,26 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
                 }
             }
 
-            console.log("Creating form block for CCPA...");
-            const formBlock = await selectedElement.before(webflow.elementPresets.FormForm);
-            console.log("formBlock created:", formBlock);
-            if (!formBlock) {
-                throw new Error("Failed to create form block");
-            }
+                         const formBlock = await selectedElement.before(webflow.elementPresets.FormForm);
+             if (!formBlock) {
+                 throw new Error("Failed to create form block");
+             }
 
-            console.log("Getting form block children...");
-            const allChildren = await formBlock.getChildren();
-            console.log("Form block children:", allChildren.length);
+             const allChildren = await formBlock.getChildren();
 
-            console.log("Finding actual form inside form wrapper...");
-            const form = allChildren.find(child => child.plugin === "Form");
-            console.log("Form found:", form);
-            if (!form) {
-                throw new Error("Failed to find form inside form block");
-            }
+             const form = allChildren.find(child => child.plugin === "Form");
+             if (!form) {
+                 throw new Error("Failed to find form inside form block");
+             }
 
-            console.log("Getting form elements and removing them...");
-            const formElements = await form.getChildren();
-            console.log("Form elements to remove:", formElements.length);
-            await Promise.all(formElements.map(child => child.remove()));
-            console.log("Form elements removed successfully");
+             const formElements = await form.getChildren();
+             await Promise.all(formElements.map(child => child.remove()));
 
-            console.log("Creating DivBlock inside form...");
-            const prefrenceContainertoggle = await form.append(webflow.elementPresets.DivBlock);
-            console.log("prefrenceContainertoggle created:", prefrenceContainertoggle);
-            if (!prefrenceContainertoggle) {
-                throw new Error("Failed to create div block inside form");
-            }
-            console.log("Setting styles for prefrenceContainertoggle...");
-            await prefrenceContainertoggle.setStyles([togglediv]);
-            console.log("Styles set for prefrenceContainertoggle");
+             const prefrenceContainertoggle = await form.append(webflow.elementPresets.DivBlock);
+             if (!prefrenceContainertoggle) {
+                 throw new Error("Failed to create div block inside form");
+             }
+             await prefrenceContainertoggle.setStyles([togglediv]);
 
             // Create Paragraph inside the DivBlock (First)
             const toggleParagraph = await prefrenceContainertoggle.append(webflow.elementPresets.Paragraph);
@@ -489,41 +434,30 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
                 await toggleParagraph.setTextContent(ccpaTranslations[language as keyof typeof ccpaTranslations].doNotShare);
             }
 
-            console.log("Creating checkbox field...");
-            const checkboxField = await prefrenceContainertoggle.append(webflow.elementPresets.FormCheckboxInput);
-            console.log("checkboxField created:", checkboxField);
+                         const checkboxField = await prefrenceContainertoggle.append(webflow.elementPresets.FormCheckboxInput);
 
-            if (!checkboxField) {
-                throw new Error("Failed to create checkbox field inside div block");
-            }
+             if (!checkboxField) {
+                 throw new Error("Failed to create checkbox field inside div block");
+             }
 
-            console.log("Setting checkbox styles and DOM ID...");
-            if ((checkboxField as any).setDomId) {
-                await checkboxField.setStyles([checkbosstyle]);
-                await (checkboxField as any).setDomId("do-not-share-checkbox"); // Type assertion
-                console.log("Checkbox styles and DOM ID set successfully");
-            }
+             if ((checkboxField as any).setDomId) {
+                 await checkboxField.setStyles([checkbosstyle]);
+                 await (checkboxField as any).setDomId("do-not-share-checkbox"); // Type assertion
+             }
 
-            console.log("Getting checkbox field children...");
-            const children = await checkboxField.getChildren();
-            console.log("Checkbox children:", children.length);
-            
-            console.log("Clearing checkbox label text...");
-            for (const child of children) {
-                if (child.type.includes("Label") && child.setTextContent) {
-                    await child.setTextContent("");
-                    console.log("Cleared label text for child:", child.type);
-                }
-            }
+             const children = await checkboxField.getChildren();
+             
+             for (const child of children) {
+                 if (child.type.includes("Label") && child.setTextContent) {
+                     await child.setTextContent("");
+                 }
+             }
 
-            console.log("Setting checkbox custom attributes...");
-            for (const child of children) {
-                if (child.type.includes("FormCheckboxInput") && child.setCustomAttribute) {
-                    await child.setCustomAttribute("data-consent-id", "do-not-share-checkbox");
-                    console.log("Set custom attribute for child:", child.type);
-                }
-            }
-            console.log("Checkbox children manipulation completed");
+             for (const child of children) {
+                 if (child.type.includes("FormCheckboxInput") && child.setCustomAttribute) {
+                     await child.setCustomAttribute("data-consent-id", "do-not-share-checkbox");
+                 }
+             }
 
 
             //////////////////////
@@ -609,13 +543,11 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
         } catch (error) {
             webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
         }
-    } catch (error) {
-        console.error("Error in createCookieccpaPreferences:", error);
-        webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
-    } finally {
-        clearTimeout(overallTimeout);
-        console.log("=== createCookieccpaPreferences END ===");
-    }
+         } catch (error) {
+         webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
+     } finally {
+         clearTimeout(overallTimeout);
+     }
 };
 
 export default createCookieccpaPreferences

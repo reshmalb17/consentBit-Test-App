@@ -61,5 +61,4 @@ const dutchTranslation: TranslationKeys = {
 // Add the new language
 addLanguage('nl', dutchTranslation);
 
-console.log("✅ New languages added successfully!");
-console.log("Available languages:", ['en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'nl']); 
+ 

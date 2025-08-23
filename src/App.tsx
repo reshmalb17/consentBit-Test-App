@@ -3,6 +3,7 @@ import "./style/styless.css";
 import WelcomeScreen from "./components/WelcomeScreen";
 import SetupStep from "./components/SetupStep";
 import WelcomeScipt from "./components/WelcomeScript";
+import CustomizationTab from "./components/CustomizationTab";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAppState } from "./hooks/useAppState";  
 import { useAuth } from "./hooks/userAuth";
@@ -15,7 +16,9 @@ import { use } from "i18next";
 const App: React.FC = () => {
 
   const queryClient = useQueryClient();
-   const {
+  const [skipWelcomeScreen, setSkipWelcomeScreen] = useState(false);
+  
+  const {
     bannerStyles,
     bannerUI,
     bannerConfig,
@@ -42,6 +45,13 @@ const App: React.FC = () => {
     window.open('https://www.consentbit.com/help-document', '_blank');
   };
 
+  const handleBackToWelcome = () => {
+    // Clear the localStorage flag and show welcome screen
+    localStorage.removeItem("bannerAddedThroughWelcome");
+    setSkipWelcomeScreen(false);
+    popups.setShowWelcomeScreen(true);
+  };
+
   // Setup step handlers
   const handleSetupGoBack = () => {
     popups.setShowSetUpStep(false);
@@ -57,7 +67,7 @@ const App: React.FC = () => {
 
  //authentication
   useEffect(() => {
-    const stored = localStorage.getItem("wf_hybrid_user");
+    const stored = localStorage.getItem("consentbit-userinfo");
 
     if (!user?.firstName && stored) {
       const parsed = JSON.parse(stored);
@@ -77,6 +87,14 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Check if banner was added through welcome flow
+  useEffect(() => {
+    const bannerAddedThroughWelcome = localStorage.getItem("bannerAddedThroughWelcome");
+    if (bannerAddedThroughWelcome === "true") {
+      setSkipWelcomeScreen(true);
+    }
+  }, []);
+
 
 
 
@@ -84,7 +102,9 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      {popups.showWelcomeScreen ? (
+      {skipWelcomeScreen ? (
+        <CustomizationTab onAuth={handleBackToWelcome} />
+      ) : popups.showWelcomeScreen ? (
         <WelcomeScreen 
           onAuthorize={handleWelcomeAuthorize}
           onNeedHelp={handleWelcomeNeedHelp}
@@ -99,7 +119,7 @@ const App: React.FC = () => {
         <div className="main-app">
           <h1>Main App Interface</h1>
           <p>Welcome to the main application!</p>
-          <button onClick={() => popups.setShowWelcomeScreen(true)}>
+          <button onClick={handleBackToWelcome}>
             Back to Welcome Screen
           </button>
         </div>

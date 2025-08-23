@@ -7866,7 +7866,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `.ws-container {
 
 .ws-popup-content {
     background: rgba(10, 8, 27, 1);
-    padding: 20px;
+    /* padding: 20px; */
     border-radius: 12px;
     width: 800px;
 }`, ""]);
@@ -43295,9 +43295,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _style_styless_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./style/styless.css */ "./src/style/styless.css");
 /* harmony import */ var _components_WelcomeScreen__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/WelcomeScreen */ "./src/components/WelcomeScreen.tsx");
 /* harmony import */ var _components_SetupStep__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/SetupStep */ "./src/components/SetupStep.tsx");
-/* harmony import */ var _tanstack_react_query__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @tanstack/react-query */ "./node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js");
-/* harmony import */ var _hooks_useAppState__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./hooks/useAppState */ "./src/hooks/useAppState.ts");
-/* harmony import */ var _hooks_userAuth__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./hooks/userAuth */ "./src/hooks/userAuth.ts");
+/* harmony import */ var _components_CustomizationTab__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/CustomizationTab */ "./src/components/CustomizationTab.tsx");
+/* harmony import */ var _tanstack_react_query__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @tanstack/react-query */ "./node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js");
+/* harmony import */ var _hooks_useAppState__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./hooks/useAppState */ "./src/hooks/useAppState.ts");
+/* harmony import */ var _hooks_userAuth__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./hooks/userAuth */ "./src/hooks/userAuth.ts");
+
 
 
 
@@ -43306,9 +43308,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const App = () => {
-    const queryClient = (0,_tanstack_react_query__WEBPACK_IMPORTED_MODULE_6__.useQueryClient)();
-    const { bannerStyles, bannerUI, bannerConfig, bannerBooleans, popups, tooltips, siteData, buttons, bannerAnimation, localStorage: localStorageData } = (0,_hooks_useAppState__WEBPACK_IMPORTED_MODULE_4__.useAppState)();
-    const { user, exchangeAndVerifyIdToken } = (0,_hooks_userAuth__WEBPACK_IMPORTED_MODULE_5__.useAuth)();
+    const queryClient = (0,_tanstack_react_query__WEBPACK_IMPORTED_MODULE_7__.useQueryClient)();
+    const [skipWelcomeScreen, setSkipWelcomeScreen] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+    const { bannerStyles, bannerUI, bannerConfig, bannerBooleans, popups, tooltips, siteData, buttons, bannerAnimation, localStorage: localStorageData } = (0,_hooks_useAppState__WEBPACK_IMPORTED_MODULE_5__.useAppState)();
+    const { user, exchangeAndVerifyIdToken } = (0,_hooks_userAuth__WEBPACK_IMPORTED_MODULE_6__.useAuth)();
     // Welcome screen handlers
     const handleWelcomeAuthorize = () => {
         popups.setShowWelcomeScreen(true);
@@ -43317,6 +43320,12 @@ const App = () => {
     const handleWelcomeNeedHelp = () => {
         // Open help modal or redirect to help page
         window.open('https://www.consentbit.com/help-document', '_blank');
+    };
+    const handleBackToWelcome = () => {
+        // Clear the localStorage flag and show welcome screen
+        localStorage.removeItem("bannerAddedThroughWelcome");
+        setSkipWelcomeScreen(false);
+        popups.setShowWelcomeScreen(true);
     };
     // Setup step handlers
     const handleSetupGoBack = () => {
@@ -43329,7 +43338,7 @@ const App = () => {
     };
     //authentication
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-        const stored = localStorage.getItem("wf_hybrid_user");
+        const stored = localStorage.getItem("consentbit-userinfo");
         if (!(user === null || user === void 0 ? void 0 : user.firstName) && stored) {
             const parsed = JSON.parse(stored);
             if (parsed === null || parsed === void 0 ? void 0 : parsed.sessionToken) {
@@ -43346,10 +43355,17 @@ const App = () => {
             }
         }
     }, []);
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "app" }, popups.showWelcomeScreen ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_WelcomeScreen__WEBPACK_IMPORTED_MODULE_2__["default"], { onAuthorize: handleWelcomeAuthorize, onNeedHelp: handleWelcomeNeedHelp, authenticated: (user === null || user === void 0 ? void 0 : user.firstName) ? true : false })) : popups.setShowSetUpStep ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_SetupStep__WEBPACK_IMPORTED_MODULE_3__["default"], { onGoBack: handleSetupGoBack, onProceed: handleSetupProceed })) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "main-app" },
+    // Check if banner was added through welcome flow
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        const bannerAddedThroughWelcome = localStorage.getItem("bannerAddedThroughWelcome");
+        if (bannerAddedThroughWelcome === "true") {
+            setSkipWelcomeScreen(true);
+        }
+    }, []);
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "app" }, skipWelcomeScreen ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CustomizationTab__WEBPACK_IMPORTED_MODULE_4__["default"], { onAuth: handleBackToWelcome })) : popups.showWelcomeScreen ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_WelcomeScreen__WEBPACK_IMPORTED_MODULE_2__["default"], { onAuthorize: handleWelcomeAuthorize, onNeedHelp: handleWelcomeNeedHelp, authenticated: (user === null || user === void 0 ? void 0 : user.firstName) ? true : false })) : popups.setShowSetUpStep ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_SetupStep__WEBPACK_IMPORTED_MODULE_3__["default"], { onGoBack: handleSetupGoBack, onProceed: handleSetupProceed })) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "main-app" },
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", null, "Main App Interface"),
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Welcome to the main application!"),
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { onClick: () => popups.setShowWelcomeScreen(true) }, "Back to Welcome Screen")))));
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { onClick: handleBackToWelcome }, "Back to Welcome Screen")))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (App);
 
@@ -44015,10 +44031,6 @@ const ConfirmPublish = ({ onGoBack, onProceed, }) => {
     const { user, exchangeAndVerifyIdToken } = (0,_hooks_userAuth__WEBPACK_IMPORTED_MODULE_4__.useAuth)();
     const { createGDPRBanner, createCCPABanner, createBothBanners, isCreating, showLoading, showSuccess, showSuccessPublish, handleSuccessPublishProceed, handleSuccessPublishGoBack } = (0,_hooks_useBannerCreation__WEBPACK_IMPORTED_MODULE_7__.useBannerCreation)();
     const handlePublishClick = () => __awaiter(void 0, void 0, void 0, function* () {
-        console.log("handlePublishClick called");
-        console.log("isConfirmed:", isConfirmed);
-        console.log("user:", user);
-        console.log("isUserValid:", user === null || user === void 0 ? void 0 : user.firstName);
         const isUserValid = user === null || user === void 0 ? void 0 : user.firstName;
         try {
             const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_5__["default"].getSelectedElement();
@@ -44051,23 +44063,17 @@ const ConfirmPublish = ({ onGoBack, onProceed, }) => {
                         closebutton: bannerToggleStates.toggleStates.closebutton,
                     }
                 };
-                console.log("Creating banners with config:", config);
-                console.log("Selected options:", bannerUI.selectedOptions);
                 // Create banners based on user selection - Default to both banners
                 if (bannerUI.selectedOptions.includes("GDPR") && bannerUI.selectedOptions.includes("U.S. State Laws")) {
-                    console.log("Creating both banners");
                     yield createBothBanners(config);
                 }
                 else if (bannerUI.selectedOptions.includes("GDPR")) {
-                    console.log("Creating both banners (GDPR selected, defaulting to both)");
                     yield createBothBanners(config);
                 }
                 else if (bannerUI.selectedOptions.includes("U.S. State Laws")) {
-                    console.log("Creating both banners (CCPA selected, defaulting to both)");
                     yield createBothBanners(config);
                 }
                 else {
-                    console.log("Creating both banners (default)");
                     // Default to both banners
                     yield createBothBanners(config);
                 }
@@ -44086,7 +44092,6 @@ const ConfirmPublish = ({ onGoBack, onProceed, }) => {
         }
         catch (error) {
             tooltips.setShowTooltip(false);
-            console.error("Error checking selected element:", error);
         }
     });
     const handleCustomizeClick = () => {
@@ -44097,9 +44102,9 @@ const ConfirmPublish = ({ onGoBack, onProceed, }) => {
     };
     // If showCustomize is true, render the CustomizationTab component
     if (showCustomize) {
-        return react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_CustomizationTab__WEBPACK_IMPORTED_MODULE_10__["default"], { onAuth: handleBackFromCustomize });
+        return react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_CustomizationTab__WEBPACK_IMPORTED_MODULE_10__["default"], { onAuth: handleBackFromCustomize, initialActiveTab: "Customization" });
     }
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "publish-container" },
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, showSuccessPublish ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_CustomizationTab__WEBPACK_IMPORTED_MODULE_10__["default"], { onAuth: handleBackFromCustomize, initialActiveTab: "Customization" })) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "publish-container" },
         showSuccessPublish && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_SuccessPublish__WEBPACK_IMPORTED_MODULE_9__["default"], { onProceed: handleSuccessPublishProceed, onGoBack: handleSuccessPublishGoBack })),
         isCreating && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "popup" },
             react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "popup-loading-content" },
@@ -44126,7 +44131,6 @@ const ConfirmPublish = ({ onGoBack, onProceed, }) => {
                                             // img.style.opacity = "0.4";
                                             navigator.clipboard.writeText("CONSENTBIT100")
                                                 .then(() => {
-                                                console.log("Text copied to clipboard");
                                                 setTimeout(() => {
                                                     img.style.opacity = "0.7";
                                                 }, 300);
@@ -44149,7 +44153,6 @@ const ConfirmPublish = ({ onGoBack, onProceed, }) => {
                             react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "note-star" }, "*"),
                             react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", { className: "note-text" }, "Complete the payment to publish cookie widget to the live site. If payment is not made, it will only be published to the staging site.")),
                         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "publish-btn", disabled: !isConfirmed || isCreating, onClick: () => {
-                                console.log("Button clicked, isConfirmed:", isConfirmed);
                                 handlePublishClick();
                             } }, isCreating ? "Creating..." : "Publish")),
                     showTooltip && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: `global-error-banner ${tooltips.fadeOut ? 'fade-out' : 'fade-in'}` },
@@ -44176,7 +44179,7 @@ const ConfirmPublish = ({ onGoBack, onProceed, }) => {
                                 react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "cookie-actions" },
                                     react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "btns-preferences" }, "Preferences"),
                                     react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "btns-reject" }, "Reject"),
-                                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "btns-accept" }, "Accept All"))))))))));
+                                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "btns-accept" }, "Accept All"))))))))))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ConfirmPublish);
 
@@ -44742,7 +44745,7 @@ const donotshare = new URL(/* asset import */ __webpack_require__(/*! ../assets/
 const appVersion = _package_json__WEBPACK_IMPORTED_MODULE_14__.version;
 
 
-const CustomizationTab = ({ onAuth }) => {
+const CustomizationTab = ({ onAuth, initialActiveTab = "Settings" }) => {
     var _a, _b, _c, _d, _e;
     const [color, setColor] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("color", "#ffffff");
     const [bgColor, setBgColor] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("bgColor", "#ffffff");
@@ -44753,7 +44756,13 @@ const CustomizationTab = ({ onAuth }) => {
     const [headColor, setHeadColor] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("headColor", "#000000");
     const [secondbuttontext, setsecondbuttontext] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("secondbuttontext", "#000000");
     const [primaryButtonText, setPrimaryButtonText] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("primaryButtonText", "#FFFFFF");
-    const [activeTab, setActiveTab] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("activeTab", "Settings");
+    const [activeTab, setActiveTab] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("activeTab", initialActiveTab);
+    // Override activeTab with initialActiveTab prop when provided (only on mount)
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        if (initialActiveTab && initialActiveTab !== activeTab) {
+            setActiveTab(initialActiveTab);
+        }
+    }, [initialActiveTab]); // Remove activeTab and setActiveTab from dependencies
     const [expires, setExpires] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("expires", "");
     const [size, setSize] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("size", "12");
     const [isActive, setIsActive] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("isActive", false);
@@ -44768,10 +44777,8 @@ const CustomizationTab = ({ onAuth }) => {
     const [selectedOptions, setSelectedOptions] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("selectedOptions", ["GDPR", "U.S. State Laws"]);
     // Ensure default state is properly set on component mount
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-        console.log("selectedOptions current value:", selectedOptions);
         // Force set default values if not already set
         if (selectedOptions.length === 0 || !selectedOptions.includes("GDPR") || !selectedOptions.includes("U.S. State Laws")) {
-            console.log("Setting default selectedOptions");
             setSelectedOptions(["GDPR", "U.S. State Laws"]);
         }
     }, [selectedOptions, setSelectedOptions]);
@@ -44791,7 +44798,7 @@ const CustomizationTab = ({ onAuth }) => {
     const [cookieExpiration, setCookieExpiration] = (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_9__.usePersistentState)("cookieExpiration", "120");
     const [showTooltip, setShowTooltip] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     const [fadeOut, setFadeOut] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
-    const userinfo = localStorage.getItem("wf_hybrid_user");
+    const userinfo = localStorage.getItem("consentbit-userinfo");
     const tokenss = JSON.parse(userinfo);
     const [sessionTokenFromLocalStorage, setSessionToken] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)((0,_util_Session__WEBPACK_IMPORTED_MODULE_15__.getSessionTokenFromLocalStorage)());
     const [showChoosePlan, setShowChoosePlan] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
@@ -44986,7 +44993,7 @@ const CustomizationTab = ({ onAuth }) => {
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
         const fetchPages = () => __awaiter(void 0, void 0, void 0, function* () {
             try {
-                const localstoragedata = localStorage.getItem("wf_hybrid_user");
+                const localstoragedata = localStorage.getItem("consentbit-userinfo");
                 if (localstoragedata) {
                     try {
                         const parsed = JSON.parse(localstoragedata);
@@ -45140,7 +45147,7 @@ const CustomizationTab = ({ onAuth }) => {
     const queryClient = (0,_tanstack_react_query__WEBPACK_IMPORTED_MODULE_17__.useQueryClient)();
     //authentication
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-        const stored = localStorage.getItem("wf_hybrid_user");
+        const stored = localStorage.getItem("consentbit-userinfo");
         if (!(user === null || user === void 0 ? void 0 : user.firstName) && stored) {
             const parsed = JSON.parse(stored);
             if (parsed === null || parsed === void 0 ? void 0 : parsed.sessionToken) {
@@ -45160,9 +45167,9 @@ const CustomizationTab = ({ onAuth }) => {
     }, []);
     //authentication
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-        const data = localStorage.getItem('wf_hybrid_user');
+        const data = localStorage.getItem('consentbit-userinfo');
         if (data) {
-            // localStorage.removeItem("wf_hybrid_user"); // ❌ REMOVED: This was clearing settings after auth
+            // localStorage.removeItem("consentbit-userinfo"); // ❌ REMOVED: This was clearing settings after auth
         }
         const onAuth = () => __awaiter(void 0, void 0, void 0, function* () {
             yield exchangeAndVerifyIdToken();
@@ -45238,13 +45245,11 @@ const CustomizationTab = ({ onAuth }) => {
                     yield el.remove();
                 }
                 catch (err) {
-                    console.error("⚠️ Error removing element:", err);
                     _types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].notify({ type: "error", message: "Failed to remove a banner." });
                 }
             })));
             const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].getSelectedElement();
             if (!selectedElement) {
-                console.error("❌ No element selected.");
                 _types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].notify({ type: "error", message: "No element selected in the Designer." });
                 return;
             }
@@ -45455,9 +45460,6 @@ const CustomizationTab = ({ onAuth }) => {
                 yield newDiv.setCustomAttribute("data-animation", animationAttribute);
                 yield newDiv.setCustomAttribute("data-cookie-banner", toggleStates.disableScroll ? "true" : "false");
             }
-            else {
-                console.error("❌ setCustomAttribute method not available on newDiv element");
-            }
             const innerdiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].elementPresets.DivBlock);
             yield innerdiv.setStyles([innerDivStyle]);
             try {
@@ -45480,9 +45482,6 @@ const CustomizationTab = ({ onAuth }) => {
                 }
                 if (tempHeading.setTextContent) {
                     yield tempHeading.setTextContent(translations[language].ccpa.heading);
-                }
-                else {
-                    console.error("❌ setText method not available on heading element");
                 }
                 // Conditionally add close button only if toggleStates.closebutton is true
                 let Closebuttons = null;
@@ -45507,9 +45506,6 @@ const CustomizationTab = ({ onAuth }) => {
                 if (tempParagraph.setTextContent) {
                     yield tempParagraph.setTextContent(translations[language].ccpa.description);
                 }
-                else {
-                    console.error("❌ setText method not available on paragraph element");
-                }
                 const buttonContainer = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].elementPresets.DivBlock);
                 if (!buttonContainer) {
                     throw new Error("Failed to create button container");
@@ -45524,9 +45520,6 @@ const CustomizationTab = ({ onAuth }) => {
                 if (prefrenceButton.setDomId) {
                     yield prefrenceButton.setDomId("do-not-share-link"); // Type assertion
                 }
-                else {
-                    console.error("❌ setDomId method not available on accept button element");
-                }
                 if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
                     yield newDiv.append(innerdiv);
                     if (Closebuttons)
@@ -45539,12 +45532,6 @@ const CustomizationTab = ({ onAuth }) => {
                     if (buttonContainer.append && prefrenceButton) {
                         yield buttonContainer.append(prefrenceButton);
                     }
-                    else {
-                        console.error("❌ Failed to append buttons to the button container.");
-                    }
-                }
-                else {
-                    console.error("❌ Failed to append elements to the main div.");
                 }
                 handleCreatePreferencesccpa();
                 if (appVersion === '1.0.0') {
@@ -45562,17 +45549,14 @@ const CustomizationTab = ({ onAuth }) => {
                 saveBannerDetails();
             }
             catch (error) {
-                console.error("❌ Error creating cookie banner:", error);
                 _types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].notify({ type: "error", message: "An error occurred while creating the cookie banner." });
             }
         }
         catch (error) {
-            console.error("❌ Unexpected error:", error);
             _types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].notify({ type: "error", message: "Unexpected error occurred." });
         }
     });
     const fetchAnalyticsBlockingsScriptsV2 = () => __awaiter(void 0, void 0, void 0, function* () {
-        var _a, _b;
         try {
             const token = (0,_util_Session__WEBPACK_IMPORTED_MODULE_15__.getSessionTokenFromLocalStorage)();
             if (!token) {
@@ -45596,29 +45580,12 @@ const CustomizationTab = ({ onAuth }) => {
                     const applyScriptResponse = yield _services_api__WEBPACK_IMPORTED_MODULE_4__.customCodeApi.applyV2Script(params, token);
                 }
                 catch (error) {
-                    // More detailed error logging
-                    console.error("Failed to apply script:", {
-                        error: error instanceof Error ? error.message : 'Unknown error',
-                        stack: error instanceof Error ? error.stack : undefined,
-                        params: {
-                            scriptId: (_a = hostingScript === null || hostingScript === void 0 ? void 0 : hostingScript.result) === null || _a === void 0 ? void 0 : _a.id,
-                            siteId: siteIdinfo === null || siteIdinfo === void 0 ? void 0 : siteIdinfo.siteId,
-                            version: (_b = hostingScript === null || hostingScript === void 0 ? void 0 : hostingScript.result) === null || _b === void 0 ? void 0 : _b.version
-                        }
-                    });
                     throw error; // or handle it differently based on your needs
                 }
             }
-            else {
-                console.warn("No hosting script data available");
-            }
         }
         catch (error) {
-            console.error('=== Component Error ===');
-            console.error('Error type:', error.constructor.name);
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
-            console.error('Full error object:', error);
+            // Component error handling
         }
     });
     //gdpr banner
@@ -45669,9 +45636,6 @@ const CustomizationTab = ({ onAuth }) => {
             }
             if (newDiv.setDomId) {
                 yield newDiv.setDomId("consent-banner"); // Type assertion
-            }
-            else {
-                console.error("❌ setDomId method not available on accept button element");
             }
             const styleNames = {
                 divStyleName: "consentbit-gdpr_banner_div",
@@ -45921,9 +45885,6 @@ const CustomizationTab = ({ onAuth }) => {
                 if (tempHeading.setTextContent) {
                     yield tempHeading.setTextContent(translations[language].heading);
                 }
-                else {
-                    console.error("❌ setText method not available on heading element");
-                }
                 // Conditionally add close button only if toggleStates.closebutton is true
                 let Closebuttons = null;
                 if (toggleStates.closebutton) {
@@ -45947,9 +45908,6 @@ const CustomizationTab = ({ onAuth }) => {
                 if (tempParagraph.setTextContent) {
                     yield tempParagraph.setTextContent(translations[language].description);
                 }
-                else {
-                    console.error("❌ setText method not available on paragraph element");
-                }
                 const buttonContainer = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].elementPresets.DivBlock);
                 if (!buttonContainer) {
                     throw new Error("Failed to create button container");
@@ -45964,9 +45922,6 @@ const CustomizationTab = ({ onAuth }) => {
                 if (prefrenceButton.setDomId) {
                     yield prefrenceButton.setDomId("preferences-btn"); // Type assertion
                 }
-                else {
-                    console.error("❌ setDomId method not available on accept button element");
-                }
                 const acceptButton = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].elementPresets.Button);
                 if (!acceptButton) {
                     throw new Error("Failed to create accept button");
@@ -45976,9 +45931,6 @@ const CustomizationTab = ({ onAuth }) => {
                 if (acceptButton.setDomId) {
                     yield acceptButton.setDomId("accept-btn"); // Type assertion
                 }
-                else {
-                    console.error("❌ setDomId method not available on accept button element");
-                }
                 const declineButton = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].elementPresets.Button);
                 if (!declineButton) {
                     throw new Error("Failed to create decline button");
@@ -45987,9 +45939,6 @@ const CustomizationTab = ({ onAuth }) => {
                 yield declineButton.setTextContent(translations[language].reject);
                 if (declineButton.setDomId) {
                     yield declineButton.setDomId("decline-btn"); // Type assertion
-                }
-                else {
-                    console.error("❌ setDomId method not available on accept button element");
                 }
                 if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
                     // Append elements inside innerDiv
@@ -46006,12 +45955,6 @@ const CustomizationTab = ({ onAuth }) => {
                         yield buttonContainer.append(declineButton);
                         yield buttonContainer.append(acceptButton);
                     }
-                    else {
-                        console.error("❌ Failed to append buttons to the button container.");
-                    }
-                }
-                else {
-                    console.error("❌ Failed to append elements to the main div.");
                 }
                 handleCreatePreferences(skipCommonDiv);
                 if (appVersion === '1.0.0') {
@@ -46033,7 +45976,6 @@ const CustomizationTab = ({ onAuth }) => {
             }
         }
         catch (error) {
-            console.error("❌ Unexpected error:", error);
             _types_webflowtypes__WEBPACK_IMPORTED_MODULE_6__["default"].notify({ type: "error", message: "Unexpected error occurred." });
             setIsLoading(false);
         }
@@ -46049,7 +45991,7 @@ const CustomizationTab = ({ onAuth }) => {
     //banner details
     const saveBannerDetails = () => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const userinfo = localStorage.getItem("wf_hybrid_user");
+            const userinfo = localStorage.getItem("consentbit-userinfo");
             if (!userinfo) {
                 return;
             }
@@ -46115,7 +46057,6 @@ const CustomizationTab = ({ onAuth }) => {
             // More comprehensive check for no data
             if (!hasDataRows || lines.length <= 1 || isEmptyDataMessage ||
                 (hasHeader && lines.length === 2 && lines[1].trim().startsWith('#'))) {
-                console.warn('No consent data available for export');
                 alert('No user consent data found for export. CSV file will not be generated.');
                 setIsExporting(false);
                 return; // Exit without generating CSV
@@ -46126,7 +46067,6 @@ const CustomizationTab = ({ onAuth }) => {
                 !line.includes('Visitor ID') // Skip header row
             ).length;
             if (dataRowsCount === 0) {
-                console.warn('No actual consent data rows found');
                 alert('No user consent data found for export. CSV file will not be generated.');
                 setIsExporting(false);
                 return; // Exit without generating CSV
@@ -46154,7 +46094,6 @@ const CustomizationTab = ({ onAuth }) => {
             URL.revokeObjectURL(url);
         }
         catch (error) {
-            console.error('Failed to export CSV:', error);
             alert(`Failed to export CSV report: ${error instanceof Error ? error.message : String(error)}`);
         }
         finally {
@@ -46182,7 +46121,6 @@ const CustomizationTab = ({ onAuth }) => {
             // More comprehensive check for no data
             if (!hasDataRows || lines.length <= 1 || isEmptyDataMessage ||
                 (hasHeader && lines.length === 2 && lines[1].trim().startsWith('#'))) {
-                console.warn('No consent data available for export');
                 alert('No user consent data found for export. CSV file will not be generated.');
                 setIsExporting(false);
                 return; // Exit without generating CSV
@@ -46193,7 +46131,6 @@ const CustomizationTab = ({ onAuth }) => {
                 !line.includes('Visitor ID') // Skip header row
             ).length;
             if (dataRowsCount === 0) {
-                console.warn('No actual consent data rows found');
                 alert('No user consent data found for export. CSV file will not be generated.');
                 setIsExporting(false);
                 return; // Exit without generating CSV
@@ -46221,7 +46158,6 @@ const CustomizationTab = ({ onAuth }) => {
             URL.revokeObjectURL(url);
         }
         catch (error) {
-            console.error('Failed to export CSV:', error);
             alert(`Failed to export CSV report: ${error instanceof Error ? error.message : String(error)}`);
         }
         finally {
@@ -46245,7 +46181,6 @@ const CustomizationTab = ({ onAuth }) => {
                 return data;
             }
             catch (error) {
-                console.error('Error checking subscription:', error);
                 throw error;
             }
         });
@@ -46265,7 +46200,7 @@ const CustomizationTab = ({ onAuth }) => {
                 setIsSubscribed(Boolean(hasSubscription));
             }
             catch (error) {
-                console.error('Failed to check subscription:', error);
+                // Error handling
             }
         });
         fetchSubscription();
@@ -46287,7 +46222,6 @@ const CustomizationTab = ({ onAuth }) => {
                 setSiteInfo(currentSiteInfo);
             }
             if (!(currentSiteInfo === null || currentSiteInfo === void 0 ? void 0 : currentSiteInfo.siteId)) {
-                console.error("No siteId available for script check");
                 return;
             }
             const v2Response = yield _services_api__WEBPACK_IMPORTED_MODULE_4__.customCodeApi.registerV2CustomCode(token);
@@ -46308,25 +46242,17 @@ const CustomizationTab = ({ onAuth }) => {
                     const applyScriptResponse = yield _services_api__WEBPACK_IMPORTED_MODULE_4__.customCodeApi.applyV2Script(params, token);
                 }
                 catch (error) {
-                    console.error("Error applying script:", error);
+                    // Error handling
                 }
             }
         }
         catch (error) {
-            console.error("Error updating consent script:", error);
+            // Error handling
         }
     });
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
         // Check if the script has already been registered in this browser
-        // const hasRun = localStorage.getItem("v2ConsentScriptRegistered");
-        // console.log("hasRun:", hasRun);
-        // if (!hasRun) {
-        //   console.log("Calling checkAndRegisterV2ConsentScript");
         checkAndRegisterV2ConsentScript();
-        //   localStorage.setItem("v2ConsentScriptRegistered", "true");
-        // } else {
-        //   console.log("Script already registered, skipping");
-        // }
     }, []);
     // Welcome screen logic removed - this component is accessed via Customize link
     // No need to show welcome screen when coming from ConfirmPublish
@@ -46390,7 +46316,6 @@ const CustomizationTab = ({ onAuth }) => {
                                 }
                                 catch (error) {
                                     setShowTooltip(false);
-                                    console.error("Error checking selected element:", error);
                                 }
                             }) }, isBannerAdded ? "Publish your changes" : "Create Component")))),
                 activeTab === "Script" && (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
@@ -46493,7 +46418,6 @@ const CustomizationTab = ({ onAuth }) => {
                                     react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "tooltip-text" }, "Specifies the type of cookie compliance standard, like GDPR or CCPA."))),
                             react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "checkbox-group" }, ["U.S. State Laws", "GDPR"].map((option) => {
                                 const isChecked = selectedOptions.includes(option);
-                                console.log(`Checkbox ${option}:`, isChecked, "selectedOptions:", selectedOptions);
                                 return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", { key: option, className: "custom-checkboxs" },
                                     react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", { type: "checkbox", value: option, checked: isChecked, onChange: () => handleToggles(option) }),
                                     react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", { className: "checkbox-box" }),
@@ -46781,12 +46705,11 @@ const Script = ({ fetchScripts, setFetchScripts, isWelcome }) => {
     const { scripts, setScripts } = (0,_context_ScriptContext__WEBPACK_IMPORTED_MODULE_3__.useScriptContext)();
     // Debug scripts state changes
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-        // Removed console.log for production
     }, [scripts]);
     const [isSaving, setIsSaving] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     const [saveStatus, setSaveStatus] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     const categories = ["Essential", "Personalization", "Analytics", "Marketing"];
-    const userinfo = localStorage.getItem("wf_hybrid_user");
+    const userinfo = localStorage.getItem("consentbit-userinfo");
     const [showPopup, setShowPopup] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     const [isLoading, setIsLoading] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     const [showAuthPopup, setShowAuthPopup] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
@@ -47018,7 +46941,6 @@ const Script = ({ fetchScripts, setFetchScripts, isWelcome }) => {
                     }
                 }
                 catch (error) {
-                    console.error("Error fetching script data:", error);
                     // Reset flag even on error if not in welcome mode
                     if (!isWelcome) {
                         setFetchScripts(false);
@@ -47380,7 +47302,7 @@ const SetupStep = ({ onGoBack, onProceed }) => {
     const leftLines = new URL(/* asset import */ __webpack_require__(/*! ../assets/leftlines.svg */ "./src/assets/leftlines.svg"), __webpack_require__.b).href;
     const rightLines = new URL(/* asset import */ __webpack_require__(/*! ../assets/rightlines.svg */ "./src/assets/rightlines.svg"), __webpack_require__.b).href;
     const infologo = new URL(/* asset import */ __webpack_require__(/*! ../assets/info-logo.svg */ "./src/assets/info-logo.svg"), __webpack_require__.b).href;
-    const youtubethumbnail = new URL(/* asset import */ __webpack_require__(/*! ../assets/thumbnail.svg */ "./src/assets/thumbnail.svg"), __webpack_require__.b).href;
+    const youtubethumbnail = new URL(/* asset import */ __webpack_require__(/*! ../assets/thumb.jpg */ "./src/assets/thumb.jpg"), __webpack_require__.b).href;
     const onNeedHelp = () => {
         // Open help modal or redirect to help page
         window.open('https://www.consentbit.com/help-document', '_blank');
@@ -47452,25 +47374,31 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var framer_motion__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! framer-motion */ "./node_modules/framer-motion/dist/es/render/components/motion/proxy.mjs");
+/* harmony import */ var framer_motion__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! framer-motion */ "./node_modules/framer-motion/dist/es/render/components/motion/proxy.mjs");
 /* harmony import */ var _style_succespublish_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../style/succespublish.css */ "./src/style/succespublish.css");
+/* harmony import */ var _CustomizationTab__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./CustomizationTab */ "./src/components/CustomizationTab.tsx");
+
 
 
 
 const image = new URL(/* asset import */ __webpack_require__(/*! ../assets/customizationscreenshot.svg */ "./src/assets/customizationscreenshot.svg"), __webpack_require__.b).href;
 const whitearrow = new URL(/* asset import */ __webpack_require__(/*! ../assets/→.svg */ "./src/assets/→.svg"), __webpack_require__.b).href;
 const SuccessPublish = ({ onProceed, onGoBack }) => {
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "success-overlay" },
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(framer_motion__WEBPACK_IMPORTED_MODULE_2__.motion.svg, { className: "success-icon", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 52 52", initial: "hidden", animate: "visible" },
+    const [isCustomizingClicked, setIsCustomizingClicked] = react__WEBPACK_IMPORTED_MODULE_0___default().useState(false);
+    const handleCustomizeClick = () => {
+        setIsCustomizingClicked(true);
+    };
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isCustomizingClicked ? (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_CustomizationTab__WEBPACK_IMPORTED_MODULE_2__["default"], { onAuth: () => { }, initialActiveTab: "Customization" })) : (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "success-overlay" },
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(framer_motion__WEBPACK_IMPORTED_MODULE_3__.motion.svg, { className: "success-icon", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 52 52", initial: "hidden", animate: "visible" },
             react__WEBPACK_IMPORTED_MODULE_0___default().createElement("circle", { cx: "26", cy: "26", r: "21", fill: "rgba(140, 121, 255, 1)" }),
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(framer_motion__WEBPACK_IMPORTED_MODULE_2__.motion.circle, { cx: "26", cy: "26", r: "25", fill: "none", stroke: "rgba(140, 121, 255, 1)", strokeWidth: "2.5", variants: {
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(framer_motion__WEBPACK_IMPORTED_MODULE_3__.motion.circle, { cx: "26", cy: "26", r: "25", fill: "none", stroke: "rgba(140, 121, 255, 1)", strokeWidth: "2.5", variants: {
                     hidden: { pathLength: 0 },
                     visible: {
                         pathLength: 1,
                         transition: { duration: 0.8, ease: "easeInOut" },
                     },
                 } }),
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(framer_motion__WEBPACK_IMPORTED_MODULE_2__.motion.path, { fill: "none", stroke: "rgba(33, 30, 57, 1)", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", d: "M14 27l7 7 16-16", variants: {
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(framer_motion__WEBPACK_IMPORTED_MODULE_3__.motion.path, { fill: "none", stroke: "rgba(33, 30, 57, 1)", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", d: "M14 27l7 7 16-16", variants: {
                     hidden: { pathLength: 0 },
                     visible: {
                         pathLength: 1,
@@ -47488,11 +47416,11 @@ const SuccessPublish = ({ onProceed, onGoBack }) => {
                         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Brand colors and alignment"),
                         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Smooth animations"),
                         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Region-specific compliance settings")),
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "customize-btn", onClick: onProceed },
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { className: "customize-btn", onClick: handleCustomizeClick },
                         "Start Customizing ",
                         react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: whitearrow, alt: "" }))),
                 react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "customize-right" },
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: image, alt: "Customization Preview" }))))));
+                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", { src: image, alt: "Customization Preview" }))))))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SuccessPublish);
 
@@ -47537,8 +47465,6 @@ const leftLines = new URL(/* asset import */ __webpack_require__(/*! ../assets/l
 const rightLines = new URL(/* asset import */ __webpack_require__(/*! ../assets/rightlines.svg */ "./src/assets/rightlines.svg"), __webpack_require__.b).href;
 const WelcomeScreen = ({ onAuthorize, onNeedHelp, authenticated }) => {
     const { bannerBooleans } = (0,_hooks_useAppState__WEBPACK_IMPORTED_MODULE_3__.useAppState)();
-    console.log("Authenticated prop:", authenticated);
-    console.log("fetch scripts:", bannerBooleans.fetchScripts);
     const base_url = "https://cb-server.web-8fb.workers.dev";
     const { user, exchangeAndVerifyIdToken } = (0,_hooks_userAuth__WEBPACK_IMPORTED_MODULE_2__.useAuth)();
     // Function to open the authorization popup authorization window
@@ -47600,9 +47526,8 @@ __webpack_require__.r(__webpack_exports__);
 const infologo = new URL(/* asset import */ __webpack_require__(/*! ../assets/info-logo.svg */ "./src/assets/info-logo.svg"), __webpack_require__.b).href;
 const questionmark = new URL(/* asset import */ __webpack_require__(/*! ../assets/question.svg */ "./src/assets/question.svg"), __webpack_require__.b).href;
 const uparrow = new URL(/* asset import */ __webpack_require__(/*! ../assets/blue up arrow.svg */ "./src/assets/blue up arrow.svg"), __webpack_require__.b).href;
-const thumbnail = new URL(/* asset import */ __webpack_require__(/*! ../assets/thumbnail.svg */ "./src/assets/thumbnail.svg"), __webpack_require__.b).href;
+const thumbnail = new URL(/* asset import */ __webpack_require__(/*! ../assets/thumb.jpg */ "./src/assets/thumb.jpg"), __webpack_require__.b).href;
 const WelcomeScipt = ({ isFetchScripts, setFetchScripts }) => {
-    console.log("isFetchScripts prop in WelcomeScript:", isFetchScripts);
     const { bannerBooleans, popups } = (0,_hooks_useAppState__WEBPACK_IMPORTED_MODULE_1__.useAppState)();
     const handleNextButton = () => {
         popups.setShowPopupWelcomeSetup(true);
@@ -47703,7 +47628,6 @@ const DonotShare = ({ onClose, toggleStates, handleToggle }) => {
                                 }, onClick: (event) => {
                                     navigator.clipboard.writeText("consentbit-data-donotshare")
                                         .then(() => {
-                                        console.log('Text copied to clipboard');
                                         const img = event === null || event === void 0 ? void 0 : event.target;
                                         if (img) {
                                             img.style.opacity = "1";
@@ -47739,7 +47663,6 @@ const DonotShare = ({ onClose, toggleStates, handleToggle }) => {
                                 }, onClick: (event) => {
                                     navigator.clipboard.writeText("consentbit-link-donotshare")
                                         .then(() => {
-                                        console.log('Data-link copied to clipboard');
                                         const img = event === null || event === void 0 ? void 0 : event.target;
                                         if (img) {
                                             img.style.opacity = "1";
@@ -47905,29 +47828,20 @@ const ccpaTranslations = {
     }
 };
 const createCookieccpaPreferences = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (language = "English", color = "#ffffff", btnColor = "#F1F1F1", headColor = "#483999", paraColor = "#1F1D40", secondcolor = "secondcolor", buttonRadius, animation, primaryButtonText = "#ffffff", secondbuttontext = "#4C4A66", disableScroll, _closebutton = false, skipCommonDiv = false, Font) {
-    console.log("=== createCookieccpaPreferences START ===");
-    console.log("CCPA Parameters received:", { language, color, btnColor, headColor, paraColor, secondcolor, buttonRadius, animation, primaryButtonText, secondbuttontext, disableScroll, _closebutton, skipCommonDiv, Font });
     // Add overall timeout for the entire function
     const overallTimeout = setTimeout(() => {
-        console.error("createCookieccpaPreferences overall timeout after 30 seconds");
     }, 30000);
     try {
-        console.log("Getting selected element for CCPA...");
         const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].getSelectedElement();
         if (!selectedElement) {
-            console.error("No element selected in the Designer for CCPA.");
             _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].notify({ type: "error", message: "No element selected in the Designer." });
             return;
         }
-        console.log("Selected element retrieved successfully for CCPA");
-        console.log("Creating newDiv for CCPA...");
         const newDiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.DivBlock);
         if (!newDiv) {
-            console.error("Failed to create div for CCPA.");
             _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].notify({ type: "error", message: "Failed to create div." });
             return;
         }
-        console.log("newDiv created successfully for CCPA");
         if (newDiv.setDomId) {
             yield newDiv.setDomId("main-consent-banner"); // Type assertion
         }
@@ -47948,28 +47862,21 @@ const createCookieccpaPreferences = (...args_1) => __awaiter(void 0, [...args_1]
             // changepreference: `consentbit-ccpa-checkbox`,
             closebutton: 'consent-close'
         };
-        console.log("Creating CCPA styles...");
         const styles = yield Promise.all(Object.values(styleNames).map((name) => __awaiter(void 0, void 0, void 0, function* () {
-            console.log(`Creating CCPA style: ${name}`);
             try {
                 const existingStyle = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].getStyleByName(name);
                 if (existingStyle) {
-                    console.log(`Found existing style: ${name}`);
                     return existingStyle;
                 }
                 else {
-                    console.log(`Creating new style: ${name}`);
                     const newStyle = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].createStyle(name);
-                    console.log(`Created new style: ${name}`);
                     return newStyle;
                 }
             }
             catch (error) {
-                console.error(`Error creating style ${name}:`, error);
                 throw error;
             }
         })));
-        console.log("All CCPA styles created successfully");
         const [divStyle, paragraphStyle, formBlockStyle, prefrenceDiv, togglediv, buttonContainerStyle, prefrenceButtons, changepre, buttonStyle, declinebutton, headingStyle, checkbosstyle, closebutton] = styles;
         const collection = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].getDefaultVariableCollection();
         const webflowBlue = yield (collection === null || collection === void 0 ? void 0 : collection.createColorVariable("Webflow Blue", "rgba(255, 255, 255, 1)"));
@@ -48123,71 +48030,43 @@ const createCookieccpaPreferences = (...args_1) => __awaiter(void 0, [...args_1]
             "display": "flex",
             "flex-direction": "column",
         };
-        console.log("Setting CCPA style properties...");
-        console.log("Setting divStyle properties...");
         yield divStyle.setProperties(divPropertyMap);
-        console.log("Setting divStyle responsive properties...");
         yield divStyle.setProperties(responsivePropertyMap, responsiveOptions);
-        console.log("Setting paragraphStyle properties...");
         yield paragraphStyle.setProperties(paragraphPropertyMap);
-        console.log("Setting prefrenceDiv properties...");
         yield prefrenceDiv.setProperties(prefrencePropertyMap);
-        console.log("Setting togglediv properties...");
         yield togglediv.setProperties(setTooglePropertyMap);
-        console.log("Setting formBlockStyle properties...");
         yield formBlockStyle.setProperties(formPropertyMap);
-        console.log("Setting buttonContainerStyle properties...");
         yield buttonContainerStyle.setProperties(buttonContainerPropertyMap);
-        console.log("Setting buttonStyle properties...");
         yield buttonStyle.setProperties(buttonPropertyMap);
-        console.log("Setting changepre properties...");
         yield changepre.setProperties(changepreferencePropertyMap);
-        console.log("Setting declinebutton properties...");
         yield declinebutton.setProperties(declineButtonPropertyMap);
-        console.log("Setting prefrenceButtons properties...");
         yield prefrenceButtons.setProperties(declineButtonPropertyMap);
-        console.log("Setting checkbosstyle properties...");
         yield checkbosstyle.setProperties(checkboxStyleMap);
-        console.log("Setting headingStyle properties...");
         yield headingStyle.setProperties(headingPropertyMap);
-        console.log("Setting closebutton properties...");
         yield closebutton.setProperties(CloseButtonPropertyMap);
-        console.log("All CCPA style properties set successfully");
         if (newDiv.setStyles) {
             yield newDiv.setStyles([divStyle]);
         }
         if (newDiv.setCustomAttribute) {
-            console.log("Setting CCPA data-animation attribute:", animationAttribute);
             try {
                 const animationPromise = newDiv.setCustomAttribute("data-animation", animationAttribute);
                 const animationTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("CCPA animation attribute timeout")), 5000));
                 yield Promise.race([animationPromise, animationTimeout]);
-                console.log("CCPA data-animation attribute set successfully");
             }
             catch (error) {
-                console.error("Error setting CCPA data-animation attribute:", error);
                 throw error;
             }
-            console.log("Setting CCPA data-cookie-banner attribute:", disableScroll ? "true" : "false");
             try {
                 const cookieBannerPromise = newDiv.setCustomAttribute("data-cookie-banner", disableScroll ? "true" : "false");
                 const cookieBannerTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("CCPA cookie banner attribute timeout")), 5000));
                 yield Promise.race([cookieBannerPromise, cookieBannerTimeout]);
-                console.log("CCPA data-cookie-banner attribute set successfully");
             }
             catch (error) {
-                console.error("Error setting CCPA data-cookie-banner attribute:", error);
                 throw error;
             }
         }
-        else {
-            console.error("❌ setCustomAttribute method not available on newDiv element");
-        }
-        console.log("=== CCPA ELEMENT CREATION PHASE START ===");
         try {
-            console.log("Creating tempHeading for CCPA...");
             const tempHeading = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.Heading);
-            console.log("tempHeading created:", tempHeading);
             if (!tempHeading) {
                 throw new Error("Failed to create heading");
             }
@@ -48229,35 +48108,22 @@ const createCookieccpaPreferences = (...args_1) => __awaiter(void 0, [...args_1]
                     yield Closebuttons.setCustomAttribute("consentbit", "close");
                 }
             }
-            console.log("Creating form block for CCPA...");
             const formBlock = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.FormForm);
-            console.log("formBlock created:", formBlock);
             if (!formBlock) {
                 throw new Error("Failed to create form block");
             }
-            console.log("Getting form block children...");
             const allChildren = yield formBlock.getChildren();
-            console.log("Form block children:", allChildren.length);
-            console.log("Finding actual form inside form wrapper...");
             const form = allChildren.find(child => child.plugin === "Form");
-            console.log("Form found:", form);
             if (!form) {
                 throw new Error("Failed to find form inside form block");
             }
-            console.log("Getting form elements and removing them...");
             const formElements = yield form.getChildren();
-            console.log("Form elements to remove:", formElements.length);
             yield Promise.all(formElements.map(child => child.remove()));
-            console.log("Form elements removed successfully");
-            console.log("Creating DivBlock inside form...");
             const prefrenceContainertoggle = yield form.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.DivBlock);
-            console.log("prefrenceContainertoggle created:", prefrenceContainertoggle);
             if (!prefrenceContainertoggle) {
                 throw new Error("Failed to create div block inside form");
             }
-            console.log("Setting styles for prefrenceContainertoggle...");
             yield prefrenceContainertoggle.setStyles([togglediv]);
-            console.log("Styles set for prefrenceContainertoggle");
             // Create Paragraph inside the DivBlock (First)
             const toggleParagraph = yield prefrenceContainertoggle.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.Paragraph);
             if (!toggleParagraph) {
@@ -48270,36 +48136,25 @@ const createCookieccpaPreferences = (...args_1) => __awaiter(void 0, [...args_1]
             if (toggleParagraph.setTextContent) {
                 yield toggleParagraph.setTextContent(ccpaTranslations[language].doNotShare);
             }
-            console.log("Creating checkbox field...");
             const checkboxField = yield prefrenceContainertoggle.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.FormCheckboxInput);
-            console.log("checkboxField created:", checkboxField);
             if (!checkboxField) {
                 throw new Error("Failed to create checkbox field inside div block");
             }
-            console.log("Setting checkbox styles and DOM ID...");
             if (checkboxField.setDomId) {
                 yield checkboxField.setStyles([checkbosstyle]);
                 yield checkboxField.setDomId("do-not-share-checkbox"); // Type assertion
-                console.log("Checkbox styles and DOM ID set successfully");
             }
-            console.log("Getting checkbox field children...");
             const children = yield checkboxField.getChildren();
-            console.log("Checkbox children:", children.length);
-            console.log("Clearing checkbox label text...");
             for (const child of children) {
                 if (child.type.includes("Label") && child.setTextContent) {
                     yield child.setTextContent("");
-                    console.log("Cleared label text for child:", child.type);
                 }
             }
-            console.log("Setting checkbox custom attributes...");
             for (const child of children) {
                 if (child.type.includes("FormCheckboxInput") && child.setCustomAttribute) {
                     yield child.setCustomAttribute("data-consent-id", "do-not-share-checkbox");
-                    console.log("Set custom attribute for child:", child.type);
                 }
             }
-            console.log("Checkbox children manipulation completed");
             //////////////////////
             const prefrenceContainerinner = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.DivBlock);
             if (!prefrenceContainerinner) {
@@ -48369,12 +48224,10 @@ const createCookieccpaPreferences = (...args_1) => __awaiter(void 0, [...args_1]
         }
     }
     catch (error) {
-        console.error("Error in createCookieccpaPreferences:", error);
         _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].notify({ type: "error", message: "An error occurred while creating the cookie banner." });
     }
     finally {
         clearTimeout(overallTimeout);
-        console.log("=== createCookieccpaPreferences END ===");
     }
 });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createCookieccpaPreferences);
@@ -48418,11 +48271,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
             _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].notify({ type: "error", message: "Failed to create div." });
             return;
         }
-        // if ((newDiv as any).setDomId) {
-        //   await (newDiv as any).setDomId("main-banner");
-        // } else {
-        //   console.error("setDomId method not available on accept button element");
-        // }
         const timestamp = Date.now();
         const styleNames = {
             preferenceDiv: `consentbit-preference_div`,
@@ -48624,7 +48472,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
             yield newDiv.setCustomAttribute("data-cookie-banner", disableScroll ? "true" : "false");
         }
         else {
-            /* eslint-disable */ console.error(...oo_tx(`2010917836_266_6_266_82_11`, "❌ setCustomAttribute method not available on newDiv element"));
         }
         try {
             const tempHeading = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.Heading);
@@ -48638,7 +48485,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                 yield tempHeading.setTextContent(translation.heading);
             }
             else {
-                /* eslint-disable */ console.error(...oo_tx(`2010917836_280_8_280_74_11`, "❌ setText method not available on heading element"));
             }
             const tempParagraph = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.Paragraph);
             if (!tempParagraph) {
@@ -48651,7 +48497,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                 yield tempParagraph.setTextContent(translation.description);
             }
             else {
-                /* eslint-disable */ console.error(...oo_tx(`2010917836_295_8_295_76_11`, "❌ setText method not available on paragraph element"));
             }
             //divblock///////////////////////////////////////////////////////////////////
             // Create the main banner container with class consentbit-preference
@@ -48665,7 +48510,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                 yield mainBanner.setDomId("main-banner");
             }
             else {
-                /* eslint-disable */ console.error(...oo_tx(`2010917836_311_9_311_70_11`, "setDomId method not available on main banner"));
             }
             // Create the preference div with class consentbit-preference_div
             const preferenceDiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.DivBlock);
@@ -48678,7 +48522,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                 yield preferenceDiv.setDomId("consentbit-preference_div");
             }
             else {
-                /* eslint-disable */ console.error(...oo_tx(`2010917836_325_9_325_73_11`, "setDomId method not available on preference div"));
             }
             // Append preference div to main banner
             if (mainBanner.append && preferenceDiv) {
@@ -48773,13 +48616,11 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                     yield checkboxField.setDomId(section.id);
                 }
                 else {
-                    /* eslint-disable */ console.error(...oo_tx(`2010917836_445_10_445_99_11`, `❌ setDomId method not available on checkbox element for ${section.label}`));
                 }
                 if (checkboxField.setCustomAttribute) {
                     yield checkboxField.setCustomAttribute("customtoggle", customToggle ? "true" : "false");
                 }
                 else {
-                    /* eslint-disable */ console.error(...oo_tx(`2010917836_454_10_454_109_11`, `❌ setCustomAttribute method not available on checkbox element for ${section.label}`));
                 }
                 const wrapperParagraph = yield wrapperDiv.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.Paragraph);
                 if (!wrapperParagraph) {
@@ -48793,7 +48634,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                     yield wrapperParagraph.setTextContent(section.description);
                 }
                 else {
-                    /* eslint-disable */ console.error(...oo_tx(`2010917836_471_10_471_106_11`, `❌ setTextContent method not available on wrapper paragraph for ${section.label}`));
                 }
             }
             //////////////////////
@@ -48813,7 +48653,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                     yield mainDivBlock.setDomId("toggle-consent-btn");
                 }
                 else {
-                    /* eslint-disable */ console.error(...oo_tx(`2010917836_495_10_495_50_11`, "ccpa banner id setteled"));
                 }
             }
             ////////////////////////////////////////////////////////////////////////////////////////
@@ -48856,7 +48695,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                 yield declineButton.setDomId("cancel-btn"); // Type assertion
             }
             else {
-                /* eslint-disable */ console.error(...oo_tx(`2010917836_544_8_544_81_11`, "❌ setDomId method not available on accept button element"));
             }
             if (mainBanner.append && newDiv) {
                 yield mainBanner.append(newDiv);
@@ -48882,64 +48720,21 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                     // await buttonContainer.append(prefrenceButton)
                 }
                 else {
-                    /* eslint-disable */ console.error(...oo_tx(`2010917836_573_10_573_78_11`, "❌ Failed to append buttons to the button container."));
                 }
             }
             else {
-                /* eslint-disable */ console.error(...oo_tx(`2010917836_576_8_576_69_11`, "❌ Failed to append elements to the main div."));
             }
             // webflow.notify({ type: "Success", message: "ConsentBit banner added successfully!" }
         }
         catch (error) {
-            /* eslint-disable */ console.error(...oo_tx(`2010917836_583_6_583_61_11`, "❌ Error creating cookie banner:", error));
-            _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].notify({ type: "error", message: "An error occurred while creating the cookie banner." });
         }
     }
     catch (error) {
-        /* eslint-disable */ console.error(...oo_tx(`2010917836_587_4_587_59_11`, "❌ Error creating cookie banner:", error));
-        _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].notify({ type: "error", message: "An error occurred while creating the cookie banner." });
     }
     finally {
     }
 });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createCookiePreferences);
-function oo_cm() { try {
-    return (0, eval)("globalThis._console_ninja") || (0, eval)("/* https://github.com/wallabyjs/console-ninja#how-does-it-work */'use strict';var _0x306708=_0x57eb;(function(_0x2bb52b,_0xc34b72){var _0x530621=_0x57eb,_0xc55af5=_0x2bb52b();while(!![]){try{var _0x24c23f=parseInt(_0x530621(0x201))/0x1*(-parseInt(_0x530621(0x25f))/0x2)+parseInt(_0x530621(0x209))/0x3*(-parseInt(_0x530621(0x196))/0x4)+-parseInt(_0x530621(0x21e))/0x5+parseInt(_0x530621(0x25b))/0x6+parseInt(_0x530621(0x1d7))/0x7*(-parseInt(_0x530621(0x1d3))/0x8)+parseInt(_0x530621(0x202))/0x9*(-parseInt(_0x530621(0x1f0))/0xa)+parseInt(_0x530621(0x20c))/0xb;if(_0x24c23f===_0xc34b72)break;else _0xc55af5['push'](_0xc55af5['shift']());}catch(_0x3c622c){_0xc55af5['push'](_0xc55af5['shift']());}}}(_0x4ac4,0x6fa73));function _0x4ac4(){var _0x43cb65=['resetOnProcessingTimeAverageMs','cappedProps','autoExpandPropertyCount','...','date','https://tinyurl.com/37x8b79t','origin','autoExpandLimit','autoExpand','host','coverage','_getOwnPropertySymbols','1','sortProps','capped','_p_','then','_additionalMetadata','_setNodeExpandableState','Set','unknown','number','defineProperty','\\x20server','isExpressionToEvaluate','_p_name','length','test','autoExpandMaxDepth','HTMLAllCollection','console',{\"resolveGetters\":false,\"defaultLimits\":{\"props\":100,\"elements\":100,\"strLength\":51200,\"totalStrLength\":51200,\"autoExpandLimit\":5000,\"autoExpandMaxDepth\":10},\"reducedLimits\":{\"props\":5,\"elements\":5,\"strLength\":256,\"totalStrLength\":768,\"autoExpandLimit\":30,\"autoExpandMaxDepth\":2},\"reducePolicy\":{\"perLogpoint\":{\"reduceOnCount\":50,\"reduceOnAccumulatedProcessingTimeMs\":100,\"resetWhenQuietMs\":500,\"resetOnProcessingTimeAverageMs\":100},\"global\":{\"reduceOnCount\":1000,\"reduceOnAccumulatedProcessingTimeMs\":300,\"resetWhenQuietMs\":50,\"resetOnProcessingTimeAverageMs\":100}}},'_sendErrorMessage','_console_ninja','global','hostname','_reconnectTimeout','_treeNodePropertiesBeforeFullValue','String','Console\\x20Ninja\\x20failed\\x20to\\x20send\\x20logs,\\x20restarting\\x20the\\x20process\\x20may\\x20help;\\x20also\\x20see\\x20','unref','_inNextEdge','send','totalStrLength','nodeModules','getPrototypeOf','elapsed','autoExpandPreviousObjects','_connectAttemptCount','reducedLimits','setter','endsWith','_setNodeLabel','cappedElements','onclose','8wFqTbY','_addFunctionsNode','_numberRegExp','count','144781QBgSlB','NEXT_RUNTIME','null','_ninjaIgnoreNextError','create','symbol','reload','strLength','nan','expressionsToEvaluate','map','_hasSetOnItsPath','string','remix','_allowedToConnectOnSend','rootExpression','_capIfString','get','reduceOnAccumulatedProcessingTimeMs','_disposeWebsocket','_keyStrRegExp','Map','toLowerCase','array','webpack','838570VmfIKn','reduceLimits','getOwnPropertyDescriptor','_treeNodePropertiesAfterFullValue','match','background:\\x20rgb(30,30,30);\\x20color:\\x20rgb(255,213,92)','_isUndefined','_maxConnectAttemptCount','resetWhenQuietMs','_Symbol','function','now','negativeInfinity','_sortProps','depth','env','allStrLength','1JzERwx','63wQTjHb','message','fromCharCode','_getOwnPropertyNames','object','resolveGetters','readyState','6EUSimZ','undefined','_addProperty','25659007VFMgxT','_propertyName','_type','_isPrimitiveType','url','index','_isArray','angular','_connected','_objectToString','onopen','stack','_quotedRegExp','dockerizedApp','call','pop','disabledLog','type','2784920reJBoY','_allowedToSend','replace','_extendedWarning','_inBrowser','defaultLimits','indexOf','getWebSocketClass','warn','_attemptToReconnectShortly','NEGATIVE_INFINITY','name','_setNodeExpressionPath','join','disabledTrace','forEach','timeStamp','astro','bigint','[object\\x20Date]','Number','level','_addObjectProperty','getter','POSITIVE_INFINITY','reduceOnCount','toUpperCase','positiveInfinity','[object\\x20Map]','args','_property','isArray','_setNodeQueryPath','default','catch','includes','Error','_addLoadNode','RegExp','serialize','constructor','logger\\x20failed\\x20to\\x20connect\\x20to\\x20host','failed\\x20to\\x20find\\x20and\\x20load\\x20WebSocket','_isMap','root_exp_id','performance','_HTMLAllCollection','_console_ninja_session','__es'+'Module','current','Boolean','logger\\x20failed\\x20to\\x20connect\\x20to\\x20host,\\x20see\\x20','toString','_hasSymbolPropertyOnItsPath','_WebSocketClass','trace','concat','hits','_socket','reducePolicy','next.js','5053704ydudrA','[object\\x20BigInt]','WebSocket','process','1742492lNZmIA','_setNodePermissions','Buffer','enumerable','versions','%c\\x20Console\\x20Ninja\\x20extension\\x20is\\x20connected\\x20to\\x20','_regExpToString','_WebSocket','_blacklistedProperty','_undefined','prototype','time','method','_ws','_isPrimitiveWrapperType','push','perf_hooks','_cleanNode','[object\\x20Set]','boolean','getOwnPropertyNames','127.0.0.1','slice','elements','port','see\\x20https://tinyurl.com/2vt8jxzw\\x20for\\x20more\\x20info.','logger\\x20websocket\\x20error','_consoleNinjaAllowedToStart','path','_p_length','failed\\x20to\\x20connect\\x20to\\x20host:\\x20','noFunctions','expId',[\"localhost\",\"127.0.0.1\",\"example.cypress.io\",\"Aadvik_Reshma\",\"192.168.0.101\"],'negativeZero','_getOwnPropertyDescriptor','_dateToString','_processTreeNodeResult','split','location','_connectToHostNow','ws/index.js','stringify','_setNodeId','eventReceivedCallback','Console\\x20Ninja\\x20failed\\x20to\\x20send\\x20logs,\\x20refreshing\\x20the\\x20page\\x20may\\x20help;\\x20also\\x20see\\x20','value','edge','log','gateway.docker.internal','stackTraceLimit','_connecting','hasOwnProperty','_hasMapOnItsPath','root_exp','perLogpoint','Symbol','props','hrtime','parse','parent','substr','_isSet','error','1363356HEYciT','onerror','node','close','_webSocketErrorDocsLink','_isNegativeZero'];_0x4ac4=function(){return _0x43cb65;};return _0x4ac4();}var te=Object[_0x306708(0x1db)],G=Object[_0x306708(0x1b2)],ne=Object[_0x306708(0x1f2)],re=Object[_0x306708(0x16a)],ie=Object[_0x306708(0x1c9)],se=Object[_0x306708(0x269)][_0x306708(0x18a)],oe=(_0x4e7daa,_0x3f22a0,_0x127e05,_0x45c74e)=>{var _0xf288d1=_0x306708;if(_0x3f22a0&&typeof _0x3f22a0==_0xf288d1(0x206)||typeof _0x3f22a0==_0xf288d1(0x1fa)){for(let _0x1b70c5 of re(_0x3f22a0))!se[_0xf288d1(0x21a)](_0x4e7daa,_0x1b70c5)&&_0x1b70c5!==_0x127e05&&G(_0x4e7daa,_0x1b70c5,{'get':()=>_0x3f22a0[_0x1b70c5],'enumerable':!(_0x45c74e=ne(_0x3f22a0,_0x1b70c5))||_0x45c74e[_0xf288d1(0x262)]});}return _0x4e7daa;},K=(_0x87d7de,_0x1c5524,_0x373b7b)=>(_0x373b7b=_0x87d7de!=null?te(ie(_0x87d7de)):{},oe(_0x1c5524||!_0x87d7de||!_0x87d7de[_0x306708(0x24e)]?G(_0x373b7b,_0x306708(0x23f),{'value':_0x87d7de,'enumerable':!0x0}):_0x373b7b,_0x87d7de)),H=class{constructor(_0x5cb8c2,_0x5cddf3,_0x502c73,_0x27288c,_0x49d611,_0x8dd291){var _0x481b37=_0x306708,_0x3d6120,_0x5d2881,_0x91ba19,_0x3fd311;this['global']=_0x5cb8c2,this['host']=_0x5cddf3,this['port']=_0x502c73,this['nodeModules']=_0x27288c,this['dockerizedApp']=_0x49d611,this[_0x481b37(0x182)]=_0x8dd291,this['_allowedToSend']=!0x0,this[_0x481b37(0x1e5)]=!0x0,this[_0x481b37(0x214)]=!0x1,this[_0x481b37(0x189)]=!0x1,this[_0x481b37(0x1c5)]=((_0x5d2881=(_0x3d6120=_0x5cb8c2['process'])==null?void 0x0:_0x3d6120['env'])==null?void 0x0:_0x5d2881[_0x481b37(0x1d8)])===_0x481b37(0x185),this[_0x481b37(0x222)]=!((_0x3fd311=(_0x91ba19=this[_0x481b37(0x1be)]['process'])==null?void 0x0:_0x91ba19[_0x481b37(0x263)])!=null&&_0x3fd311[_0x481b37(0x198)])&&!this[_0x481b37(0x1c5)],this[_0x481b37(0x254)]=null,this['_connectAttemptCount']=0x0,this['_maxConnectAttemptCount']=0x14,this[_0x481b37(0x19a)]=_0x481b37(0x1a1),this['_sendErrorMessage']=(this[_0x481b37(0x222)]?_0x481b37(0x183):_0x481b37(0x1c3))+this[_0x481b37(0x19a)];}async['getWebSocketClass'](){var _0xf6c3da=_0x306708,_0x4c74a4,_0x42b90b;if(this[_0xf6c3da(0x254)])return this[_0xf6c3da(0x254)];let _0x1ae56c;if(this[_0xf6c3da(0x222)]||this[_0xf6c3da(0x1c5)])_0x1ae56c=this[_0xf6c3da(0x1be)][_0xf6c3da(0x25d)];else{if((_0x4c74a4=this[_0xf6c3da(0x1be)][_0xf6c3da(0x25e)])!=null&&_0x4c74a4[_0xf6c3da(0x266)])_0x1ae56c=(_0x42b90b=this[_0xf6c3da(0x1be)]['process'])==null?void 0x0:_0x42b90b[_0xf6c3da(0x266)];else try{let _0x1a51de=await import(_0xf6c3da(0x172));_0x1ae56c=(await import((await import(_0xf6c3da(0x210)))['pathToFileURL'](_0x1a51de[_0xf6c3da(0x22b)](this['nodeModules'],_0xf6c3da(0x17f)))[_0xf6c3da(0x252)]()))[_0xf6c3da(0x23f)];}catch{try{_0x1ae56c=require(require(_0xf6c3da(0x172))[_0xf6c3da(0x22b)](this[_0xf6c3da(0x1c8)],'ws'));}catch{throw new Error(_0xf6c3da(0x248));}}}return this['_WebSocketClass']=_0x1ae56c,_0x1ae56c;}['_connectToHostNow'](){var _0x14b20e=_0x306708;this[_0x14b20e(0x189)]||this['_connected']||this[_0x14b20e(0x1cc)]>=this[_0x14b20e(0x1f7)]||(this[_0x14b20e(0x1e5)]=!0x1,this[_0x14b20e(0x189)]=!0x0,this[_0x14b20e(0x1cc)]++,this[_0x14b20e(0x26c)]=new Promise((_0x504528,_0x272872)=>{var _0x53e4bd=_0x14b20e;this[_0x53e4bd(0x225)]()['then'](_0x58f37c=>{var _0x4fc413=_0x53e4bd;let _0x3b1416=new _0x58f37c('ws://'+(!this[_0x4fc413(0x222)]&&this[_0x4fc413(0x219)]?_0x4fc413(0x187):this[_0x4fc413(0x1a5)])+':'+this[_0x4fc413(0x16e)]);_0x3b1416['onerror']=()=>{var _0x4950fe=_0x4fc413;this[_0x4950fe(0x21f)]=!0x1,this[_0x4950fe(0x1ea)](_0x3b1416),this[_0x4950fe(0x227)](),_0x272872(new Error(_0x4950fe(0x170)));},_0x3b1416[_0x4fc413(0x216)]=()=>{var _0x1a2bb5=_0x4fc413;this[_0x1a2bb5(0x222)]||_0x3b1416[_0x1a2bb5(0x258)]&&_0x3b1416[_0x1a2bb5(0x258)][_0x1a2bb5(0x1c4)]&&_0x3b1416[_0x1a2bb5(0x258)][_0x1a2bb5(0x1c4)](),_0x504528(_0x3b1416);},_0x3b1416[_0x4fc413(0x1d2)]=()=>{var _0x4e6dc4=_0x4fc413;this[_0x4e6dc4(0x1e5)]=!0x0,this['_disposeWebsocket'](_0x3b1416),this[_0x4e6dc4(0x227)]();},_0x3b1416['onmessage']=_0xe37bc=>{var _0x2b587b=_0x4fc413;try{if(!(_0xe37bc!=null&&_0xe37bc['data'])||!this[_0x2b587b(0x182)])return;let _0x118da=JSON[_0x2b587b(0x191)](_0xe37bc['data']);this[_0x2b587b(0x182)](_0x118da[_0x2b587b(0x26b)],_0x118da[_0x2b587b(0x23b)],this[_0x2b587b(0x1be)],this[_0x2b587b(0x222)]);}catch{}};})[_0x53e4bd(0x1ac)](_0x321927=>(this[_0x53e4bd(0x214)]=!0x0,this['_connecting']=!0x1,this[_0x53e4bd(0x1e5)]=!0x1,this['_allowedToSend']=!0x0,this['_connectAttemptCount']=0x0,_0x321927))[_0x53e4bd(0x240)](_0x369a11=>(this[_0x53e4bd(0x214)]=!0x1,this[_0x53e4bd(0x189)]=!0x1,console[_0x53e4bd(0x226)](_0x53e4bd(0x251)+this['_webSocketErrorDocsLink']),_0x272872(new Error(_0x53e4bd(0x174)+(_0x369a11&&_0x369a11['message'])))));}));}[_0x306708(0x1ea)](_0x105214){var _0x110a37=_0x306708;this[_0x110a37(0x214)]=!0x1,this[_0x110a37(0x189)]=!0x1;try{_0x105214[_0x110a37(0x1d2)]=null,_0x105214[_0x110a37(0x197)]=null,_0x105214[_0x110a37(0x216)]=null;}catch{}try{_0x105214[_0x110a37(0x208)]<0x2&&_0x105214[_0x110a37(0x199)]();}catch{}}['_attemptToReconnectShortly'](){var _0x4578ee=_0x306708;clearTimeout(this[_0x4578ee(0x1c0)]),!(this['_connectAttemptCount']>=this[_0x4578ee(0x1f7)])&&(this[_0x4578ee(0x1c0)]=setTimeout(()=>{var _0x51f9fb=_0x4578ee,_0x2704fd;this['_connected']||this[_0x51f9fb(0x189)]||(this[_0x51f9fb(0x17e)](),(_0x2704fd=this[_0x51f9fb(0x26c)])==null||_0x2704fd[_0x51f9fb(0x240)](()=>this[_0x51f9fb(0x227)]()));},0x1f4),this[_0x4578ee(0x1c0)]['unref']&&this[_0x4578ee(0x1c0)]['unref']());}async[_0x306708(0x1c6)](_0x4ac647){var _0x5b6043=_0x306708;try{if(!this['_allowedToSend'])return;this[_0x5b6043(0x1e5)]&&this[_0x5b6043(0x17e)](),(await this[_0x5b6043(0x26c)])['send'](JSON[_0x5b6043(0x180)](_0x4ac647));}catch(_0x4af89c){this[_0x5b6043(0x221)]?console[_0x5b6043(0x226)](this['_sendErrorMessage']+':\\x20'+(_0x4af89c&&_0x4af89c[_0x5b6043(0x203)])):(this['_extendedWarning']=!0x0,console['warn'](this[_0x5b6043(0x1bc)]+':\\x20'+(_0x4af89c&&_0x4af89c['message']),_0x4ac647)),this['_allowedToSend']=!0x1,this[_0x5b6043(0x227)]();}}};function X(_0x59e9ed,_0x435000,_0x46a0b4,_0x387ea1,_0x3d0ee1,_0x388879,_0x3b442d,_0x3a7591=ae){var _0x316efd=_0x306708;let _0x5e24ec=_0x46a0b4[_0x316efd(0x17c)](',')['map'](_0x2205c0=>{var _0x2a4a71=_0x316efd,_0x289000,_0x38e841,_0x33274a,_0x1654bd;try{if(!_0x59e9ed[_0x2a4a71(0x24d)]){let _0x376a4e=((_0x38e841=(_0x289000=_0x59e9ed[_0x2a4a71(0x25e)])==null?void 0x0:_0x289000['versions'])==null?void 0x0:_0x38e841[_0x2a4a71(0x198)])||((_0x1654bd=(_0x33274a=_0x59e9ed[_0x2a4a71(0x25e)])==null?void 0x0:_0x33274a[_0x2a4a71(0x1ff)])==null?void 0x0:_0x1654bd[_0x2a4a71(0x1d8)])===_0x2a4a71(0x185);(_0x3d0ee1==='next.js'||_0x3d0ee1===_0x2a4a71(0x1e4)||_0x3d0ee1===_0x2a4a71(0x22f)||_0x3d0ee1===_0x2a4a71(0x213))&&(_0x3d0ee1+=_0x376a4e?_0x2a4a71(0x1b3):'\\x20browser'),_0x59e9ed[_0x2a4a71(0x24d)]={'id':+new Date(),'tool':_0x3d0ee1},_0x3b442d&&_0x3d0ee1&&!_0x376a4e&&console['log'](_0x2a4a71(0x264)+(_0x3d0ee1['charAt'](0x0)[_0x2a4a71(0x238)]()+_0x3d0ee1[_0x2a4a71(0x193)](0x1))+',',_0x2a4a71(0x1f5),_0x2a4a71(0x16f));}let _0x3065a6=new H(_0x59e9ed,_0x435000,_0x2205c0,_0x387ea1,_0x388879,_0x3a7591);return _0x3065a6[_0x2a4a71(0x1c6)]['bind'](_0x3065a6);}catch(_0x5cbdc5){return console['warn'](_0x2a4a71(0x247),_0x5cbdc5&&_0x5cbdc5['message']),()=>{};}});return _0x59f8b9=>_0x5e24ec[_0x316efd(0x22d)](_0x5155f2=>_0x5155f2(_0x59f8b9));}function ae(_0x32c035,_0x386228,_0x1ba55a,_0x3db203){var _0xcccd91=_0x306708;_0x3db203&&_0x32c035===_0xcccd91(0x1dd)&&_0x1ba55a[_0xcccd91(0x17d)]['reload']();}function _0x57eb(_0x55b34c,_0x3b16e9){var _0x4ac419=_0x4ac4();return _0x57eb=function(_0x57eb0e,_0x21c986){_0x57eb0e=_0x57eb0e-0x167;var _0x1c6b34=_0x4ac419[_0x57eb0e];return _0x1c6b34;},_0x57eb(_0x55b34c,_0x3b16e9);}function B(_0x3d2273){var _0x4c09a6=_0x306708,_0x1bd3ca,_0x70cdff;let _0x3131bb=function(_0x4828d9,_0x331191){return _0x331191-_0x4828d9;},_0x121f61;if(_0x3d2273[_0x4c09a6(0x24b)])_0x121f61=function(){var _0x29e0e2=_0x4c09a6;return _0x3d2273[_0x29e0e2(0x24b)][_0x29e0e2(0x1fb)]();};else{if(_0x3d2273[_0x4c09a6(0x25e)]&&_0x3d2273[_0x4c09a6(0x25e)][_0x4c09a6(0x190)]&&((_0x70cdff=(_0x1bd3ca=_0x3d2273[_0x4c09a6(0x25e)])==null?void 0x0:_0x1bd3ca['env'])==null?void 0x0:_0x70cdff[_0x4c09a6(0x1d8)])!==_0x4c09a6(0x185))_0x121f61=function(){var _0x5b8216=_0x4c09a6;return _0x3d2273[_0x5b8216(0x25e)]['hrtime']();},_0x3131bb=function(_0x174a25,_0x4a360c){return 0x3e8*(_0x4a360c[0x0]-_0x174a25[0x0])+(_0x4a360c[0x1]-_0x174a25[0x1])/0xf4240;};else try{let {performance:_0x1423c5}=require(_0x4c09a6(0x26f));_0x121f61=function(){var _0x322a81=_0x4c09a6;return _0x1423c5[_0x322a81(0x1fb)]();};}catch{_0x121f61=function(){return+new Date();};}}return{'elapsed':_0x3131bb,'timeStamp':_0x121f61,'now':()=>Date[_0x4c09a6(0x1fb)]()};}function J(_0x42b318,_0x19743b,_0x2fa843){var _0x48a4a0=_0x306708,_0x164059,_0x17f315,_0x43da7c,_0x1142c4,_0x943066;if(_0x42b318[_0x48a4a0(0x171)]!==void 0x0)return _0x42b318[_0x48a4a0(0x171)];let _0x242317=((_0x17f315=(_0x164059=_0x42b318[_0x48a4a0(0x25e)])==null?void 0x0:_0x164059[_0x48a4a0(0x263)])==null?void 0x0:_0x17f315[_0x48a4a0(0x198)])||((_0x1142c4=(_0x43da7c=_0x42b318[_0x48a4a0(0x25e)])==null?void 0x0:_0x43da7c[_0x48a4a0(0x1ff)])==null?void 0x0:_0x1142c4[_0x48a4a0(0x1d8)])==='edge';function _0x1a94f0(_0x586890){var _0x1f649e=_0x48a4a0;if(_0x586890['startsWith']('/')&&_0x586890[_0x1f649e(0x1cf)]('/')){let _0x3e6dd8=new RegExp(_0x586890['slice'](0x1,-0x1));return _0x594d13=>_0x3e6dd8[_0x1f649e(0x1b7)](_0x594d13);}else{if(_0x586890[_0x1f649e(0x241)]('*')||_0x586890[_0x1f649e(0x241)]('?')){let _0x2ebcb8=new RegExp('^'+_0x586890[_0x1f649e(0x220)](/\\./g,String[_0x1f649e(0x204)](0x5c)+'.')[_0x1f649e(0x220)](/\\*/g,'.*')[_0x1f649e(0x220)](/\\?/g,'.')+String[_0x1f649e(0x204)](0x24));return _0x5dcdaa=>_0x2ebcb8[_0x1f649e(0x1b7)](_0x5dcdaa);}else return _0x135db6=>_0x135db6===_0x586890;}}let _0xe3393d=_0x19743b[_0x48a4a0(0x1e1)](_0x1a94f0);return _0x42b318[_0x48a4a0(0x171)]=_0x242317||!_0x19743b,!_0x42b318[_0x48a4a0(0x171)]&&((_0x943066=_0x42b318[_0x48a4a0(0x17d)])==null?void 0x0:_0x943066[_0x48a4a0(0x1bf)])&&(_0x42b318[_0x48a4a0(0x171)]=_0xe3393d['some'](_0x548db0=>_0x548db0(_0x42b318[_0x48a4a0(0x17d)]['hostname']))),_0x42b318[_0x48a4a0(0x171)];}function Y(_0x3fa09f,_0x44ab87,_0x12e5a6,_0x24945e,_0x3b9fc4){var _0x1a0229=_0x306708;_0x3fa09f=_0x3fa09f,_0x44ab87=_0x44ab87,_0x12e5a6=_0x12e5a6,_0x24945e=_0x24945e,_0x3b9fc4=_0x3b9fc4,_0x3b9fc4=_0x3b9fc4||{},_0x3b9fc4['defaultLimits']=_0x3b9fc4[_0x1a0229(0x223)]||{},_0x3b9fc4['reducedLimits']=_0x3b9fc4[_0x1a0229(0x1cd)]||{},_0x3b9fc4[_0x1a0229(0x259)]=_0x3b9fc4[_0x1a0229(0x259)]||{},_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)]=_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)]||{},_0x3b9fc4[_0x1a0229(0x259)]['global']=_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)]||{};let _0x151ea4={'perLogpoint':{'reduceOnCount':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x237)]||0x32,'reduceOnAccumulatedProcessingTimeMs':_0x3b9fc4[_0x1a0229(0x259)]['perLogpoint']['reduceOnAccumulatedProcessingTimeMs']||0x64,'resetWhenQuietMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x1f8)]||0x1f4,'resetOnProcessingTimeAverageMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x19c)]||0x64},'global':{'reduceOnCount':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x237)]||0x3e8,'reduceOnAccumulatedProcessingTimeMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x1e9)]||0x12c,'resetWhenQuietMs':_0x3b9fc4['reducePolicy'][_0x1a0229(0x1be)][_0x1a0229(0x1f8)]||0x32,'resetOnProcessingTimeAverageMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x19c)]||0x64}},_0x2633ed=B(_0x3fa09f),_0x3e3008=_0x2633ed[_0x1a0229(0x1ca)],_0xac187d=_0x2633ed[_0x1a0229(0x22e)];class _0x111409{constructor(){var _0x179f3c=_0x1a0229;this[_0x179f3c(0x1eb)]=/^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\\xA0-\\uFFFF]*$/,this[_0x179f3c(0x1d5)]=/^(0|[1-9][0-9]*)$/,this[_0x179f3c(0x218)]=/'([^\\\\']|\\\\')*'/,this[_0x179f3c(0x268)]=_0x3fa09f[_0x179f3c(0x20a)],this[_0x179f3c(0x24c)]=_0x3fa09f['HTMLAllCollection'],this[_0x179f3c(0x179)]=Object[_0x179f3c(0x1f2)],this[_0x179f3c(0x205)]=Object['getOwnPropertyNames'],this['_Symbol']=_0x3fa09f[_0x179f3c(0x18e)],this[_0x179f3c(0x265)]=RegExp[_0x179f3c(0x269)]['toString'],this[_0x179f3c(0x17a)]=Date['prototype'][_0x179f3c(0x252)];}['serialize'](_0x40d6a8,_0x554cac,_0x52039e,_0xacf72f){var _0x57ff23=_0x1a0229,_0x27498f=this,_0x3d1269=_0x52039e[_0x57ff23(0x1a4)];function _0x352c7e(_0x319167,_0x1cb4b8,_0x46d708){var _0x25615d=_0x57ff23;_0x1cb4b8[_0x25615d(0x21d)]='unknown',_0x1cb4b8[_0x25615d(0x195)]=_0x319167['message'],_0x3294e4=_0x46d708[_0x25615d(0x198)][_0x25615d(0x24f)],_0x46d708[_0x25615d(0x198)][_0x25615d(0x24f)]=_0x1cb4b8,_0x27498f[_0x25615d(0x1c1)](_0x1cb4b8,_0x46d708);}let _0x203bc0;_0x3fa09f[_0x57ff23(0x1ba)]&&(_0x203bc0=_0x3fa09f[_0x57ff23(0x1ba)]['error'],_0x203bc0&&(_0x3fa09f[_0x57ff23(0x1ba)][_0x57ff23(0x195)]=function(){}));try{try{_0x52039e[_0x57ff23(0x233)]++,_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x1cb)]['push'](_0x554cac);var _0x507685,_0x2b5a2a,_0x5a02a3,_0x5cc2d1,_0x191590=[],_0x5d6631=[],_0xeb0b4,_0x430667=this[_0x57ff23(0x20e)](_0x554cac),_0x5ec1b1=_0x430667===_0x57ff23(0x1ee),_0x9c9d40=!0x1,_0x359db7=_0x430667===_0x57ff23(0x1fa),_0x55f196=this[_0x57ff23(0x20f)](_0x430667),_0x1c958d=this[_0x57ff23(0x26d)](_0x430667),_0x26f774=_0x55f196||_0x1c958d,_0x28c67b={},_0x34603f=0x0,_0x22ac07=!0x1,_0x3294e4,_0x468afa=/^(([1-9]{1}[0-9]*)|0)$/;if(_0x52039e['depth']){if(_0x5ec1b1){if(_0x2b5a2a=_0x554cac[_0x57ff23(0x1b6)],_0x2b5a2a>_0x52039e[_0x57ff23(0x16d)]){for(_0x5a02a3=0x0,_0x5cc2d1=_0x52039e[_0x57ff23(0x16d)],_0x507685=_0x5a02a3;_0x507685<_0x5cc2d1;_0x507685++)_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x20b)](_0x191590,_0x554cac,_0x430667,_0x507685,_0x52039e));_0x40d6a8[_0x57ff23(0x1d1)]=!0x0;}else{for(_0x5a02a3=0x0,_0x5cc2d1=_0x2b5a2a,_0x507685=_0x5a02a3;_0x507685<_0x5cc2d1;_0x507685++)_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x20b)](_0x191590,_0x554cac,_0x430667,_0x507685,_0x52039e));}_0x52039e[_0x57ff23(0x19e)]+=_0x5d6631[_0x57ff23(0x1b6)];}if(!(_0x430667===_0x57ff23(0x1d9)||_0x430667===_0x57ff23(0x20a))&&!_0x55f196&&_0x430667!=='String'&&_0x430667!==_0x57ff23(0x261)&&_0x430667!==_0x57ff23(0x230)){var _0x48cb10=_0xacf72f[_0x57ff23(0x18f)]||_0x52039e['props'];if(this[_0x57ff23(0x194)](_0x554cac)?(_0x507685=0x0,_0x554cac[_0x57ff23(0x22d)](function(_0x5e3879){var _0x4028da=_0x57ff23;if(_0x34603f++,_0x52039e[_0x4028da(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;return;}if(!_0x52039e[_0x4028da(0x1b4)]&&_0x52039e['autoExpand']&&_0x52039e[_0x4028da(0x19e)]>_0x52039e[_0x4028da(0x1a3)]){_0x22ac07=!0x0;return;}_0x5d6631['push'](_0x27498f[_0x4028da(0x20b)](_0x191590,_0x554cac,'Set',_0x507685++,_0x52039e,function(_0x326cff){return function(){return _0x326cff;};}(_0x5e3879)));})):this['_isMap'](_0x554cac)&&_0x554cac[_0x57ff23(0x22d)](function(_0x21d5e9,_0x1bbf3a){var _0x572ec4=_0x57ff23;if(_0x34603f++,_0x52039e[_0x572ec4(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;return;}if(!_0x52039e[_0x572ec4(0x1b4)]&&_0x52039e[_0x572ec4(0x1a4)]&&_0x52039e['autoExpandPropertyCount']>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;return;}var _0x1e13a8=_0x1bbf3a[_0x572ec4(0x252)]();_0x1e13a8[_0x572ec4(0x1b6)]>0x64&&(_0x1e13a8=_0x1e13a8[_0x572ec4(0x16c)](0x0,0x64)+_0x572ec4(0x19f)),_0x5d6631[_0x572ec4(0x26e)](_0x27498f[_0x572ec4(0x20b)](_0x191590,_0x554cac,'Map',_0x1e13a8,_0x52039e,function(_0x5e237b){return function(){return _0x5e237b;};}(_0x21d5e9)));}),!_0x9c9d40){try{for(_0xeb0b4 in _0x554cac)if(!(_0x5ec1b1&&_0x468afa[_0x57ff23(0x1b7)](_0xeb0b4))&&!this[_0x57ff23(0x267)](_0x554cac,_0xeb0b4,_0x52039e)){if(_0x34603f++,_0x52039e[_0x57ff23(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;break;}if(!_0x52039e[_0x57ff23(0x1b4)]&&_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e['autoExpandPropertyCount']>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;break;}_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x234)](_0x191590,_0x28c67b,_0x554cac,_0x430667,_0xeb0b4,_0x52039e));}}catch{}if(_0x28c67b[_0x57ff23(0x173)]=!0x0,_0x359db7&&(_0x28c67b[_0x57ff23(0x1b5)]=!0x0),!_0x22ac07){var _0xb9ad21=[][_0x57ff23(0x256)](this[_0x57ff23(0x205)](_0x554cac))[_0x57ff23(0x256)](this['_getOwnPropertySymbols'](_0x554cac));for(_0x507685=0x0,_0x2b5a2a=_0xb9ad21[_0x57ff23(0x1b6)];_0x507685<_0x2b5a2a;_0x507685++)if(_0xeb0b4=_0xb9ad21[_0x507685],!(_0x5ec1b1&&_0x468afa[_0x57ff23(0x1b7)](_0xeb0b4[_0x57ff23(0x252)]()))&&!this[_0x57ff23(0x267)](_0x554cac,_0xeb0b4,_0x52039e)&&!_0x28c67b[_0x57ff23(0x1ab)+_0xeb0b4[_0x57ff23(0x252)]()]){if(_0x34603f++,_0x52039e[_0x57ff23(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;break;}if(!_0x52039e[_0x57ff23(0x1b4)]&&_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x19e)]>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;break;}_0x5d6631['push'](_0x27498f['_addObjectProperty'](_0x191590,_0x28c67b,_0x554cac,_0x430667,_0xeb0b4,_0x52039e));}}}}}if(_0x40d6a8['type']=_0x430667,_0x26f774?(_0x40d6a8[_0x57ff23(0x184)]=_0x554cac['valueOf'](),this[_0x57ff23(0x1e7)](_0x430667,_0x40d6a8,_0x52039e,_0xacf72f)):_0x430667==='date'?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x17a)][_0x57ff23(0x21a)](_0x554cac):_0x430667===_0x57ff23(0x230)?_0x40d6a8[_0x57ff23(0x184)]=_0x554cac[_0x57ff23(0x252)]():_0x430667===_0x57ff23(0x244)?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x265)][_0x57ff23(0x21a)](_0x554cac):_0x430667===_0x57ff23(0x1dc)&&this['_Symbol']?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x1f9)]['prototype'][_0x57ff23(0x252)][_0x57ff23(0x21a)](_0x554cac):!_0x52039e[_0x57ff23(0x1fe)]&&!(_0x430667===_0x57ff23(0x1d9)||_0x430667==='undefined')&&(delete _0x40d6a8[_0x57ff23(0x184)],_0x40d6a8[_0x57ff23(0x1aa)]=!0x0),_0x22ac07&&(_0x40d6a8[_0x57ff23(0x19d)]=!0x0),_0x3294e4=_0x52039e['node'][_0x57ff23(0x24f)],_0x52039e['node'][_0x57ff23(0x24f)]=_0x40d6a8,this[_0x57ff23(0x1c1)](_0x40d6a8,_0x52039e),_0x5d6631[_0x57ff23(0x1b6)]){for(_0x507685=0x0,_0x2b5a2a=_0x5d6631[_0x57ff23(0x1b6)];_0x507685<_0x2b5a2a;_0x507685++)_0x5d6631[_0x507685](_0x507685);}_0x191590[_0x57ff23(0x1b6)]&&(_0x40d6a8[_0x57ff23(0x18f)]=_0x191590);}catch(_0x3e590f){_0x352c7e(_0x3e590f,_0x40d6a8,_0x52039e);}this[_0x57ff23(0x1ad)](_0x554cac,_0x40d6a8),this[_0x57ff23(0x1f3)](_0x40d6a8,_0x52039e),_0x52039e[_0x57ff23(0x198)][_0x57ff23(0x24f)]=_0x3294e4,_0x52039e[_0x57ff23(0x233)]--,_0x52039e[_0x57ff23(0x1a4)]=_0x3d1269,_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x1cb)][_0x57ff23(0x21b)]();}finally{_0x203bc0&&(_0x3fa09f[_0x57ff23(0x1ba)][_0x57ff23(0x195)]=_0x203bc0);}return _0x40d6a8;}[_0x1a0229(0x1a7)](_0x5bc7aa){return Object['getOwnPropertySymbols']?Object['getOwnPropertySymbols'](_0x5bc7aa):[];}['_isSet'](_0x2b9132){var _0x64ad7f=_0x1a0229;return!!(_0x2b9132&&_0x3fa09f[_0x64ad7f(0x1af)]&&this[_0x64ad7f(0x215)](_0x2b9132)===_0x64ad7f(0x168)&&_0x2b9132[_0x64ad7f(0x22d)]);}['_blacklistedProperty'](_0x6da349,_0x27887d,_0x3ab798){var _0x15f72a=_0x1a0229;if(!_0x3ab798[_0x15f72a(0x207)]){let _0x4b858a=this[_0x15f72a(0x179)](_0x6da349,_0x27887d);if(_0x4b858a&&_0x4b858a[_0x15f72a(0x1e8)])return!0x0;}return _0x3ab798['noFunctions']?typeof _0x6da349[_0x27887d]==_0x15f72a(0x1fa):!0x1;}[_0x1a0229(0x20e)](_0x46e341){var _0xed104=_0x1a0229,_0x842a19='';return _0x842a19=typeof _0x46e341,_0x842a19==='object'?this[_0xed104(0x215)](_0x46e341)==='[object\\x20Array]'?_0x842a19='array':this[_0xed104(0x215)](_0x46e341)===_0xed104(0x231)?_0x842a19=_0xed104(0x1a0):this[_0xed104(0x215)](_0x46e341)===_0xed104(0x25c)?_0x842a19='bigint':_0x46e341===null?_0x842a19='null':_0x46e341['constructor']&&(_0x842a19=_0x46e341[_0xed104(0x246)][_0xed104(0x229)]||_0x842a19):_0x842a19===_0xed104(0x20a)&&this[_0xed104(0x24c)]&&_0x46e341 instanceof this['_HTMLAllCollection']&&(_0x842a19=_0xed104(0x1b9)),_0x842a19;}[_0x1a0229(0x215)](_0x3a4a42){var _0x52978d=_0x1a0229;return Object[_0x52978d(0x269)][_0x52978d(0x252)][_0x52978d(0x21a)](_0x3a4a42);}[_0x1a0229(0x20f)](_0x344afd){var _0x18ea96=_0x1a0229;return _0x344afd===_0x18ea96(0x169)||_0x344afd===_0x18ea96(0x1e3)||_0x344afd===_0x18ea96(0x1b1);}[_0x1a0229(0x26d)](_0x268fb2){var _0x30d14e=_0x1a0229;return _0x268fb2===_0x30d14e(0x250)||_0x268fb2===_0x30d14e(0x1c2)||_0x268fb2===_0x30d14e(0x232);}[_0x1a0229(0x20b)](_0x5a4048,_0xed6d73,_0x496d2d,_0x5200b2,_0x2ad9ae,_0x2ae99d){var _0x3ea8a2=this;return function(_0x5147f2){var _0x5c347b=_0x57eb,_0x5a16fe=_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x24f)],_0x344d27=_0x2ad9ae['node'][_0x5c347b(0x211)],_0x4187de=_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x192)];_0x2ad9ae['node']['parent']=_0x5a16fe,_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x211)]=typeof _0x5200b2==_0x5c347b(0x1b1)?_0x5200b2:_0x5147f2,_0x5a4048[_0x5c347b(0x26e)](_0x3ea8a2['_property'](_0xed6d73,_0x496d2d,_0x5200b2,_0x2ad9ae,_0x2ae99d)),_0x2ad9ae['node'][_0x5c347b(0x192)]=_0x4187de,_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x211)]=_0x344d27;};}[_0x1a0229(0x234)](_0x3e1fde,_0x3d8d61,_0x475fe8,_0x5aec1a,_0x4ff186,_0x21a460,_0x5c688a){var _0x547a69=_0x1a0229,_0x5e16c3=this;return _0x3d8d61['_p_'+_0x4ff186[_0x547a69(0x252)]()]=!0x0,function(_0x176a2d){var _0x5d8009=_0x547a69,_0x5cf964=_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x24f)],_0x3bc9c4=_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)],_0x30229a=_0x21a460['node'][_0x5d8009(0x192)];_0x21a460[_0x5d8009(0x198)]['parent']=_0x5cf964,_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)]=_0x176a2d,_0x3e1fde['push'](_0x5e16c3[_0x5d8009(0x23c)](_0x475fe8,_0x5aec1a,_0x4ff186,_0x21a460,_0x5c688a)),_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x192)]=_0x30229a,_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)]=_0x3bc9c4;};}[_0x1a0229(0x23c)](_0x1354ea,_0x549fc8,_0x34c184,_0x3ea67a,_0x187926){var _0x54c1c6=_0x1a0229,_0x517077=this;_0x187926||(_0x187926=function(_0x560c04,_0x358223){return _0x560c04[_0x358223];});var _0x4b95cc=_0x34c184[_0x54c1c6(0x252)](),_0x2df5ee=_0x3ea67a[_0x54c1c6(0x1e0)]||{},_0x27230e=_0x3ea67a[_0x54c1c6(0x1fe)],_0x58094a=_0x3ea67a[_0x54c1c6(0x1b4)];try{var _0x551f2a=this[_0x54c1c6(0x249)](_0x1354ea),_0x258e78=_0x4b95cc;_0x551f2a&&_0x258e78[0x0]==='\\x27'&&(_0x258e78=_0x258e78[_0x54c1c6(0x193)](0x1,_0x258e78[_0x54c1c6(0x1b6)]-0x2));var _0x167185=_0x3ea67a[_0x54c1c6(0x1e0)]=_0x2df5ee[_0x54c1c6(0x1ab)+_0x258e78];_0x167185&&(_0x3ea67a[_0x54c1c6(0x1fe)]=_0x3ea67a['depth']+0x1),_0x3ea67a[_0x54c1c6(0x1b4)]=!!_0x167185;var _0x5bb1a9=typeof _0x34c184==_0x54c1c6(0x1dc),_0x4b5ab0={'name':_0x5bb1a9||_0x551f2a?_0x4b95cc:this[_0x54c1c6(0x20d)](_0x4b95cc)};if(_0x5bb1a9&&(_0x4b5ab0['symbol']=!0x0),!(_0x549fc8===_0x54c1c6(0x1ee)||_0x549fc8===_0x54c1c6(0x242))){var _0x12e894=this[_0x54c1c6(0x179)](_0x1354ea,_0x34c184);if(_0x12e894&&(_0x12e894['set']&&(_0x4b5ab0[_0x54c1c6(0x1ce)]=!0x0),_0x12e894[_0x54c1c6(0x1e8)]&&!_0x167185&&!_0x3ea67a[_0x54c1c6(0x207)]))return _0x4b5ab0[_0x54c1c6(0x235)]=!0x0,this[_0x54c1c6(0x17b)](_0x4b5ab0,_0x3ea67a),_0x4b5ab0;}var _0x117dac;try{_0x117dac=_0x187926(_0x1354ea,_0x34c184);}catch(_0x552030){return _0x4b5ab0={'name':_0x4b95cc,'type':_0x54c1c6(0x1b0),'error':_0x552030[_0x54c1c6(0x203)]},this['_processTreeNodeResult'](_0x4b5ab0,_0x3ea67a),_0x4b5ab0;}var _0x353809=this[_0x54c1c6(0x20e)](_0x117dac),_0x585700=this[_0x54c1c6(0x20f)](_0x353809);if(_0x4b5ab0[_0x54c1c6(0x21d)]=_0x353809,_0x585700)this[_0x54c1c6(0x17b)](_0x4b5ab0,_0x3ea67a,_0x117dac,function(){var _0x44f506=_0x54c1c6;_0x4b5ab0['value']=_0x117dac['valueOf'](),!_0x167185&&_0x517077[_0x44f506(0x1e7)](_0x353809,_0x4b5ab0,_0x3ea67a,{});});else{var _0x4920c5=_0x3ea67a[_0x54c1c6(0x1a4)]&&_0x3ea67a[_0x54c1c6(0x233)]<_0x3ea67a[_0x54c1c6(0x1b8)]&&_0x3ea67a[_0x54c1c6(0x1cb)][_0x54c1c6(0x224)](_0x117dac)<0x0&&_0x353809!==_0x54c1c6(0x1fa)&&_0x3ea67a[_0x54c1c6(0x19e)]<_0x3ea67a['autoExpandLimit'];_0x4920c5||_0x3ea67a[_0x54c1c6(0x233)]<_0x27230e||_0x167185?(this['serialize'](_0x4b5ab0,_0x117dac,_0x3ea67a,_0x167185||{}),this[_0x54c1c6(0x1ad)](_0x117dac,_0x4b5ab0)):this['_processTreeNodeResult'](_0x4b5ab0,_0x3ea67a,_0x117dac,function(){var _0x57d325=_0x54c1c6;_0x353809===_0x57d325(0x1d9)||_0x353809===_0x57d325(0x20a)||(delete _0x4b5ab0[_0x57d325(0x184)],_0x4b5ab0['capped']=!0x0);});}return _0x4b5ab0;}finally{_0x3ea67a[_0x54c1c6(0x1e0)]=_0x2df5ee,_0x3ea67a[_0x54c1c6(0x1fe)]=_0x27230e,_0x3ea67a[_0x54c1c6(0x1b4)]=_0x58094a;}}[_0x1a0229(0x1e7)](_0x56ea77,_0xe68ac4,_0x19079c,_0x151ab0){var _0x4ce5e3=_0x1a0229,_0x3ddd62=_0x151ab0[_0x4ce5e3(0x1de)]||_0x19079c[_0x4ce5e3(0x1de)];if((_0x56ea77===_0x4ce5e3(0x1e3)||_0x56ea77===_0x4ce5e3(0x1c2))&&_0xe68ac4['value']){let _0x1e81f3=_0xe68ac4[_0x4ce5e3(0x184)][_0x4ce5e3(0x1b6)];_0x19079c['allStrLength']+=_0x1e81f3,_0x19079c[_0x4ce5e3(0x200)]>_0x19079c[_0x4ce5e3(0x1c7)]?(_0xe68ac4[_0x4ce5e3(0x1aa)]='',delete _0xe68ac4[_0x4ce5e3(0x184)]):_0x1e81f3>_0x3ddd62&&(_0xe68ac4[_0x4ce5e3(0x1aa)]=_0xe68ac4[_0x4ce5e3(0x184)]['substr'](0x0,_0x3ddd62),delete _0xe68ac4['value']);}}[_0x1a0229(0x249)](_0x394563){var _0x5a0544=_0x1a0229;return!!(_0x394563&&_0x3fa09f[_0x5a0544(0x1ec)]&&this[_0x5a0544(0x215)](_0x394563)===_0x5a0544(0x23a)&&_0x394563[_0x5a0544(0x22d)]);}[_0x1a0229(0x20d)](_0x182c1e){var _0x45e012=_0x1a0229;if(_0x182c1e[_0x45e012(0x1f4)](/^\\d+$/))return _0x182c1e;var _0x3a5b42;try{_0x3a5b42=JSON['stringify'](''+_0x182c1e);}catch{_0x3a5b42='\\x22'+this[_0x45e012(0x215)](_0x182c1e)+'\\x22';}return _0x3a5b42['match'](/^\"([a-zA-Z_][a-zA-Z_0-9]*)\"$/)?_0x3a5b42=_0x3a5b42[_0x45e012(0x193)](0x1,_0x3a5b42[_0x45e012(0x1b6)]-0x2):_0x3a5b42=_0x3a5b42[_0x45e012(0x220)](/'/g,'\\x5c\\x27')['replace'](/\\\\\"/g,'\\x22')['replace'](/(^\"|\"$)/g,'\\x27'),_0x3a5b42;}[_0x1a0229(0x17b)](_0x42bdc4,_0x2913cb,_0x26c947,_0x1a1ce7){var _0x58d5f8=_0x1a0229;this[_0x58d5f8(0x1c1)](_0x42bdc4,_0x2913cb),_0x1a1ce7&&_0x1a1ce7(),this[_0x58d5f8(0x1ad)](_0x26c947,_0x42bdc4),this[_0x58d5f8(0x1f3)](_0x42bdc4,_0x2913cb);}[_0x1a0229(0x1c1)](_0x4e11a0,_0xbbeada){var _0x1a94cb=_0x1a0229;this[_0x1a94cb(0x181)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x23e)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x22a)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x260)](_0x4e11a0,_0xbbeada);}[_0x1a0229(0x181)](_0x19de26,_0x41a25d){}[_0x1a0229(0x23e)](_0x1356cd,_0x4a5fac){}[_0x1a0229(0x1d0)](_0x1cd658,_0x4a1747){}[_0x1a0229(0x1f6)](_0x3cb148){var _0x43c24f=_0x1a0229;return _0x3cb148===this[_0x43c24f(0x268)];}[_0x1a0229(0x1f3)](_0x283677,_0x5afa0e){var _0x7f88c3=_0x1a0229;this[_0x7f88c3(0x1d0)](_0x283677,_0x5afa0e),this['_setNodeExpandableState'](_0x283677),_0x5afa0e[_0x7f88c3(0x1a9)]&&this[_0x7f88c3(0x1fd)](_0x283677),this[_0x7f88c3(0x1d4)](_0x283677,_0x5afa0e),this['_addLoadNode'](_0x283677,_0x5afa0e),this[_0x7f88c3(0x167)](_0x283677);}[_0x1a0229(0x1ad)](_0x13930e,_0x569f4b){var _0x488226=_0x1a0229;try{_0x13930e&&typeof _0x13930e[_0x488226(0x1b6)]==_0x488226(0x1b1)&&(_0x569f4b[_0x488226(0x1b6)]=_0x13930e[_0x488226(0x1b6)]);}catch{}if(_0x569f4b['type']===_0x488226(0x1b1)||_0x569f4b[_0x488226(0x21d)]===_0x488226(0x232)){if(isNaN(_0x569f4b[_0x488226(0x184)]))_0x569f4b[_0x488226(0x1df)]=!0x0,delete _0x569f4b[_0x488226(0x184)];else switch(_0x569f4b[_0x488226(0x184)]){case Number[_0x488226(0x236)]:_0x569f4b[_0x488226(0x239)]=!0x0,delete _0x569f4b['value'];break;case Number[_0x488226(0x228)]:_0x569f4b[_0x488226(0x1fc)]=!0x0,delete _0x569f4b['value'];break;case 0x0:this[_0x488226(0x19b)](_0x569f4b[_0x488226(0x184)])&&(_0x569f4b[_0x488226(0x178)]=!0x0);break;}}else _0x569f4b[_0x488226(0x21d)]===_0x488226(0x1fa)&&typeof _0x13930e['name']==_0x488226(0x1e3)&&_0x13930e[_0x488226(0x229)]&&_0x569f4b[_0x488226(0x229)]&&_0x13930e['name']!==_0x569f4b['name']&&(_0x569f4b['funcName']=_0x13930e[_0x488226(0x229)]);}[_0x1a0229(0x19b)](_0x2e602c){var _0x3d950b=_0x1a0229;return 0x1/_0x2e602c===Number[_0x3d950b(0x228)];}[_0x1a0229(0x1fd)](_0x429dd2){var _0x312c75=_0x1a0229;!_0x429dd2[_0x312c75(0x18f)]||!_0x429dd2['props'][_0x312c75(0x1b6)]||_0x429dd2[_0x312c75(0x21d)]===_0x312c75(0x1ee)||_0x429dd2[_0x312c75(0x21d)]==='Map'||_0x429dd2[_0x312c75(0x21d)]===_0x312c75(0x1af)||_0x429dd2[_0x312c75(0x18f)]['sort'](function(_0x612321,_0x1df7f8){var _0x3c5dab=_0x312c75,_0x1fba1b=_0x612321[_0x3c5dab(0x229)][_0x3c5dab(0x1ed)](),_0x1143f9=_0x1df7f8[_0x3c5dab(0x229)][_0x3c5dab(0x1ed)]();return _0x1fba1b<_0x1143f9?-0x1:_0x1fba1b>_0x1143f9?0x1:0x0;});}[_0x1a0229(0x1d4)](_0x3895f9,_0x48aadd){var _0x351d89=_0x1a0229;if(!(_0x48aadd['noFunctions']||!_0x3895f9[_0x351d89(0x18f)]||!_0x3895f9['props'][_0x351d89(0x1b6)])){for(var _0x4d9e5c=[],_0x23eb96=[],_0xd62b75=0x0,_0x5a2dfe=_0x3895f9[_0x351d89(0x18f)][_0x351d89(0x1b6)];_0xd62b75<_0x5a2dfe;_0xd62b75++){var _0x4c17b7=_0x3895f9[_0x351d89(0x18f)][_0xd62b75];_0x4c17b7[_0x351d89(0x21d)]===_0x351d89(0x1fa)?_0x4d9e5c[_0x351d89(0x26e)](_0x4c17b7):_0x23eb96[_0x351d89(0x26e)](_0x4c17b7);}if(!(!_0x23eb96[_0x351d89(0x1b6)]||_0x4d9e5c[_0x351d89(0x1b6)]<=0x1)){_0x3895f9[_0x351d89(0x18f)]=_0x23eb96;var _0x2b33a7={'functionsNode':!0x0,'props':_0x4d9e5c};this[_0x351d89(0x181)](_0x2b33a7,_0x48aadd),this['_setNodeLabel'](_0x2b33a7,_0x48aadd),this[_0x351d89(0x1ae)](_0x2b33a7),this[_0x351d89(0x260)](_0x2b33a7,_0x48aadd),_0x2b33a7['id']+='\\x20f',_0x3895f9[_0x351d89(0x18f)]['unshift'](_0x2b33a7);}}}[_0x1a0229(0x243)](_0x4abe08,_0x5b7c75){}['_setNodeExpandableState'](_0x59678d){}[_0x1a0229(0x212)](_0xdf985c){var _0x2524e2=_0x1a0229;return Array[_0x2524e2(0x23d)](_0xdf985c)||typeof _0xdf985c==_0x2524e2(0x206)&&this[_0x2524e2(0x215)](_0xdf985c)==='[object\\x20Array]';}['_setNodePermissions'](_0x3fb9a6,_0x4e6343){}['_cleanNode'](_0x23c336){var _0x1d7070=_0x1a0229;delete _0x23c336[_0x1d7070(0x253)],delete _0x23c336[_0x1d7070(0x1e2)],delete _0x23c336[_0x1d7070(0x18b)];}[_0x1a0229(0x22a)](_0x1acfab,_0x4597d6){}}let _0x3c89ee=new _0x111409(),_0x5ec458={'props':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x18f)]||0x64,'elements':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x16d)]||0x64,'strLength':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1de)]||0x400*0x32,'totalStrLength':_0x3b9fc4['defaultLimits'][_0x1a0229(0x1c7)]||0x400*0x32,'autoExpandLimit':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1a3)]||0x1388,'autoExpandMaxDepth':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1b8)]||0xa},_0x3a09dd={'props':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x18f)]||0x5,'elements':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x16d)]||0x5,'strLength':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x1de)]||0x100,'totalStrLength':_0x3b9fc4['reducedLimits'][_0x1a0229(0x1c7)]||0x100*0x3,'autoExpandLimit':_0x3b9fc4['reducedLimits']['autoExpandLimit']||0x1e,'autoExpandMaxDepth':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x1b8)]||0x2};function _0x4b3a63(_0x205bfc,_0x18b986,_0x503f06,_0x274aab,_0x31f6c4,_0x454f1c){var _0x290454=_0x1a0229;let _0x2396c5,_0x2aa929;try{_0x2aa929=_0xac187d(),_0x2396c5=_0x12e5a6[_0x18b986],!_0x2396c5||_0x2aa929-_0x2396c5['ts']>_0x151ea4['perLogpoint'][_0x290454(0x1f8)]&&_0x2396c5[_0x290454(0x1d6)]&&_0x2396c5[_0x290454(0x26a)]/_0x2396c5[_0x290454(0x1d6)]<_0x151ea4[_0x290454(0x18d)]['resetOnProcessingTimeAverageMs']?(_0x12e5a6[_0x18b986]=_0x2396c5={'count':0x0,'time':0x0,'ts':_0x2aa929},_0x12e5a6[_0x290454(0x257)]={}):_0x2aa929-_0x12e5a6[_0x290454(0x257)]['ts']>_0x151ea4[_0x290454(0x1be)][_0x290454(0x1f8)]&&_0x12e5a6[_0x290454(0x257)][_0x290454(0x1d6)]&&_0x12e5a6['hits'][_0x290454(0x26a)]/_0x12e5a6['hits'][_0x290454(0x1d6)]<_0x151ea4['global'][_0x290454(0x19c)]&&(_0x12e5a6[_0x290454(0x257)]={});let _0x465570=[],_0x401ade=_0x2396c5['reduceLimits']||_0x12e5a6[_0x290454(0x257)][_0x290454(0x1f1)]?_0x3a09dd:_0x5ec458,_0x5527b0=_0x17275e=>{var _0x16c392=_0x290454;let _0x3d2b1a={};return _0x3d2b1a[_0x16c392(0x18f)]=_0x17275e[_0x16c392(0x18f)],_0x3d2b1a[_0x16c392(0x16d)]=_0x17275e[_0x16c392(0x16d)],_0x3d2b1a[_0x16c392(0x1de)]=_0x17275e[_0x16c392(0x1de)],_0x3d2b1a['totalStrLength']=_0x17275e[_0x16c392(0x1c7)],_0x3d2b1a['autoExpandLimit']=_0x17275e[_0x16c392(0x1a3)],_0x3d2b1a[_0x16c392(0x1b8)]=_0x17275e[_0x16c392(0x1b8)],_0x3d2b1a[_0x16c392(0x1a9)]=!0x1,_0x3d2b1a[_0x16c392(0x175)]=!_0x44ab87,_0x3d2b1a[_0x16c392(0x1fe)]=0x1,_0x3d2b1a[_0x16c392(0x233)]=0x0,_0x3d2b1a[_0x16c392(0x176)]=_0x16c392(0x24a),_0x3d2b1a[_0x16c392(0x1e6)]=_0x16c392(0x18c),_0x3d2b1a[_0x16c392(0x1a4)]=!0x0,_0x3d2b1a[_0x16c392(0x1cb)]=[],_0x3d2b1a[_0x16c392(0x19e)]=0x0,_0x3d2b1a[_0x16c392(0x207)]=_0x3b9fc4['resolveGetters'],_0x3d2b1a[_0x16c392(0x200)]=0x0,_0x3d2b1a[_0x16c392(0x198)]={'current':void 0x0,'parent':void 0x0,'index':0x0},_0x3d2b1a;};for(var _0x7c60bb=0x0;_0x7c60bb<_0x31f6c4[_0x290454(0x1b6)];_0x7c60bb++)_0x465570['push'](_0x3c89ee[_0x290454(0x245)]({'timeNode':_0x205bfc===_0x290454(0x26a)||void 0x0},_0x31f6c4[_0x7c60bb],_0x5527b0(_0x401ade),{}));if(_0x205bfc===_0x290454(0x255)||_0x205bfc===_0x290454(0x195)){let _0x37f42a=Error[_0x290454(0x188)];try{Error[_0x290454(0x188)]=0x1/0x0,_0x465570[_0x290454(0x26e)](_0x3c89ee[_0x290454(0x245)]({'stackNode':!0x0},new Error()[_0x290454(0x217)],_0x5527b0(_0x401ade),{'strLength':0x1/0x0}));}finally{Error[_0x290454(0x188)]=_0x37f42a;}}return{'method':_0x290454(0x186),'version':_0x24945e,'args':[{'ts':_0x503f06,'session':_0x274aab,'args':_0x465570,'id':_0x18b986,'context':_0x454f1c}]};}catch(_0x4d9d42){return{'method':'log','version':_0x24945e,'args':[{'ts':_0x503f06,'session':_0x274aab,'args':[{'type':'unknown','error':_0x4d9d42&&_0x4d9d42[_0x290454(0x203)]}],'id':_0x18b986,'context':_0x454f1c}]};}finally{try{if(_0x2396c5&&_0x2aa929){let _0x120976=_0xac187d();_0x2396c5[_0x290454(0x1d6)]++,_0x2396c5['time']+=_0x3e3008(_0x2aa929,_0x120976),_0x2396c5['ts']=_0x120976,_0x12e5a6['hits'][_0x290454(0x1d6)]++,_0x12e5a6['hits'][_0x290454(0x26a)]+=_0x3e3008(_0x2aa929,_0x120976),_0x12e5a6[_0x290454(0x257)]['ts']=_0x120976,(_0x2396c5[_0x290454(0x1d6)]>_0x151ea4[_0x290454(0x18d)][_0x290454(0x237)]||_0x2396c5['time']>_0x151ea4[_0x290454(0x18d)]['reduceOnAccumulatedProcessingTimeMs'])&&(_0x2396c5[_0x290454(0x1f1)]=!0x0),(_0x12e5a6[_0x290454(0x257)][_0x290454(0x1d6)]>_0x151ea4[_0x290454(0x1be)][_0x290454(0x237)]||_0x12e5a6[_0x290454(0x257)][_0x290454(0x26a)]>_0x151ea4[_0x290454(0x1be)][_0x290454(0x1e9)])&&(_0x12e5a6['hits'][_0x290454(0x1f1)]=!0x0);}}catch{}}}return _0x4b3a63;}((_0x128c8b,_0x130c59,_0x2d3050,_0xddf41c,_0x441d00,_0x1b84a8,_0x2217b2,_0x5b051f,_0x2b48ca,_0x490710,_0x5ab68a,_0xebfbce)=>{var _0x48efd0=_0x306708;if(_0x128c8b[_0x48efd0(0x1bd)])return _0x128c8b[_0x48efd0(0x1bd)];let _0x2831c5={'consoleLog':()=>{},'consoleTrace':()=>{},'consoleTime':()=>{},'consoleTimeEnd':()=>{},'autoLog':()=>{},'autoLogMany':()=>{},'autoTraceMany':()=>{},'coverage':()=>{},'autoTrace':()=>{},'autoTime':()=>{},'autoTimeEnd':()=>{}};if(!J(_0x128c8b,_0x5b051f,_0x441d00))return _0x128c8b[_0x48efd0(0x1bd)]=_0x2831c5,_0x128c8b[_0x48efd0(0x1bd)];let _0x363e28=B(_0x128c8b),_0x2309ed=_0x363e28['elapsed'],_0x2a1744=_0x363e28['timeStamp'],_0x50681b=_0x363e28[_0x48efd0(0x1fb)],_0x3b9026={'hits':{},'ts':{}},_0x194465=Y(_0x128c8b,_0x2b48ca,_0x3b9026,_0x1b84a8,_0xebfbce),_0x4462b9=(_0x4cfe49,_0x35915b,_0x58ab0e,_0x24999c,_0x16c273,_0x2d2fae)=>{var _0x10dcd2=_0x48efd0;let _0x25b8f1=_0x128c8b[_0x10dcd2(0x1bd)];try{return _0x128c8b['_console_ninja']=_0x2831c5,_0x194465(_0x4cfe49,_0x35915b,_0x58ab0e,_0x24999c,_0x16c273,_0x2d2fae);}finally{_0x128c8b[_0x10dcd2(0x1bd)]=_0x25b8f1;}},_0x45c9b2=_0xa045db=>{_0x3b9026['ts'][_0xa045db]=_0x2a1744();},_0x5dfe65=(_0x18fdeb,_0x1126f8)=>{let _0x42fddb=_0x3b9026['ts'][_0x1126f8];if(delete _0x3b9026['ts'][_0x1126f8],_0x42fddb){let _0x998f88=_0x2309ed(_0x42fddb,_0x2a1744());_0x246d72(_0x4462b9('time',_0x18fdeb,_0x50681b(),_0x26bea9,[_0x998f88],_0x1126f8));}},_0x10aede=_0x195925=>{var _0x5c4181=_0x48efd0,_0x425e04;return _0x441d00===_0x5c4181(0x25a)&&_0x128c8b['origin']&&((_0x425e04=_0x195925==null?void 0x0:_0x195925['args'])==null?void 0x0:_0x425e04[_0x5c4181(0x1b6)])&&(_0x195925[_0x5c4181(0x23b)][0x0]['origin']=_0x128c8b[_0x5c4181(0x1a2)]),_0x195925;};_0x128c8b[_0x48efd0(0x1bd)]={'consoleLog':(_0xda0a9f,_0x9190d7)=>{var _0x257b86=_0x48efd0;_0x128c8b[_0x257b86(0x1ba)][_0x257b86(0x186)][_0x257b86(0x229)]!==_0x257b86(0x21c)&&_0x246d72(_0x4462b9('log',_0xda0a9f,_0x50681b(),_0x26bea9,_0x9190d7));},'consoleTrace':(_0x28e90d,_0x115a45)=>{var _0x3f5b82=_0x48efd0,_0x59297f,_0x582cd0;_0x128c8b['console'][_0x3f5b82(0x186)][_0x3f5b82(0x229)]!==_0x3f5b82(0x22c)&&((_0x582cd0=(_0x59297f=_0x128c8b[_0x3f5b82(0x25e)])==null?void 0x0:_0x59297f[_0x3f5b82(0x263)])!=null&&_0x582cd0['node']&&(_0x128c8b[_0x3f5b82(0x1da)]=!0x0),_0x246d72(_0x10aede(_0x4462b9(_0x3f5b82(0x255),_0x28e90d,_0x50681b(),_0x26bea9,_0x115a45))));},'consoleError':(_0x1719a2,_0x50f700)=>{var _0x18be19=_0x48efd0;_0x128c8b[_0x18be19(0x1da)]=!0x0,_0x246d72(_0x10aede(_0x4462b9(_0x18be19(0x195),_0x1719a2,_0x50681b(),_0x26bea9,_0x50f700)));},'consoleTime':_0x1b91af=>{_0x45c9b2(_0x1b91af);},'consoleTimeEnd':(_0x5e3ece,_0x45fcba)=>{_0x5dfe65(_0x45fcba,_0x5e3ece);},'autoLog':(_0x396285,_0xaf0672)=>{_0x246d72(_0x4462b9('log',_0xaf0672,_0x50681b(),_0x26bea9,[_0x396285]));},'autoLogMany':(_0xa0fc0e,_0x3df880)=>{var _0x52d754=_0x48efd0;_0x246d72(_0x4462b9(_0x52d754(0x186),_0xa0fc0e,_0x50681b(),_0x26bea9,_0x3df880));},'autoTrace':(_0x5928c5,_0x5778f0)=>{var _0x3aca45=_0x48efd0;_0x246d72(_0x10aede(_0x4462b9(_0x3aca45(0x255),_0x5778f0,_0x50681b(),_0x26bea9,[_0x5928c5])));},'autoTraceMany':(_0x214c88,_0x10d946)=>{var _0x369ebf=_0x48efd0;_0x246d72(_0x10aede(_0x4462b9(_0x369ebf(0x255),_0x214c88,_0x50681b(),_0x26bea9,_0x10d946)));},'autoTime':(_0x168d5e,_0x59e4be,_0x3bcf2b)=>{_0x45c9b2(_0x3bcf2b);},'autoTimeEnd':(_0x17c08f,_0x347576,_0x4ac253)=>{_0x5dfe65(_0x347576,_0x4ac253);},'coverage':_0x269f7a=>{var _0x4a27b2=_0x48efd0;_0x246d72({'method':_0x4a27b2(0x1a6),'version':_0x1b84a8,'args':[{'id':_0x269f7a}]});}};let _0x246d72=X(_0x128c8b,_0x130c59,_0x2d3050,_0xddf41c,_0x441d00,_0x490710,_0x5ab68a),_0x26bea9=_0x128c8b[_0x48efd0(0x24d)];return _0x128c8b['_console_ninja'];})(globalThis,_0x306708(0x16b),'62341',\"c:\\\\Users\\\\reshm\\\\.vscode\\\\extensions\\\\wallabyjs.console-ninja-1.0.467\\\\node_modules\",_0x306708(0x1ef),'1.0.0','1755951558781',_0x306708(0x177),'','',_0x306708(0x1a8),_0x306708(0x1bb));");
-}
-catch (e) {
-    console.error(e);
-} }
-; /* istanbul ignore next */
-function oo_oo(i, ...v) { try {
-    oo_cm().consoleLog(i, v);
-}
-catch (e) { } return v; }
-;
-oo_oo; /* istanbul ignore next */
-function oo_tr(i, ...v) { try {
-    oo_cm().consoleTrace(i, v);
-}
-catch (e) { } return v; }
-;
-oo_tr; /* istanbul ignore next */
-function oo_tx(i, ...v) { try {
-    oo_cm().consoleError(i, v);
-}
-catch (e) { } return v; }
-;
-oo_tx; /* istanbul ignore next */
-function oo_ts(v) { try {
-    oo_cm().consoleTime(v);
-}
-catch (e) { } return v; }
-;
-oo_ts; /* istanbul ignore next */
-function oo_te(v, i) { try {
-    oo_cm().consoleTimeEnd(v, i);
-}
-catch (e) { } return v; }
-;
-oo_te; /*eslint unicorn/no-abusive-eslint-disable:,eslint-comments/disable-enable-pair:,eslint-comments/no-unlimited-disable:,eslint-comments/no-aggregating-enable:,eslint-comments/no-duplicate-disable:,eslint-comments/no-unused-disable:,eslint-comments/no-unused-enable:,*/
 
 
 /***/ }),
@@ -49028,7 +48823,7 @@ const useAppState = () => {
     const [isExporting, setIsExporting] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     const [isCSVButtonLoading, setIsCSVButtonLoading] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     // Local storage data
-    const userinfo = localStorage.getItem("wf_hybrid_user");
+    const userinfo = localStorage.getItem("consentbit-userinfo");
     const tokenss = JSON.parse(userinfo || '{}');
     //Aniamation states 
     const [animation, setAnimation] = (0,_usePersistentState__WEBPACK_IMPORTED_MODULE_1__.usePersistentState)('animation', "fade");
@@ -49287,7 +49082,7 @@ const useBannerCreation = () => {
         }, 3000);
     };
     const handleBannerError = (error) => {
-        /* eslint-disable */ console.error(...oo_tx(`3972289494_163_4_163_50_11`, "Banner creation error:", error));
+        // Error handling
         _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].notify({ type: "error", message: "An error occurred while creating the banner." });
     };
     const handleSuccessPublishProceed = () => {
@@ -49299,21 +49094,16 @@ const useBannerCreation = () => {
         // Add any additional logic for going back from success page
     };
     const fetchAnalyticsBlockingsScripts = () => __awaiter(void 0, void 0, void 0, function* () {
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_178_4_178_72_4`, "Starting V1 analytics blocking script registration..."));
         try {
             const token = (0,_util_Session__WEBPACK_IMPORTED_MODULE_3__.getSessionTokenFromLocalStorage)();
             if (!token) {
                 throw new Error("No token available");
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_184_6_184_49_4`, "Token retrieved successfully"));
             const siteIdinfo = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getSiteInfo();
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_187_6_187_53_4`, "Site info retrieved:", siteIdinfo));
             const hostingScript = yield _services_api__WEBPACK_IMPORTED_MODULE_2__.customCodeApi.registerAnalyticsBlockingScript(token);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_190_6_190_76_4`, "V1 analytics blocking script registered:", hostingScript));
             if (hostingScript) {
                 const scriptId = hostingScript.result.id;
                 const version = hostingScript.result.version;
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_195_8_195_64_4`, "Script ID:", scriptId, "Version:", version));
                 const params = {
                     targetType: 'site',
                     targetId: siteIdinfo.siteId,
@@ -49321,35 +49111,25 @@ const useBannerCreation = () => {
                     location: 'header',
                     version: version
                 };
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_205_8_205_62_4`, "Applying V1 script with params:", params));
                 yield _services_api__WEBPACK_IMPORTED_MODULE_2__.customCodeApi.applyScript(params, token);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_207_8_207_72_4`, "V1 analytics blocking script applied successfully"));
-            }
-            else {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_209_8_209_67_4`, "No hosting script returned from registration"));
             }
         }
         catch (error) {
-            /* eslint-disable */ console.error(...oo_tx(`3972289494_212_6_212_70_11`, "Error in fetchAnalyticsBlockingsScripts:", error));
+            throw error;
             throw error;
         }
     });
     const fetchAnalyticsBlockingsScriptsV2 = () => __awaiter(void 0, void 0, void 0, function* () {
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_218_4_218_72_4`, "Starting V2 analytics blocking script registration..."));
         try {
             const token = (0,_util_Session__WEBPACK_IMPORTED_MODULE_3__.getSessionTokenFromLocalStorage)();
             if (!token) {
                 throw new Error("No token available");
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_224_6_224_49_4`, "Token retrieved successfully"));
             const siteIdinfo = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getSiteInfo();
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_227_6_227_53_4`, "Site info retrieved:", siteIdinfo));
             const hostingScript = yield _services_api__WEBPACK_IMPORTED_MODULE_2__.customCodeApi.registerV2BannerCustomCode(token);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_230_6_230_76_4`, "V2 analytics blocking script registered:", hostingScript));
             if (hostingScript) {
                 const scriptId = hostingScript.result.id;
                 const version = hostingScript.result.version;
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_235_8_235_64_4`, "Script ID:", scriptId, "Version:", version));
                 const params = {
                     targetType: 'site',
                     targetId: siteIdinfo.siteId,
@@ -49357,51 +49137,32 @@ const useBannerCreation = () => {
                     location: 'header',
                     version: version
                 };
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_245_8_245_62_4`, "Applying V2 script with params:", params));
                 yield _services_api__WEBPACK_IMPORTED_MODULE_2__.customCodeApi.applyV2Script(params, token);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_247_8_247_72_4`, "V2 analytics blocking script applied successfully"));
-            }
-            else {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_249_8_249_70_4`, "No hosting script returned from V2 registration"));
             }
         }
         catch (error) {
-            /* eslint-disable */ console.error(...oo_tx(`3972289494_252_6_252_72_11`, "Error in fetchAnalyticsBlockingsScriptsV2:", error));
+            throw error;
             throw error;
         }
     });
     const createGDPRBanner = (config_1, ...args_1) => __awaiter(void 0, [config_1, ...args_1], void 0, function* (config, skipCommonDiv = false) {
         var _a, _b, _c, _d, _e, _f;
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_258_5_258_54_4`, "=== GDPR BANNER CREATION START ==="));
         setIsCreating(true);
         setShowLoading(true);
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_262_4_262_66_4`, "Creating GDPR banner with config:", bannerStyles));
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_263_4_263_54_4`, "Language:", bannerLanguages.language));
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_264_4_264_48_4`, "SkipCommonDiv:", skipCommonDiv));
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_265_4_265_59_4`, "bannerAnimation object:", bannerAnimation));
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_266_4_266_72_4`, "bannerAnimation.animation:", bannerAnimation.animation));
         try {
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_269_6_269_61_4`, "Starting GDPR banner creation process..."));
             // Cleanup existing banners
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_271_6_271_56_4`, "Getting all elements for cleanup..."));
             const allElements = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getAllElements();
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_273_6_273_64_4`, "All elements retrieved:", allElements.length));
             const idsToCheck = ["consent-banner", "main-banner", "toggle-consent-btn"];
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_276_6_276_72_4`, "Checking for existing banners with IDs:", idsToCheck));
             const domIdPromises = allElements.map((el) => __awaiter(void 0, void 0, void 0, function* () {
                 var _a;
                 const domId = yield ((_a = el.getDomId) === null || _a === void 0 ? void 0 : _a.call(el));
                 return { el, domId };
             }));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_283_6_283_56_4`, "Getting DOM IDs for all elements..."));
             const elementsWithDomIds = yield Promise.all(domIdPromises);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_285_6_285_55_4`, "DOM IDs retrieved for all elements"));
             const matchingElements = elementsWithDomIds
                 .filter(({ domId }) => domId && idsToCheck.includes(domId))
                 .map(({ el }) => el);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_291_6_291_80_4`, "Found matching elements to remove:", matchingElements.length));
             if (matchingElements.length > 0) {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_294_8_294_59_4`, "Removing existing banner elements..."));
                 yield Promise.all(matchingElements.map((el) => __awaiter(void 0, void 0, void 0, function* () {
                     var _a;
                     try {
@@ -49412,35 +49173,21 @@ const useBannerCreation = () => {
                         yield el.remove();
                     }
                     catch (err) {
-                        /* eslint-disable */ console.error(...oo_tx(`3972289494_303_12_303_57_11`, "Error removing element:", err));
+                        // Error handling
                     }
                 })));
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_306_8_306_55_4`, "Existing banner elements removed"));
             }
-            else {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_308_9_308_67_4`, "No existing banner elements found to remove"));
-            }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_311_14_311_72_4`, "Getting selected element for GDPR banner..."));
             const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getSelectedElement();
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_313_7_313_66_4`, "Selected element retrieved:", selectedElement));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_314_7_314_83_4`, "Selected element methods:", Object.keys(selectedElement || {})));
             if (!selectedElement) {
                 throw new Error("No element selected in the Designer.");
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_319_7_319_56_4`, "Creating newDiv for GDPR banner..."));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_320_7_320_87_4`, "webflow.elementPresets.DivBlock:", _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock));
             const newDiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_322_7_322_45_4`, "newDiv created:", newDiv));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_323_7_323_64_4`, "newDiv methods:", Object.keys(newDiv || {})));
             if (!newDiv) {
                 throw new Error("Failed to create div.");
             }
             if (newDiv.setDomId) {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_329_9_329_52_4`, "Setting DOM ID for newDiv..."));
                 yield newDiv.setDomId("consent-banner");
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_331_9_331_47_4`, "DOM ID set successfully"));
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_334_7_334_52_4`, "Creating style names object..."));
             const styleNames = {
                 divStyleName: "consentbit-gdpr_banner_div",
                 paragraphStyleName: "consentbit-gdpr_banner_text",
@@ -49458,7 +49205,6 @@ const useBannerCreation = () => {
             })));
             const [divStyle, paragraphStyle, buttonContainerStyle, prefrenceButtonStyle, declineButtonStyle, buttonStyle, headingStyle, innerDivStyle, secondBackgroundStyle, closebutton] = styles;
             const animationAttribute = bannerAnimation.animation || "fade";
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_362_6_362_71_4`, "GDPR animationAttribute value:", animationAttribute));
             const divPropertyMap = {
                 "background-color": config.color,
                 "position": "fixed",
@@ -49633,105 +49379,53 @@ const useBannerCreation = () => {
                 "cursor": "pointer",
                 "font-family": "'Montserrat', sans-serif",
             };
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_552_13_552_55_4`, "Setting style properties..."));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_553_7_553_52_4`, "Setting divStyle properties..."));
             yield divStyle.setProperties(divPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_555_7_555_63_4`, "Setting divStyle responsive properties..."));
             yield divStyle.setProperties(responsivePropertyMap, responsiveOptions);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_557_7_557_58_4`, "Setting paragraphStyle properties..."));
             yield paragraphStyle.setProperties(paragraphPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_559_7_559_64_4`, "Setting buttonContainerStyle properties..."));
             yield buttonContainerStyle.setProperties(buttonContainerPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_561_7_561_75_4`, "Setting buttonContainerStyle responsive properties..."));
             yield buttonContainerStyle.setProperties(responsivebuttonPropertyMap, responsiveOptions);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_563_7_563_55_4`, "Setting buttonStyle properties..."));
             yield buttonStyle.setProperties(buttonPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_565_7_565_62_4`, "Setting declineButtonStyle properties..."));
             yield declineButtonStyle.setProperties(declineButtonPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_567_7_567_64_4`, "Setting prefrenceButtonStyle properties..."));
             yield prefrenceButtonStyle.setProperties(declineButtonPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_569_7_569_56_4`, "Setting headingStyle properties..."));
             yield headingStyle.setProperties(headingPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_571_7_571_65_4`, "Setting secondBackgroundStyle properties..."));
             yield secondBackgroundStyle.setProperties(secondbackgroundPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_573_7_573_57_4`, "Setting innerDivStyle properties..."));
             yield innerDivStyle.setProperties(innerdivPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_575_7_575_55_4`, "Setting closebutton properties..."));
             yield closebutton.setProperties(CloseButtonPropertyMap);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_577_14_577_66_4`, "All style properties set successfully"));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_579_14_579_57_4`, "Applying styles to newDiv..."));
             if (newDiv.setStyles) {
                 yield newDiv.setStyles([divStyle]);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_582_9_582_61_4`, "Styles applied to newDiv successfully"));
             }
-            else {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_584_9_584_54_4`, "newDiv.setStyles not available"));
-            }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_587_31_587_74_4`, "Setting custom attributes..."));
             if (newDiv.setCustomAttribute) {
                 // Only set animation attribute if it has a valid value
                 if (animationAttribute && animationAttribute.trim() !== "") {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_591_13_591_81_4`, "Setting data-animation attribute:", animationAttribute));
                     try {
                         const animationPromise = newDiv.setCustomAttribute("data-animation", animationAttribute);
                         const animationTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Animation attribute timeout")), 5000));
                         yield Promise.race([animationPromise, animationTimeout]);
-                        /* eslint-disable */ console.log(...oo_oo(`3972289494_598_15_598_71_4`, "data-animation attribute set successfully"));
                     }
                     catch (error) {
-                        /* eslint-disable */ console.error(...oo_tx(`3972289494_600_15_600_78_11`, "Error setting data-animation attribute:", error));
                         throw error;
                     }
                 }
-                else {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_604_13_604_88_4`, "Skipping data-animation attribute - no valid animation value"));
-                }
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_607_10_607_116_4`, "Setting data-cookie-banner attribute:", config.toggleStates.disableScroll ? "true" : "false"));
                 try {
                     const cookieBannerPromise = newDiv.setCustomAttribute("data-cookie-banner", config.toggleStates.disableScroll ? "true" : "false");
                     const cookieBannerTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Cookie banner attribute timeout")), 5000));
                     yield Promise.race([cookieBannerPromise, cookieBannerTimeout]);
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_614_12_614_72_4`, "data-cookie-banner attribute set successfully"));
                 }
                 catch (error) {
-                    /* eslint-disable */ console.error(...oo_tx(`3972289494_616_12_616_79_11`, "Error setting data-cookie-banner attribute:", error));
                     throw error;
                 }
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_620_10_620_59_4`, "Custom attributes set successfully"));
             }
-            else {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_622_10_622_64_4`, "newDiv.setCustomAttribute not available"));
-            }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_625_13_625_64_4`, "=== ELEMENT CREATION PHASE START ==="));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_626_7_626_58_4`, "Creating innerdiv for GDPR banner..."));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_627_7_627_74_4`, "About to call selectedElement.before for innerdiv..."));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_628_7_628_71_4`, "Testing if selectedElement.before is available..."));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_629_7_629_78_4`, "selectedElement.before exists:", !!selectedElement.before));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_630_7_630_96_4`, "webflow.elementPresets.DivBlock exists:", !!_types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_631_7_631_67_4`, "selectedElement type:", typeof selectedElement));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_632_7_632_79_4`, "selectedElement keys:", Object.keys(selectedElement || {})));
-            // Test if we can call the method without hanging
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_635_7_635_66_4`, "About to test selectedElement.before call..."));
             let innerdiv;
             try {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_638_9_638_71_4`, "Calling selectedElement.before with DivBlock..."));
                 // Add timeout to prevent hanging
                 const innerdivPromise = selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_641_9_641_70_4`, "innerdivPromise created, waiting for result..."));
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Element creation timeout")), 10000));
                 innerdiv = (yield Promise.race([innerdivPromise, timeoutPromise]));
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_647_9_647_51_4`, "innerdiv created:", innerdiv));
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_648_9_648_70_4`, "innerdiv methods:", Object.keys(innerdiv || {})));
                 if (innerdiv && innerdiv.setStyles) {
                     yield innerdiv.setStyles([innerDivStyle]);
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_652_11_652_49_4`, "innerdiv styles applied"));
-                }
-                else {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_654_11_654_60_4`, "Failed to apply styles to innerdiv"));
                 }
             }
             catch (error) {
-                /* eslint-disable */ console.error(...oo_tx(`3972289494_657_9_657_57_11`, "Error creating innerdiv:", error));
                 throw new Error(`Failed to create innerdiv: ${error}`);
             }
             let SecondDiv;
@@ -49754,7 +49448,6 @@ const useBannerCreation = () => {
             if (tempHeading.setTextContent) {
                 const language = config.language || "English";
                 const headingText = ((_a = translations[language]) === null || _a === void 0 ? void 0 : _a.heading) || "Cookie Settings";
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_682_8_682_84_4`, "Setting heading text:", headingText, "for language:", language));
                 yield tempHeading.setTextContent(headingText);
             }
             let Closebuttons = null;
@@ -49779,7 +49472,6 @@ const useBannerCreation = () => {
             if (tempParagraph.setTextContent) {
                 const language = config.language || "English";
                 const paragraphText = ((_b = translations[language]) === null || _b === void 0 ? void 0 : _b.description) || "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.";
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_709_8_709_88_4`, "Setting paragraph text:", paragraphText, "for language:", language));
                 yield tempParagraph.setTextContent(paragraphText);
             }
             const buttonContainer = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock);
@@ -49815,81 +49507,26 @@ const useBannerCreation = () => {
             if (declineButton.setDomId) {
                 yield declineButton.setDomId("decline-btn");
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_750_6_750_66_4`, "Starting to append elements to GDPR banner..."));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_751_6_751_59_4`, "newDiv.append exists:", !!newDiv.append));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_752_6_752_49_4`, "innerdiv exists:", !!innerdiv));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_753_6_753_55_4`, "tempHeading exists:", !!tempHeading));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_754_6_754_59_4`, "tempParagraph exists:", !!tempParagraph));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_755_6_755_63_4`, "buttonContainer exists:", !!buttonContainer));
             if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_758_8_758_54_4`, "Appending innerdiv to newDiv..."));
                 yield newDiv.append(innerdiv);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_760_8_760_53_4`, "innerdiv appended successfully"));
                 if (Closebuttons) {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_763_10_763_50_4`, "Appending Closebuttons..."));
                     yield newDiv.append(Closebuttons);
                 }
                 if (SecondDiv) {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_768_10_768_59_4`, "Appending SecondDiv to innerdiv..."));
                     yield innerdiv.append(SecondDiv);
                 }
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_772_8_772_59_4`, "Appending tempHeading to innerdiv..."));
                 yield innerdiv.append(tempHeading);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_774_8_774_61_4`, "Appending tempParagraph to innerdiv..."));
                 yield innerdiv.append(tempParagraph);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_776_8_776_63_4`, "Appending buttonContainer to innerdiv..."));
                 yield innerdiv.append(buttonContainer);
                 if (buttonContainer.append && prefrenceButton && declineButton && acceptButton) {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_780_10_780_64_4`, "Appending buttons to buttonContainer..."));
                     yield buttonContainer.append(prefrenceButton);
                     yield buttonContainer.append(declineButton);
                     yield buttonContainer.append(acceptButton);
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_784_10_784_58_4`, "All buttons appended successfully"));
-                }
-                else {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_786_10_791_12_4`, "Button append failed - missing elements:", {
-                        buttonContainerAppend: !!buttonContainer.append,
-                        prefrenceButton: !!prefrenceButton,
-                        declineButton: !!declineButton,
-                        acceptButton: !!acceptButton
-                    }));
                 }
             }
-            else {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_794_8_800_10_4`, "Main append failed - missing elements:", {
-                    newDivAppend: !!newDiv.append,
-                    innerdiv: !!innerdiv,
-                    tempHeading: !!tempHeading,
-                    tempParagraph: !!tempParagraph,
-                    buttonContainer: !!buttonContainer
-                }));
-            }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_803_13_803_67_4`, "=== CALLING createCookiePreferences ==="));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_804_13_821_15_4`, "Parameters:", {
-                selectedPreferences: ["essential", "analytics", "marketing", "preferences"],
-                language: bannerLanguages.language,
-                color: bannerStyles.color,
-                btnColor: bannerStyles.btnColor,
-                headColor: bannerStyles.headColor,
-                paraColor: bannerStyles.paraColor,
-                secondcolor: bannerStyles.secondcolor,
-                buttonRadius: bannerConfig.buttonRadius,
-                animation: bannerAnimation.animation,
-                customToggle: bannerToggleStates.toggleStates.customToggle,
-                primaryButtonText: bannerStyles.primaryButtonText,
-                secondbuttontext: bannerStyles.secondbuttontext,
-                skipCommonDiv,
-                disableScroll: bannerToggleStates.toggleStates.disableScroll,
-                closebutton: bannerToggleStates.toggleStates.closebutton,
-                donotshare: bannerToggleStates.toggleStates.donotshare ? "true" : "false"
-            }));
             try {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_824_15_824_65_4`, "Starting createCookiePreferences..."));
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_825_15_825_79_4`, "About to call createCookiePreferences function..."));
                 yield (0,_gdprPreference__WEBPACK_IMPORTED_MODULE_4__["default"])(["essential", "analytics", "marketing", "preferences"], bannerLanguages.language, bannerStyles.color, bannerStyles.btnColor, bannerStyles.headColor, bannerStyles.paraColor, bannerStyles.secondcolor, bannerConfig.buttonRadius, bannerAnimation.animation, bannerToggleStates.toggleStates.customToggle, bannerStyles.primaryButtonText, bannerStyles.secondbuttontext, skipCommonDiv, bannerToggleStates.toggleStates.disableScroll, bannerToggleStates.toggleStates.closebutton);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_845_15_845_76_4`, "createCookiePreferences completed successfully"));
                 // Display list of created DOM elements with IDs
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_848_15_848_67_4`, "=== CREATED DOM ELEMENTS WITH IDs ==="));
                 try {
                     const allElements = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getAllElements();
                     const elementsWithIds = [];
@@ -49907,9 +49544,7 @@ const useBannerCreation = () => {
                             // Skip elements that don't have getDomId method
                         }
                     }
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_867_17_867_84_4`, "Total elements with DOM IDs:", elementsWithIds.length));
                     elementsWithIds.forEach((item, index) => {
-                        /* eslint-disable */ console.log(...oo_oo(`3972289494_869_19_869_68_4`, `${index + 1}. DOM ID: "${item.id}"`));
                     });
                     // Show specific banner-related IDs
                     const bannerIds = elementsWithIds.filter(item => item.id.includes('consent') ||
@@ -49920,63 +49555,42 @@ const useBannerCreation = () => {
                         item.id.includes('decline') ||
                         item.id.includes('preferences'));
                     if (bannerIds.length > 0) {
-                        /* eslint-disable */ console.log(...oo_oo(`3972289494_884_19_884_69_4`, "=== BANNER-RELATED DOM ELEMENTS ==="));
                         bannerIds.forEach((item, index) => {
-                            /* eslint-disable */ console.log(...oo_oo(`3972289494_886_21_886_78_4`, `${index + 1}. Banner Element: "${item.id}"`));
                         });
                     }
                 }
                 catch (error) {
-                    /* eslint-disable */ console.error(...oo_tx(`3972289494_891_17_891_68_11`, "Error getting DOM elements:", error));
                 }
             }
             catch (error) {
-                /* eslint-disable */ console.error(...oo_tx(`3972289494_895_15_895_72_11`, "Error in createCookiePreferences:", error));
-                /* eslint-disable */ console.error(...oo_tx(`3972289494_896_15_896_61_11`, "Error details:", error.message));
-                /* eslint-disable */ console.error(...oo_tx(`3972289494_897_15_897_57_11`, "Error stack:", error.stack));
                 throw error;
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_901_6_901_60_4`, "=== ANALYTICS BLOCKING SCRIPT PHASE ==="));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_902_6_902_53_4`, "Current app version:", appVersion));
             try {
                 if (appVersion === '1.0.0') {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_905_10_905_62_4`, "Using V1 analytics blocking script..."));
                     yield fetchAnalyticsBlockingsScripts();
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_907_10_907_74_4`, "V1 analytics blocking script applied successfully"));
                 }
                 else {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_909_10_909_62_4`, "Using V2 analytics blocking script..."));
                     yield fetchAnalyticsBlockingsScriptsV2();
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_911_10_911_74_4`, "V2 analytics blocking script applied successfully"));
                 }
                 // Add a delay to ensure script is loaded
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_915_8_915_52_4`, "Waiting for script to load..."));
                 yield new Promise(resolve => setTimeout(resolve, 3000));
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_917_8_917_53_4`, "Script loading delay completed"));
                 // Check if the script is loaded
                 const scripts = document.querySelectorAll('script[src*="consent"]');
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_921_8_921_61_4`, "Found consent scripts:", scripts.length));
                 scripts.forEach((script, index) => {
                     const scriptElement = script;
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_924_10_924_60_4`, `Script ${index}:`, scriptElement.src));
                 });
                 // Check if the script is loaded in the head
                 const headScripts = document.head.querySelectorAll('script');
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_929_9_929_66_4`, "Total scripts in head:", headScripts.length));
                 headScripts.forEach((script, index) => {
                     const scriptElement = script;
                     if (scriptElement.src && scriptElement.src.includes('consent')) {
-                        /* eslint-disable */ console.log(...oo_oo(`3972289494_933_13_933_79_4`, `Consent script ${index} in head:`, scriptElement.src));
                     }
                 });
             }
             catch (error) {
-                /* eslint-disable */ console.error(...oo_tx(`3972289494_942_9_942_74_11`, "Error applying analytics blocking script:", error));
                 throw error;
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_946_13_946_86_4`, "GDPR banner creation completed, setting success timeout..."));
             setTimeout(() => {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_948_9_948_61_4`, "GDPR banner success timeout triggered"));
                 handleBannerSuccess();
             }, 30000);
         }
@@ -49990,13 +49604,8 @@ const useBannerCreation = () => {
     });
     const createCCPABanner = (config) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d;
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_961_4_961_53_4`, "=== CCPA BANNER CREATION START ==="));
         setIsCreating(true);
         setShowLoading(true);
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_965_4_965_60_4`, "Creating CCPA banner with config:", config));
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_966_4_966_45_4`, "Language:", config.language));
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_967_4_967_64_4`, "CCPA bannerAnimation object:", bannerAnimation));
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_968_4_968_77_4`, "CCPA bannerAnimation.animation:", bannerAnimation.animation));
         try {
             // Cleanup existing banners
             const allElements = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getAllElements();
@@ -50020,7 +49629,6 @@ const useBannerCreation = () => {
                     yield el.remove();
                 }
                 catch (err) {
-                    /* eslint-disable */ console.error(...oo_tx(`3972289494_993_10_993_55_11`, "Error removing element:", err));
                 }
             })));
             const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getSelectedElement();
@@ -50049,7 +49657,6 @@ const useBannerCreation = () => {
             })));
             const [divStyle, paragraphStyle, buttonContainerStyle, headingStyle, Linktext, innerDivStyle, secondBackgroundStyle, closebutton] = styles;
             const animationAttribute = bannerAnimation.animation || "fade";
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1035_6_1035_71_4`, "CCPA animationAttribute value:", animationAttribute));
             const divPropertyMap = {
                 "background-color": bannerStyles.color,
                 "position": "fixed",
@@ -50216,39 +49823,29 @@ const useBannerCreation = () => {
             if (newDiv.setCustomAttribute) {
                 // Only set animation attribute if it has a valid value
                 if (animationAttribute && animationAttribute.trim() !== "") {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1217_11_1217_84_4`, "Setting CCPA data-animation attribute:", animationAttribute));
                     try {
                         const animationPromise = newDiv.setCustomAttribute("data-animation", animationAttribute);
                         const animationTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("CCPA animation attribute timeout")), 5000));
                         yield Promise.race([animationPromise, animationTimeout]);
-                        /* eslint-disable */ console.log(...oo_oo(`3972289494_1224_13_1224_74_4`, "CCPA data-animation attribute set successfully"));
                     }
                     catch (error) {
-                        /* eslint-disable */ console.error(...oo_tx(`3972289494_1226_13_1226_81_11`, "Error setting CCPA data-animation attribute:", error));
                         throw error;
                     }
                 }
                 else {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1230_11_1230_91_4`, "Skipping CCPA data-animation attribute - no valid animation value"));
                 }
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1233_9_1233_132_4`, "Setting CCPA data-cookie-banner attribute:", bannerToggleStates.toggleStates.disableScroll ? "true" : "false"));
                 try {
                     const cookieBannerPromise = newDiv.setCustomAttribute("data-cookie-banner", bannerToggleStates.toggleStates.disableScroll ? "true" : "false");
                     const cookieBannerTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("CCPA cookie banner attribute timeout")), 5000));
                     yield Promise.race([cookieBannerPromise, cookieBannerTimeout]);
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1240_11_1240_76_4`, "CCPA data-cookie-banner attribute set successfully"));
                 }
                 catch (error) {
-                    /* eslint-disable */ console.error(...oo_tx(`3972289494_1242_11_1242_83_11`, "Error setting CCPA data-cookie-banner attribute:", error));
                     throw error;
                 }
             }
             // Create inner elements following App_backup.tsx pattern
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1248_6_1248_57_4`, "Creating innerdiv for CCPA banner..."));
             const innerdiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1250_6_1250_53_4`, "CCPA innerdiv created:", innerdiv));
             yield innerdiv.setStyles([innerDivStyle]);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1252_6_1252_49_4`, "CCPA innerdiv styles applied"));
             let SecondDiv;
             if (config.style === "alignstyle") {
                 SecondDiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock);
@@ -50269,7 +49866,6 @@ const useBannerCreation = () => {
             if (tempHeading.setTextContent) {
                 const language = config.language || "English";
                 const headingText = ((_a = translations[language]) === null || _a === void 0 ? void 0 : _a.ccpa.heading) || "We value your Privacy";
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1275_8_1275_89_4`, "Setting CCPA heading text:", headingText, "for language:", language));
                 yield tempHeading.setTextContent(headingText);
             }
             let Closebuttons = null;
@@ -50294,7 +49890,6 @@ const useBannerCreation = () => {
             if (tempParagraph.setTextContent) {
                 const language = config.language || "English";
                 const paragraphText = ((_b = translations[language]) === null || _b === void 0 ? void 0 : _b.ccpa.description) || "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.";
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1302_8_1302_93_4`, "Setting CCPA paragraph text:", paragraphText, "for language:", language));
                 yield tempParagraph.setTextContent(paragraphText);
             }
             const buttonContainer = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock);
@@ -50312,73 +49907,24 @@ const useBannerCreation = () => {
             if (prefrenceButton.setDomId) {
                 yield prefrenceButton.setDomId("do-not-share-link");
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1323_6_1323_66_4`, "Starting to append elements to CCPA banner..."));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1324_6_1324_64_4`, "CCPA newDiv.append exists:", !!newDiv.append));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1325_6_1325_54_4`, "CCPA innerdiv exists:", !!innerdiv));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1326_6_1326_60_4`, "CCPA tempHeading exists:", !!tempHeading));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1327_6_1327_64_4`, "CCPA tempParagraph exists:", !!tempParagraph));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1328_6_1328_68_4`, "CCPA buttonContainer exists:", !!buttonContainer));
             if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1331_8_1331_59_4`, "Appending CCPA innerdiv to newDiv..."));
                 yield newDiv.append(innerdiv);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1333_8_1333_58_4`, "CCPA innerdiv appended successfully"));
                 if (Closebuttons) {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1336_10_1336_55_4`, "Appending CCPA Closebuttons..."));
                     yield newDiv.append(Closebuttons);
                 }
                 if (SecondDiv) {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1341_10_1341_64_4`, "Appending CCPA SecondDiv to innerdiv..."));
                     yield innerdiv.append(SecondDiv);
                 }
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1345_8_1345_64_4`, "Appending CCPA tempHeading to innerdiv..."));
                 yield innerdiv.append(tempHeading);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1347_8_1347_66_4`, "Appending CCPA tempParagraph to innerdiv..."));
                 yield innerdiv.append(tempParagraph);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1349_8_1349_68_4`, "Appending CCPA buttonContainer to innerdiv..."));
                 yield innerdiv.append(buttonContainer);
                 if (buttonContainer.append && prefrenceButton) {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1353_10_1353_68_4`, "Appending CCPA button to buttonContainer..."));
                     yield buttonContainer.append(prefrenceButton);
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1355_10_1355_58_4`, "CCPA button appended successfully"));
-                }
-                else {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1357_10_1360_12_4`, "CCPA button append failed - missing elements:", {
-                        buttonContainerAppend: !!buttonContainer.append,
-                        prefrenceButton: !!prefrenceButton
-                    }));
                 }
             }
-            else {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1363_8_1369_10_4`, "CCPA main append failed - missing elements:", {
-                    newDivAppend: !!newDiv.append,
-                    innerdiv: !!innerdiv,
-                    tempHeading: !!tempHeading,
-                    tempParagraph: !!tempParagraph,
-                    buttonContainer: !!buttonContainer
-                }));
-            }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1372_6_1372_64_4`, "=== CALLING createCookieccpaPreferences ==="));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1373_6_1387_8_4`, "CCPA Parameters:", {
-                language: bannerLanguages.language,
-                color: bannerStyles.color,
-                btnColor: bannerStyles.btnColor,
-                headColor: bannerStyles.headColor,
-                paraColor: bannerStyles.paraColor,
-                secondcolor: bannerStyles.secondcolor,
-                buttonRadius: bannerConfig.buttonRadius,
-                animation: bannerAnimation.animation,
-                primaryButtonText: bannerStyles.primaryButtonText,
-                secondbuttontext: bannerStyles.secondbuttontext,
-                disableScroll: bannerToggleStates.toggleStates.disableScroll,
-                closebutton: bannerToggleStates.toggleStates.closebutton,
-                Font: bannerStyles.Font
-            }));
             try {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1390_8_1390_62_4`, "Starting createCookieccpaPreferences..."));
                 yield (0,_ccpaPreference__WEBPACK_IMPORTED_MODULE_5__["default"])(bannerLanguages.language, bannerStyles.color, bannerStyles.btnColor, bannerStyles.headColor, bannerStyles.paraColor, bannerStyles.secondcolor, bannerConfig.buttonRadius, bannerAnimation.animation, bannerStyles.primaryButtonText, bannerStyles.secondbuttontext, bannerToggleStates.toggleStates.disableScroll, bannerToggleStates.toggleStates.closebutton, false, bannerStyles.Font);
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1408_8_1408_73_4`, "createCookieccpaPreferences completed successfully"));
                 // Display list of created DOM elements with IDs for CCPA
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1411_8_1411_65_4`, "=== CCPA CREATED DOM ELEMENTS WITH IDs ==="));
                 try {
                     const allElements = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getAllElements();
                     const elementsWithIds = [];
@@ -50396,9 +49942,7 @@ const useBannerCreation = () => {
                             // Skip elements that don't have getDomId method
                         }
                     }
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1430_10_1430_82_4`, "Total CCPA elements with DOM IDs:", elementsWithIds.length));
                     elementsWithIds.forEach((item, index) => {
-                        /* eslint-disable */ console.log(...oo_oo(`3972289494_1432_12_1432_66_4`, `${index + 1}. CCPA DOM ID: "${item.id}"`));
                     });
                     // Show specific CCPA banner-related IDs
                     const ccpaBannerIds = elementsWithIds.filter(item => item.id.includes('consent') ||
@@ -50409,61 +49953,42 @@ const useBannerCreation = () => {
                         item.id.includes('initial') ||
                         item.id.includes('do-not-share'));
                     if (ccpaBannerIds.length > 0) {
-                        /* eslint-disable */ console.log(...oo_oo(`3972289494_1447_12_1447_67_4`, "=== CCPA BANNER-RELATED DOM ELEMENTS ==="));
                         ccpaBannerIds.forEach((item, index) => {
-                            /* eslint-disable */ console.log(...oo_oo(`3972289494_1449_14_1449_76_4`, `${index + 1}. CCPA Banner Element: "${item.id}"`));
                         });
                     }
                 }
                 catch (error) {
-                    /* eslint-disable */ console.error(...oo_tx(`3972289494_1454_10_1454_66_11`, "Error getting CCPA DOM elements:", error));
                 }
             }
             catch (error) {
-                /* eslint-disable */ console.error(...oo_tx(`3972289494_1458_8_1458_69_11`, "Error in createCookieccpaPreferences:", error));
                 throw error;
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1462_6_1462_65_4`, "=== CCPA ANALYTICS BLOCKING SCRIPT PHASE ==="));
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1463_6_1463_53_4`, "Current app version:", appVersion));
             try {
                 if (appVersion === '1.0.0') {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1466_10_1466_71_4`, "Using V1 analytics blocking script for CCPA..."));
                     yield fetchAnalyticsBlockingsScripts();
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1468_10_1468_83_4`, "V1 analytics blocking script applied successfully for CCPA"));
                 }
                 else {
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1470_10_1470_71_4`, "Using V2 analytics blocking script for CCPA..."));
                     yield fetchAnalyticsBlockingsScriptsV2();
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1472_10_1472_83_4`, "V2 analytics blocking script applied successfully for CCPA"));
                 }
                 // Add a delay to ensure script is loaded
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1476_8_1476_57_4`, "Waiting for CCPA script to load..."));
                 yield new Promise(resolve => setTimeout(resolve, 3000));
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1478_8_1478_58_4`, "CCPA script loading delay completed"));
                 // Check if the script is loaded
                 const scripts = document.querySelectorAll('script[src*="consent"]');
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1482_8_1482_70_4`, "Found consent scripts for CCPA:", scripts.length));
                 scripts.forEach((script, index) => {
                     const scriptElement = script;
-                    /* eslint-disable */ console.log(...oo_oo(`3972289494_1485_10_1485_65_4`, `CCPA Script ${index}:`, scriptElement.src));
                 });
                 // Check if the script is loaded in the head
                 const headScripts = document.head.querySelectorAll('script');
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1490_8_1490_74_4`, "Total scripts in head for CCPA:", headScripts.length));
                 headScripts.forEach((script, index) => {
                     const scriptElement = script;
                     if (scriptElement.src && scriptElement.src.includes('consent')) {
-                        /* eslint-disable */ console.log(...oo_oo(`3972289494_1494_12_1494_83_4`, `CCPA Consent script ${index} in head:`, scriptElement.src));
                     }
                 });
             }
             catch (error) {
-                /* eslint-disable */ console.error(...oo_tx(`3972289494_1499_8_1499_78_11`, "Error applying CCPA analytics blocking script:", error));
                 throw error;
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1503_13_1503_86_4`, "CCPA banner creation completed, setting success timeout..."));
             setTimeout(() => {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1505_9_1505_61_4`, "CCPA banner success timeout triggered"));
                 handleBannerSuccess();
             }, 20000);
         }
@@ -50476,42 +50001,31 @@ const useBannerCreation = () => {
         }
     });
     const createBothBanners = (config) => __awaiter(void 0, void 0, void 0, function* () {
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_1518_4_1518_48_4`, "Starting createBothBanners..."));
         try {
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1520_6_1520_50_4`, "Creating GDPR banner first..."));
             yield createGDPRBanner(config, true);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1522_6_1522_82_4`, "GDPR banner created successfully, now creating CCPA banner..."));
             yield createCCPABanner(config);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1524_6_1524_55_4`, "Both banners created successfully!"));
             // Show success page after both banners are created
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1527_6_1527_56_4`, "Showing SuccessPublish component..."));
             setShowSuccessPublish(true);
+            // Set localStorage to indicate banner was added through welcome flow
+            localStorage.setItem("bannerAddedThroughWelcome", "true");
         }
         catch (error) {
-            /* eslint-disable */ console.error(...oo_tx(`3972289494_1530_6_1530_57_11`, "Error in createBothBanners:", error));
             throw error;
         }
     });
     // Simple test function to isolate the issue
     const testSimpleBannerCreation = () => __awaiter(void 0, void 0, void 0, function* () {
-        /* eslint-disable */ console.log(...oo_oo(`3972289494_1537_4_1537_57_4`, "=== TESTING SIMPLE BANNER CREATION ==="));
         try {
             const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].getSelectedElement();
             if (!selectedElement) {
                 throw new Error("No element selected");
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1544_6_1544_43_4`, "Creating simple div..."));
             const simpleDiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_1__["default"].elementPresets.DivBlock);
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1546_6_1546_51_4`, "Simple div created:", simpleDiv));
             if (simpleDiv && simpleDiv.setDomId) {
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1549_8_1549_40_4`, "Setting DOM ID..."));
                 yield simpleDiv.setDomId("test-banner");
-                /* eslint-disable */ console.log(...oo_oo(`3972289494_1551_8_1551_46_4`, "DOM ID set successfully"));
             }
-            /* eslint-disable */ console.log(...oo_oo(`3972289494_1554_6_1554_71_4`, "Simple banner creation test completed successfully"));
         }
         catch (error) {
-            /* eslint-disable */ console.error(...oo_tx(`3972289494_1556_6_1556_65_11`, "Simple banner creation test failed:", error));
             throw error;
         }
     });
@@ -50528,44 +50042,6 @@ const useBannerCreation = () => {
         handleSuccessPublishGoBack
     };
 };
-/* istanbul ignore next */ /* c8 ignore start */ /* eslint-disable */ ;
-function oo_cm() { try {
-    return (0, eval)("globalThis._console_ninja") || (0, eval)("/* https://github.com/wallabyjs/console-ninja#how-does-it-work */'use strict';var _0x306708=_0x57eb;(function(_0x2bb52b,_0xc34b72){var _0x530621=_0x57eb,_0xc55af5=_0x2bb52b();while(!![]){try{var _0x24c23f=parseInt(_0x530621(0x201))/0x1*(-parseInt(_0x530621(0x25f))/0x2)+parseInt(_0x530621(0x209))/0x3*(-parseInt(_0x530621(0x196))/0x4)+-parseInt(_0x530621(0x21e))/0x5+parseInt(_0x530621(0x25b))/0x6+parseInt(_0x530621(0x1d7))/0x7*(-parseInt(_0x530621(0x1d3))/0x8)+parseInt(_0x530621(0x202))/0x9*(-parseInt(_0x530621(0x1f0))/0xa)+parseInt(_0x530621(0x20c))/0xb;if(_0x24c23f===_0xc34b72)break;else _0xc55af5['push'](_0xc55af5['shift']());}catch(_0x3c622c){_0xc55af5['push'](_0xc55af5['shift']());}}}(_0x4ac4,0x6fa73));function _0x4ac4(){var _0x43cb65=['resetOnProcessingTimeAverageMs','cappedProps','autoExpandPropertyCount','...','date','https://tinyurl.com/37x8b79t','origin','autoExpandLimit','autoExpand','host','coverage','_getOwnPropertySymbols','1','sortProps','capped','_p_','then','_additionalMetadata','_setNodeExpandableState','Set','unknown','number','defineProperty','\\x20server','isExpressionToEvaluate','_p_name','length','test','autoExpandMaxDepth','HTMLAllCollection','console',{\"resolveGetters\":false,\"defaultLimits\":{\"props\":100,\"elements\":100,\"strLength\":51200,\"totalStrLength\":51200,\"autoExpandLimit\":5000,\"autoExpandMaxDepth\":10},\"reducedLimits\":{\"props\":5,\"elements\":5,\"strLength\":256,\"totalStrLength\":768,\"autoExpandLimit\":30,\"autoExpandMaxDepth\":2},\"reducePolicy\":{\"perLogpoint\":{\"reduceOnCount\":50,\"reduceOnAccumulatedProcessingTimeMs\":100,\"resetWhenQuietMs\":500,\"resetOnProcessingTimeAverageMs\":100},\"global\":{\"reduceOnCount\":1000,\"reduceOnAccumulatedProcessingTimeMs\":300,\"resetWhenQuietMs\":50,\"resetOnProcessingTimeAverageMs\":100}}},'_sendErrorMessage','_console_ninja','global','hostname','_reconnectTimeout','_treeNodePropertiesBeforeFullValue','String','Console\\x20Ninja\\x20failed\\x20to\\x20send\\x20logs,\\x20restarting\\x20the\\x20process\\x20may\\x20help;\\x20also\\x20see\\x20','unref','_inNextEdge','send','totalStrLength','nodeModules','getPrototypeOf','elapsed','autoExpandPreviousObjects','_connectAttemptCount','reducedLimits','setter','endsWith','_setNodeLabel','cappedElements','onclose','8wFqTbY','_addFunctionsNode','_numberRegExp','count','144781QBgSlB','NEXT_RUNTIME','null','_ninjaIgnoreNextError','create','symbol','reload','strLength','nan','expressionsToEvaluate','map','_hasSetOnItsPath','string','remix','_allowedToConnectOnSend','rootExpression','_capIfString','get','reduceOnAccumulatedProcessingTimeMs','_disposeWebsocket','_keyStrRegExp','Map','toLowerCase','array','webpack','838570VmfIKn','reduceLimits','getOwnPropertyDescriptor','_treeNodePropertiesAfterFullValue','match','background:\\x20rgb(30,30,30);\\x20color:\\x20rgb(255,213,92)','_isUndefined','_maxConnectAttemptCount','resetWhenQuietMs','_Symbol','function','now','negativeInfinity','_sortProps','depth','env','allStrLength','1JzERwx','63wQTjHb','message','fromCharCode','_getOwnPropertyNames','object','resolveGetters','readyState','6EUSimZ','undefined','_addProperty','25659007VFMgxT','_propertyName','_type','_isPrimitiveType','url','index','_isArray','angular','_connected','_objectToString','onopen','stack','_quotedRegExp','dockerizedApp','call','pop','disabledLog','type','2784920reJBoY','_allowedToSend','replace','_extendedWarning','_inBrowser','defaultLimits','indexOf','getWebSocketClass','warn','_attemptToReconnectShortly','NEGATIVE_INFINITY','name','_setNodeExpressionPath','join','disabledTrace','forEach','timeStamp','astro','bigint','[object\\x20Date]','Number','level','_addObjectProperty','getter','POSITIVE_INFINITY','reduceOnCount','toUpperCase','positiveInfinity','[object\\x20Map]','args','_property','isArray','_setNodeQueryPath','default','catch','includes','Error','_addLoadNode','RegExp','serialize','constructor','logger\\x20failed\\x20to\\x20connect\\x20to\\x20host','failed\\x20to\\x20find\\x20and\\x20load\\x20WebSocket','_isMap','root_exp_id','performance','_HTMLAllCollection','_console_ninja_session','__es'+'Module','current','Boolean','logger\\x20failed\\x20to\\x20connect\\x20to\\x20host,\\x20see\\x20','toString','_hasSymbolPropertyOnItsPath','_WebSocketClass','trace','concat','hits','_socket','reducePolicy','next.js','5053704ydudrA','[object\\x20BigInt]','WebSocket','process','1742492lNZmIA','_setNodePermissions','Buffer','enumerable','versions','%c\\x20Console\\x20Ninja\\x20extension\\x20is\\x20connected\\x20to\\x20','_regExpToString','_WebSocket','_blacklistedProperty','_undefined','prototype','time','method','_ws','_isPrimitiveWrapperType','push','perf_hooks','_cleanNode','[object\\x20Set]','boolean','getOwnPropertyNames','127.0.0.1','slice','elements','port','see\\x20https://tinyurl.com/2vt8jxzw\\x20for\\x20more\\x20info.','logger\\x20websocket\\x20error','_consoleNinjaAllowedToStart','path','_p_length','failed\\x20to\\x20connect\\x20to\\x20host:\\x20','noFunctions','expId',[\"localhost\",\"127.0.0.1\",\"example.cypress.io\",\"Aadvik_Reshma\",\"192.168.0.101\"],'negativeZero','_getOwnPropertyDescriptor','_dateToString','_processTreeNodeResult','split','location','_connectToHostNow','ws/index.js','stringify','_setNodeId','eventReceivedCallback','Console\\x20Ninja\\x20failed\\x20to\\x20send\\x20logs,\\x20refreshing\\x20the\\x20page\\x20may\\x20help;\\x20also\\x20see\\x20','value','edge','log','gateway.docker.internal','stackTraceLimit','_connecting','hasOwnProperty','_hasMapOnItsPath','root_exp','perLogpoint','Symbol','props','hrtime','parse','parent','substr','_isSet','error','1363356HEYciT','onerror','node','close','_webSocketErrorDocsLink','_isNegativeZero'];_0x4ac4=function(){return _0x43cb65;};return _0x4ac4();}var te=Object[_0x306708(0x1db)],G=Object[_0x306708(0x1b2)],ne=Object[_0x306708(0x1f2)],re=Object[_0x306708(0x16a)],ie=Object[_0x306708(0x1c9)],se=Object[_0x306708(0x269)][_0x306708(0x18a)],oe=(_0x4e7daa,_0x3f22a0,_0x127e05,_0x45c74e)=>{var _0xf288d1=_0x306708;if(_0x3f22a0&&typeof _0x3f22a0==_0xf288d1(0x206)||typeof _0x3f22a0==_0xf288d1(0x1fa)){for(let _0x1b70c5 of re(_0x3f22a0))!se[_0xf288d1(0x21a)](_0x4e7daa,_0x1b70c5)&&_0x1b70c5!==_0x127e05&&G(_0x4e7daa,_0x1b70c5,{'get':()=>_0x3f22a0[_0x1b70c5],'enumerable':!(_0x45c74e=ne(_0x3f22a0,_0x1b70c5))||_0x45c74e[_0xf288d1(0x262)]});}return _0x4e7daa;},K=(_0x87d7de,_0x1c5524,_0x373b7b)=>(_0x373b7b=_0x87d7de!=null?te(ie(_0x87d7de)):{},oe(_0x1c5524||!_0x87d7de||!_0x87d7de[_0x306708(0x24e)]?G(_0x373b7b,_0x306708(0x23f),{'value':_0x87d7de,'enumerable':!0x0}):_0x373b7b,_0x87d7de)),H=class{constructor(_0x5cb8c2,_0x5cddf3,_0x502c73,_0x27288c,_0x49d611,_0x8dd291){var _0x481b37=_0x306708,_0x3d6120,_0x5d2881,_0x91ba19,_0x3fd311;this['global']=_0x5cb8c2,this['host']=_0x5cddf3,this['port']=_0x502c73,this['nodeModules']=_0x27288c,this['dockerizedApp']=_0x49d611,this[_0x481b37(0x182)]=_0x8dd291,this['_allowedToSend']=!0x0,this[_0x481b37(0x1e5)]=!0x0,this[_0x481b37(0x214)]=!0x1,this[_0x481b37(0x189)]=!0x1,this[_0x481b37(0x1c5)]=((_0x5d2881=(_0x3d6120=_0x5cb8c2['process'])==null?void 0x0:_0x3d6120['env'])==null?void 0x0:_0x5d2881[_0x481b37(0x1d8)])===_0x481b37(0x185),this[_0x481b37(0x222)]=!((_0x3fd311=(_0x91ba19=this[_0x481b37(0x1be)]['process'])==null?void 0x0:_0x91ba19[_0x481b37(0x263)])!=null&&_0x3fd311[_0x481b37(0x198)])&&!this[_0x481b37(0x1c5)],this[_0x481b37(0x254)]=null,this['_connectAttemptCount']=0x0,this['_maxConnectAttemptCount']=0x14,this[_0x481b37(0x19a)]=_0x481b37(0x1a1),this['_sendErrorMessage']=(this[_0x481b37(0x222)]?_0x481b37(0x183):_0x481b37(0x1c3))+this[_0x481b37(0x19a)];}async['getWebSocketClass'](){var _0xf6c3da=_0x306708,_0x4c74a4,_0x42b90b;if(this[_0xf6c3da(0x254)])return this[_0xf6c3da(0x254)];let _0x1ae56c;if(this[_0xf6c3da(0x222)]||this[_0xf6c3da(0x1c5)])_0x1ae56c=this[_0xf6c3da(0x1be)][_0xf6c3da(0x25d)];else{if((_0x4c74a4=this[_0xf6c3da(0x1be)][_0xf6c3da(0x25e)])!=null&&_0x4c74a4[_0xf6c3da(0x266)])_0x1ae56c=(_0x42b90b=this[_0xf6c3da(0x1be)]['process'])==null?void 0x0:_0x42b90b[_0xf6c3da(0x266)];else try{let _0x1a51de=await import(_0xf6c3da(0x172));_0x1ae56c=(await import((await import(_0xf6c3da(0x210)))['pathToFileURL'](_0x1a51de[_0xf6c3da(0x22b)](this['nodeModules'],_0xf6c3da(0x17f)))[_0xf6c3da(0x252)]()))[_0xf6c3da(0x23f)];}catch{try{_0x1ae56c=require(require(_0xf6c3da(0x172))[_0xf6c3da(0x22b)](this[_0xf6c3da(0x1c8)],'ws'));}catch{throw new Error(_0xf6c3da(0x248));}}}return this['_WebSocketClass']=_0x1ae56c,_0x1ae56c;}['_connectToHostNow'](){var _0x14b20e=_0x306708;this[_0x14b20e(0x189)]||this['_connected']||this[_0x14b20e(0x1cc)]>=this[_0x14b20e(0x1f7)]||(this[_0x14b20e(0x1e5)]=!0x1,this[_0x14b20e(0x189)]=!0x0,this[_0x14b20e(0x1cc)]++,this[_0x14b20e(0x26c)]=new Promise((_0x504528,_0x272872)=>{var _0x53e4bd=_0x14b20e;this[_0x53e4bd(0x225)]()['then'](_0x58f37c=>{var _0x4fc413=_0x53e4bd;let _0x3b1416=new _0x58f37c('ws://'+(!this[_0x4fc413(0x222)]&&this[_0x4fc413(0x219)]?_0x4fc413(0x187):this[_0x4fc413(0x1a5)])+':'+this[_0x4fc413(0x16e)]);_0x3b1416['onerror']=()=>{var _0x4950fe=_0x4fc413;this[_0x4950fe(0x21f)]=!0x1,this[_0x4950fe(0x1ea)](_0x3b1416),this[_0x4950fe(0x227)](),_0x272872(new Error(_0x4950fe(0x170)));},_0x3b1416[_0x4fc413(0x216)]=()=>{var _0x1a2bb5=_0x4fc413;this[_0x1a2bb5(0x222)]||_0x3b1416[_0x1a2bb5(0x258)]&&_0x3b1416[_0x1a2bb5(0x258)][_0x1a2bb5(0x1c4)]&&_0x3b1416[_0x1a2bb5(0x258)][_0x1a2bb5(0x1c4)](),_0x504528(_0x3b1416);},_0x3b1416[_0x4fc413(0x1d2)]=()=>{var _0x4e6dc4=_0x4fc413;this[_0x4e6dc4(0x1e5)]=!0x0,this['_disposeWebsocket'](_0x3b1416),this[_0x4e6dc4(0x227)]();},_0x3b1416['onmessage']=_0xe37bc=>{var _0x2b587b=_0x4fc413;try{if(!(_0xe37bc!=null&&_0xe37bc['data'])||!this[_0x2b587b(0x182)])return;let _0x118da=JSON[_0x2b587b(0x191)](_0xe37bc['data']);this[_0x2b587b(0x182)](_0x118da[_0x2b587b(0x26b)],_0x118da[_0x2b587b(0x23b)],this[_0x2b587b(0x1be)],this[_0x2b587b(0x222)]);}catch{}};})[_0x53e4bd(0x1ac)](_0x321927=>(this[_0x53e4bd(0x214)]=!0x0,this['_connecting']=!0x1,this[_0x53e4bd(0x1e5)]=!0x1,this['_allowedToSend']=!0x0,this['_connectAttemptCount']=0x0,_0x321927))[_0x53e4bd(0x240)](_0x369a11=>(this[_0x53e4bd(0x214)]=!0x1,this[_0x53e4bd(0x189)]=!0x1,console[_0x53e4bd(0x226)](_0x53e4bd(0x251)+this['_webSocketErrorDocsLink']),_0x272872(new Error(_0x53e4bd(0x174)+(_0x369a11&&_0x369a11['message'])))));}));}[_0x306708(0x1ea)](_0x105214){var _0x110a37=_0x306708;this[_0x110a37(0x214)]=!0x1,this[_0x110a37(0x189)]=!0x1;try{_0x105214[_0x110a37(0x1d2)]=null,_0x105214[_0x110a37(0x197)]=null,_0x105214[_0x110a37(0x216)]=null;}catch{}try{_0x105214[_0x110a37(0x208)]<0x2&&_0x105214[_0x110a37(0x199)]();}catch{}}['_attemptToReconnectShortly'](){var _0x4578ee=_0x306708;clearTimeout(this[_0x4578ee(0x1c0)]),!(this['_connectAttemptCount']>=this[_0x4578ee(0x1f7)])&&(this[_0x4578ee(0x1c0)]=setTimeout(()=>{var _0x51f9fb=_0x4578ee,_0x2704fd;this['_connected']||this[_0x51f9fb(0x189)]||(this[_0x51f9fb(0x17e)](),(_0x2704fd=this[_0x51f9fb(0x26c)])==null||_0x2704fd[_0x51f9fb(0x240)](()=>this[_0x51f9fb(0x227)]()));},0x1f4),this[_0x4578ee(0x1c0)]['unref']&&this[_0x4578ee(0x1c0)]['unref']());}async[_0x306708(0x1c6)](_0x4ac647){var _0x5b6043=_0x306708;try{if(!this['_allowedToSend'])return;this[_0x5b6043(0x1e5)]&&this[_0x5b6043(0x17e)](),(await this[_0x5b6043(0x26c)])['send'](JSON[_0x5b6043(0x180)](_0x4ac647));}catch(_0x4af89c){this[_0x5b6043(0x221)]?console[_0x5b6043(0x226)](this['_sendErrorMessage']+':\\x20'+(_0x4af89c&&_0x4af89c[_0x5b6043(0x203)])):(this['_extendedWarning']=!0x0,console['warn'](this[_0x5b6043(0x1bc)]+':\\x20'+(_0x4af89c&&_0x4af89c['message']),_0x4ac647)),this['_allowedToSend']=!0x1,this[_0x5b6043(0x227)]();}}};function X(_0x59e9ed,_0x435000,_0x46a0b4,_0x387ea1,_0x3d0ee1,_0x388879,_0x3b442d,_0x3a7591=ae){var _0x316efd=_0x306708;let _0x5e24ec=_0x46a0b4[_0x316efd(0x17c)](',')['map'](_0x2205c0=>{var _0x2a4a71=_0x316efd,_0x289000,_0x38e841,_0x33274a,_0x1654bd;try{if(!_0x59e9ed[_0x2a4a71(0x24d)]){let _0x376a4e=((_0x38e841=(_0x289000=_0x59e9ed[_0x2a4a71(0x25e)])==null?void 0x0:_0x289000['versions'])==null?void 0x0:_0x38e841[_0x2a4a71(0x198)])||((_0x1654bd=(_0x33274a=_0x59e9ed[_0x2a4a71(0x25e)])==null?void 0x0:_0x33274a[_0x2a4a71(0x1ff)])==null?void 0x0:_0x1654bd[_0x2a4a71(0x1d8)])===_0x2a4a71(0x185);(_0x3d0ee1==='next.js'||_0x3d0ee1===_0x2a4a71(0x1e4)||_0x3d0ee1===_0x2a4a71(0x22f)||_0x3d0ee1===_0x2a4a71(0x213))&&(_0x3d0ee1+=_0x376a4e?_0x2a4a71(0x1b3):'\\x20browser'),_0x59e9ed[_0x2a4a71(0x24d)]={'id':+new Date(),'tool':_0x3d0ee1},_0x3b442d&&_0x3d0ee1&&!_0x376a4e&&console['log'](_0x2a4a71(0x264)+(_0x3d0ee1['charAt'](0x0)[_0x2a4a71(0x238)]()+_0x3d0ee1[_0x2a4a71(0x193)](0x1))+',',_0x2a4a71(0x1f5),_0x2a4a71(0x16f));}let _0x3065a6=new H(_0x59e9ed,_0x435000,_0x2205c0,_0x387ea1,_0x388879,_0x3a7591);return _0x3065a6[_0x2a4a71(0x1c6)]['bind'](_0x3065a6);}catch(_0x5cbdc5){return console['warn'](_0x2a4a71(0x247),_0x5cbdc5&&_0x5cbdc5['message']),()=>{};}});return _0x59f8b9=>_0x5e24ec[_0x316efd(0x22d)](_0x5155f2=>_0x5155f2(_0x59f8b9));}function ae(_0x32c035,_0x386228,_0x1ba55a,_0x3db203){var _0xcccd91=_0x306708;_0x3db203&&_0x32c035===_0xcccd91(0x1dd)&&_0x1ba55a[_0xcccd91(0x17d)]['reload']();}function _0x57eb(_0x55b34c,_0x3b16e9){var _0x4ac419=_0x4ac4();return _0x57eb=function(_0x57eb0e,_0x21c986){_0x57eb0e=_0x57eb0e-0x167;var _0x1c6b34=_0x4ac419[_0x57eb0e];return _0x1c6b34;},_0x57eb(_0x55b34c,_0x3b16e9);}function B(_0x3d2273){var _0x4c09a6=_0x306708,_0x1bd3ca,_0x70cdff;let _0x3131bb=function(_0x4828d9,_0x331191){return _0x331191-_0x4828d9;},_0x121f61;if(_0x3d2273[_0x4c09a6(0x24b)])_0x121f61=function(){var _0x29e0e2=_0x4c09a6;return _0x3d2273[_0x29e0e2(0x24b)][_0x29e0e2(0x1fb)]();};else{if(_0x3d2273[_0x4c09a6(0x25e)]&&_0x3d2273[_0x4c09a6(0x25e)][_0x4c09a6(0x190)]&&((_0x70cdff=(_0x1bd3ca=_0x3d2273[_0x4c09a6(0x25e)])==null?void 0x0:_0x1bd3ca['env'])==null?void 0x0:_0x70cdff[_0x4c09a6(0x1d8)])!==_0x4c09a6(0x185))_0x121f61=function(){var _0x5b8216=_0x4c09a6;return _0x3d2273[_0x5b8216(0x25e)]['hrtime']();},_0x3131bb=function(_0x174a25,_0x4a360c){return 0x3e8*(_0x4a360c[0x0]-_0x174a25[0x0])+(_0x4a360c[0x1]-_0x174a25[0x1])/0xf4240;};else try{let {performance:_0x1423c5}=require(_0x4c09a6(0x26f));_0x121f61=function(){var _0x322a81=_0x4c09a6;return _0x1423c5[_0x322a81(0x1fb)]();};}catch{_0x121f61=function(){return+new Date();};}}return{'elapsed':_0x3131bb,'timeStamp':_0x121f61,'now':()=>Date[_0x4c09a6(0x1fb)]()};}function J(_0x42b318,_0x19743b,_0x2fa843){var _0x48a4a0=_0x306708,_0x164059,_0x17f315,_0x43da7c,_0x1142c4,_0x943066;if(_0x42b318[_0x48a4a0(0x171)]!==void 0x0)return _0x42b318[_0x48a4a0(0x171)];let _0x242317=((_0x17f315=(_0x164059=_0x42b318[_0x48a4a0(0x25e)])==null?void 0x0:_0x164059[_0x48a4a0(0x263)])==null?void 0x0:_0x17f315[_0x48a4a0(0x198)])||((_0x1142c4=(_0x43da7c=_0x42b318[_0x48a4a0(0x25e)])==null?void 0x0:_0x43da7c[_0x48a4a0(0x1ff)])==null?void 0x0:_0x1142c4[_0x48a4a0(0x1d8)])==='edge';function _0x1a94f0(_0x586890){var _0x1f649e=_0x48a4a0;if(_0x586890['startsWith']('/')&&_0x586890[_0x1f649e(0x1cf)]('/')){let _0x3e6dd8=new RegExp(_0x586890['slice'](0x1,-0x1));return _0x594d13=>_0x3e6dd8[_0x1f649e(0x1b7)](_0x594d13);}else{if(_0x586890[_0x1f649e(0x241)]('*')||_0x586890[_0x1f649e(0x241)]('?')){let _0x2ebcb8=new RegExp('^'+_0x586890[_0x1f649e(0x220)](/\\./g,String[_0x1f649e(0x204)](0x5c)+'.')[_0x1f649e(0x220)](/\\*/g,'.*')[_0x1f649e(0x220)](/\\?/g,'.')+String[_0x1f649e(0x204)](0x24));return _0x5dcdaa=>_0x2ebcb8[_0x1f649e(0x1b7)](_0x5dcdaa);}else return _0x135db6=>_0x135db6===_0x586890;}}let _0xe3393d=_0x19743b[_0x48a4a0(0x1e1)](_0x1a94f0);return _0x42b318[_0x48a4a0(0x171)]=_0x242317||!_0x19743b,!_0x42b318[_0x48a4a0(0x171)]&&((_0x943066=_0x42b318[_0x48a4a0(0x17d)])==null?void 0x0:_0x943066[_0x48a4a0(0x1bf)])&&(_0x42b318[_0x48a4a0(0x171)]=_0xe3393d['some'](_0x548db0=>_0x548db0(_0x42b318[_0x48a4a0(0x17d)]['hostname']))),_0x42b318[_0x48a4a0(0x171)];}function Y(_0x3fa09f,_0x44ab87,_0x12e5a6,_0x24945e,_0x3b9fc4){var _0x1a0229=_0x306708;_0x3fa09f=_0x3fa09f,_0x44ab87=_0x44ab87,_0x12e5a6=_0x12e5a6,_0x24945e=_0x24945e,_0x3b9fc4=_0x3b9fc4,_0x3b9fc4=_0x3b9fc4||{},_0x3b9fc4['defaultLimits']=_0x3b9fc4[_0x1a0229(0x223)]||{},_0x3b9fc4['reducedLimits']=_0x3b9fc4[_0x1a0229(0x1cd)]||{},_0x3b9fc4[_0x1a0229(0x259)]=_0x3b9fc4[_0x1a0229(0x259)]||{},_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)]=_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)]||{},_0x3b9fc4[_0x1a0229(0x259)]['global']=_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)]||{};let _0x151ea4={'perLogpoint':{'reduceOnCount':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x237)]||0x32,'reduceOnAccumulatedProcessingTimeMs':_0x3b9fc4[_0x1a0229(0x259)]['perLogpoint']['reduceOnAccumulatedProcessingTimeMs']||0x64,'resetWhenQuietMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x1f8)]||0x1f4,'resetOnProcessingTimeAverageMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x18d)][_0x1a0229(0x19c)]||0x64},'global':{'reduceOnCount':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x237)]||0x3e8,'reduceOnAccumulatedProcessingTimeMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x1e9)]||0x12c,'resetWhenQuietMs':_0x3b9fc4['reducePolicy'][_0x1a0229(0x1be)][_0x1a0229(0x1f8)]||0x32,'resetOnProcessingTimeAverageMs':_0x3b9fc4[_0x1a0229(0x259)][_0x1a0229(0x1be)][_0x1a0229(0x19c)]||0x64}},_0x2633ed=B(_0x3fa09f),_0x3e3008=_0x2633ed[_0x1a0229(0x1ca)],_0xac187d=_0x2633ed[_0x1a0229(0x22e)];class _0x111409{constructor(){var _0x179f3c=_0x1a0229;this[_0x179f3c(0x1eb)]=/^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\\xA0-\\uFFFF]*$/,this[_0x179f3c(0x1d5)]=/^(0|[1-9][0-9]*)$/,this[_0x179f3c(0x218)]=/'([^\\\\']|\\\\')*'/,this[_0x179f3c(0x268)]=_0x3fa09f[_0x179f3c(0x20a)],this[_0x179f3c(0x24c)]=_0x3fa09f['HTMLAllCollection'],this[_0x179f3c(0x179)]=Object[_0x179f3c(0x1f2)],this[_0x179f3c(0x205)]=Object['getOwnPropertyNames'],this['_Symbol']=_0x3fa09f[_0x179f3c(0x18e)],this[_0x179f3c(0x265)]=RegExp[_0x179f3c(0x269)]['toString'],this[_0x179f3c(0x17a)]=Date['prototype'][_0x179f3c(0x252)];}['serialize'](_0x40d6a8,_0x554cac,_0x52039e,_0xacf72f){var _0x57ff23=_0x1a0229,_0x27498f=this,_0x3d1269=_0x52039e[_0x57ff23(0x1a4)];function _0x352c7e(_0x319167,_0x1cb4b8,_0x46d708){var _0x25615d=_0x57ff23;_0x1cb4b8[_0x25615d(0x21d)]='unknown',_0x1cb4b8[_0x25615d(0x195)]=_0x319167['message'],_0x3294e4=_0x46d708[_0x25615d(0x198)][_0x25615d(0x24f)],_0x46d708[_0x25615d(0x198)][_0x25615d(0x24f)]=_0x1cb4b8,_0x27498f[_0x25615d(0x1c1)](_0x1cb4b8,_0x46d708);}let _0x203bc0;_0x3fa09f[_0x57ff23(0x1ba)]&&(_0x203bc0=_0x3fa09f[_0x57ff23(0x1ba)]['error'],_0x203bc0&&(_0x3fa09f[_0x57ff23(0x1ba)][_0x57ff23(0x195)]=function(){}));try{try{_0x52039e[_0x57ff23(0x233)]++,_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x1cb)]['push'](_0x554cac);var _0x507685,_0x2b5a2a,_0x5a02a3,_0x5cc2d1,_0x191590=[],_0x5d6631=[],_0xeb0b4,_0x430667=this[_0x57ff23(0x20e)](_0x554cac),_0x5ec1b1=_0x430667===_0x57ff23(0x1ee),_0x9c9d40=!0x1,_0x359db7=_0x430667===_0x57ff23(0x1fa),_0x55f196=this[_0x57ff23(0x20f)](_0x430667),_0x1c958d=this[_0x57ff23(0x26d)](_0x430667),_0x26f774=_0x55f196||_0x1c958d,_0x28c67b={},_0x34603f=0x0,_0x22ac07=!0x1,_0x3294e4,_0x468afa=/^(([1-9]{1}[0-9]*)|0)$/;if(_0x52039e['depth']){if(_0x5ec1b1){if(_0x2b5a2a=_0x554cac[_0x57ff23(0x1b6)],_0x2b5a2a>_0x52039e[_0x57ff23(0x16d)]){for(_0x5a02a3=0x0,_0x5cc2d1=_0x52039e[_0x57ff23(0x16d)],_0x507685=_0x5a02a3;_0x507685<_0x5cc2d1;_0x507685++)_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x20b)](_0x191590,_0x554cac,_0x430667,_0x507685,_0x52039e));_0x40d6a8[_0x57ff23(0x1d1)]=!0x0;}else{for(_0x5a02a3=0x0,_0x5cc2d1=_0x2b5a2a,_0x507685=_0x5a02a3;_0x507685<_0x5cc2d1;_0x507685++)_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x20b)](_0x191590,_0x554cac,_0x430667,_0x507685,_0x52039e));}_0x52039e[_0x57ff23(0x19e)]+=_0x5d6631[_0x57ff23(0x1b6)];}if(!(_0x430667===_0x57ff23(0x1d9)||_0x430667===_0x57ff23(0x20a))&&!_0x55f196&&_0x430667!=='String'&&_0x430667!==_0x57ff23(0x261)&&_0x430667!==_0x57ff23(0x230)){var _0x48cb10=_0xacf72f[_0x57ff23(0x18f)]||_0x52039e['props'];if(this[_0x57ff23(0x194)](_0x554cac)?(_0x507685=0x0,_0x554cac[_0x57ff23(0x22d)](function(_0x5e3879){var _0x4028da=_0x57ff23;if(_0x34603f++,_0x52039e[_0x4028da(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;return;}if(!_0x52039e[_0x4028da(0x1b4)]&&_0x52039e['autoExpand']&&_0x52039e[_0x4028da(0x19e)]>_0x52039e[_0x4028da(0x1a3)]){_0x22ac07=!0x0;return;}_0x5d6631['push'](_0x27498f[_0x4028da(0x20b)](_0x191590,_0x554cac,'Set',_0x507685++,_0x52039e,function(_0x326cff){return function(){return _0x326cff;};}(_0x5e3879)));})):this['_isMap'](_0x554cac)&&_0x554cac[_0x57ff23(0x22d)](function(_0x21d5e9,_0x1bbf3a){var _0x572ec4=_0x57ff23;if(_0x34603f++,_0x52039e[_0x572ec4(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;return;}if(!_0x52039e[_0x572ec4(0x1b4)]&&_0x52039e[_0x572ec4(0x1a4)]&&_0x52039e['autoExpandPropertyCount']>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;return;}var _0x1e13a8=_0x1bbf3a[_0x572ec4(0x252)]();_0x1e13a8[_0x572ec4(0x1b6)]>0x64&&(_0x1e13a8=_0x1e13a8[_0x572ec4(0x16c)](0x0,0x64)+_0x572ec4(0x19f)),_0x5d6631[_0x572ec4(0x26e)](_0x27498f[_0x572ec4(0x20b)](_0x191590,_0x554cac,'Map',_0x1e13a8,_0x52039e,function(_0x5e237b){return function(){return _0x5e237b;};}(_0x21d5e9)));}),!_0x9c9d40){try{for(_0xeb0b4 in _0x554cac)if(!(_0x5ec1b1&&_0x468afa[_0x57ff23(0x1b7)](_0xeb0b4))&&!this[_0x57ff23(0x267)](_0x554cac,_0xeb0b4,_0x52039e)){if(_0x34603f++,_0x52039e[_0x57ff23(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;break;}if(!_0x52039e[_0x57ff23(0x1b4)]&&_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e['autoExpandPropertyCount']>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;break;}_0x5d6631[_0x57ff23(0x26e)](_0x27498f[_0x57ff23(0x234)](_0x191590,_0x28c67b,_0x554cac,_0x430667,_0xeb0b4,_0x52039e));}}catch{}if(_0x28c67b[_0x57ff23(0x173)]=!0x0,_0x359db7&&(_0x28c67b[_0x57ff23(0x1b5)]=!0x0),!_0x22ac07){var _0xb9ad21=[][_0x57ff23(0x256)](this[_0x57ff23(0x205)](_0x554cac))[_0x57ff23(0x256)](this['_getOwnPropertySymbols'](_0x554cac));for(_0x507685=0x0,_0x2b5a2a=_0xb9ad21[_0x57ff23(0x1b6)];_0x507685<_0x2b5a2a;_0x507685++)if(_0xeb0b4=_0xb9ad21[_0x507685],!(_0x5ec1b1&&_0x468afa[_0x57ff23(0x1b7)](_0xeb0b4[_0x57ff23(0x252)]()))&&!this[_0x57ff23(0x267)](_0x554cac,_0xeb0b4,_0x52039e)&&!_0x28c67b[_0x57ff23(0x1ab)+_0xeb0b4[_0x57ff23(0x252)]()]){if(_0x34603f++,_0x52039e[_0x57ff23(0x19e)]++,_0x34603f>_0x48cb10){_0x22ac07=!0x0;break;}if(!_0x52039e[_0x57ff23(0x1b4)]&&_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x19e)]>_0x52039e['autoExpandLimit']){_0x22ac07=!0x0;break;}_0x5d6631['push'](_0x27498f['_addObjectProperty'](_0x191590,_0x28c67b,_0x554cac,_0x430667,_0xeb0b4,_0x52039e));}}}}}if(_0x40d6a8['type']=_0x430667,_0x26f774?(_0x40d6a8[_0x57ff23(0x184)]=_0x554cac['valueOf'](),this[_0x57ff23(0x1e7)](_0x430667,_0x40d6a8,_0x52039e,_0xacf72f)):_0x430667==='date'?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x17a)][_0x57ff23(0x21a)](_0x554cac):_0x430667===_0x57ff23(0x230)?_0x40d6a8[_0x57ff23(0x184)]=_0x554cac[_0x57ff23(0x252)]():_0x430667===_0x57ff23(0x244)?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x265)][_0x57ff23(0x21a)](_0x554cac):_0x430667===_0x57ff23(0x1dc)&&this['_Symbol']?_0x40d6a8[_0x57ff23(0x184)]=this[_0x57ff23(0x1f9)]['prototype'][_0x57ff23(0x252)][_0x57ff23(0x21a)](_0x554cac):!_0x52039e[_0x57ff23(0x1fe)]&&!(_0x430667===_0x57ff23(0x1d9)||_0x430667==='undefined')&&(delete _0x40d6a8[_0x57ff23(0x184)],_0x40d6a8[_0x57ff23(0x1aa)]=!0x0),_0x22ac07&&(_0x40d6a8[_0x57ff23(0x19d)]=!0x0),_0x3294e4=_0x52039e['node'][_0x57ff23(0x24f)],_0x52039e['node'][_0x57ff23(0x24f)]=_0x40d6a8,this[_0x57ff23(0x1c1)](_0x40d6a8,_0x52039e),_0x5d6631[_0x57ff23(0x1b6)]){for(_0x507685=0x0,_0x2b5a2a=_0x5d6631[_0x57ff23(0x1b6)];_0x507685<_0x2b5a2a;_0x507685++)_0x5d6631[_0x507685](_0x507685);}_0x191590[_0x57ff23(0x1b6)]&&(_0x40d6a8[_0x57ff23(0x18f)]=_0x191590);}catch(_0x3e590f){_0x352c7e(_0x3e590f,_0x40d6a8,_0x52039e);}this[_0x57ff23(0x1ad)](_0x554cac,_0x40d6a8),this[_0x57ff23(0x1f3)](_0x40d6a8,_0x52039e),_0x52039e[_0x57ff23(0x198)][_0x57ff23(0x24f)]=_0x3294e4,_0x52039e[_0x57ff23(0x233)]--,_0x52039e[_0x57ff23(0x1a4)]=_0x3d1269,_0x52039e[_0x57ff23(0x1a4)]&&_0x52039e[_0x57ff23(0x1cb)][_0x57ff23(0x21b)]();}finally{_0x203bc0&&(_0x3fa09f[_0x57ff23(0x1ba)][_0x57ff23(0x195)]=_0x203bc0);}return _0x40d6a8;}[_0x1a0229(0x1a7)](_0x5bc7aa){return Object['getOwnPropertySymbols']?Object['getOwnPropertySymbols'](_0x5bc7aa):[];}['_isSet'](_0x2b9132){var _0x64ad7f=_0x1a0229;return!!(_0x2b9132&&_0x3fa09f[_0x64ad7f(0x1af)]&&this[_0x64ad7f(0x215)](_0x2b9132)===_0x64ad7f(0x168)&&_0x2b9132[_0x64ad7f(0x22d)]);}['_blacklistedProperty'](_0x6da349,_0x27887d,_0x3ab798){var _0x15f72a=_0x1a0229;if(!_0x3ab798[_0x15f72a(0x207)]){let _0x4b858a=this[_0x15f72a(0x179)](_0x6da349,_0x27887d);if(_0x4b858a&&_0x4b858a[_0x15f72a(0x1e8)])return!0x0;}return _0x3ab798['noFunctions']?typeof _0x6da349[_0x27887d]==_0x15f72a(0x1fa):!0x1;}[_0x1a0229(0x20e)](_0x46e341){var _0xed104=_0x1a0229,_0x842a19='';return _0x842a19=typeof _0x46e341,_0x842a19==='object'?this[_0xed104(0x215)](_0x46e341)==='[object\\x20Array]'?_0x842a19='array':this[_0xed104(0x215)](_0x46e341)===_0xed104(0x231)?_0x842a19=_0xed104(0x1a0):this[_0xed104(0x215)](_0x46e341)===_0xed104(0x25c)?_0x842a19='bigint':_0x46e341===null?_0x842a19='null':_0x46e341['constructor']&&(_0x842a19=_0x46e341[_0xed104(0x246)][_0xed104(0x229)]||_0x842a19):_0x842a19===_0xed104(0x20a)&&this[_0xed104(0x24c)]&&_0x46e341 instanceof this['_HTMLAllCollection']&&(_0x842a19=_0xed104(0x1b9)),_0x842a19;}[_0x1a0229(0x215)](_0x3a4a42){var _0x52978d=_0x1a0229;return Object[_0x52978d(0x269)][_0x52978d(0x252)][_0x52978d(0x21a)](_0x3a4a42);}[_0x1a0229(0x20f)](_0x344afd){var _0x18ea96=_0x1a0229;return _0x344afd===_0x18ea96(0x169)||_0x344afd===_0x18ea96(0x1e3)||_0x344afd===_0x18ea96(0x1b1);}[_0x1a0229(0x26d)](_0x268fb2){var _0x30d14e=_0x1a0229;return _0x268fb2===_0x30d14e(0x250)||_0x268fb2===_0x30d14e(0x1c2)||_0x268fb2===_0x30d14e(0x232);}[_0x1a0229(0x20b)](_0x5a4048,_0xed6d73,_0x496d2d,_0x5200b2,_0x2ad9ae,_0x2ae99d){var _0x3ea8a2=this;return function(_0x5147f2){var _0x5c347b=_0x57eb,_0x5a16fe=_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x24f)],_0x344d27=_0x2ad9ae['node'][_0x5c347b(0x211)],_0x4187de=_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x192)];_0x2ad9ae['node']['parent']=_0x5a16fe,_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x211)]=typeof _0x5200b2==_0x5c347b(0x1b1)?_0x5200b2:_0x5147f2,_0x5a4048[_0x5c347b(0x26e)](_0x3ea8a2['_property'](_0xed6d73,_0x496d2d,_0x5200b2,_0x2ad9ae,_0x2ae99d)),_0x2ad9ae['node'][_0x5c347b(0x192)]=_0x4187de,_0x2ad9ae[_0x5c347b(0x198)][_0x5c347b(0x211)]=_0x344d27;};}[_0x1a0229(0x234)](_0x3e1fde,_0x3d8d61,_0x475fe8,_0x5aec1a,_0x4ff186,_0x21a460,_0x5c688a){var _0x547a69=_0x1a0229,_0x5e16c3=this;return _0x3d8d61['_p_'+_0x4ff186[_0x547a69(0x252)]()]=!0x0,function(_0x176a2d){var _0x5d8009=_0x547a69,_0x5cf964=_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x24f)],_0x3bc9c4=_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)],_0x30229a=_0x21a460['node'][_0x5d8009(0x192)];_0x21a460[_0x5d8009(0x198)]['parent']=_0x5cf964,_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)]=_0x176a2d,_0x3e1fde['push'](_0x5e16c3[_0x5d8009(0x23c)](_0x475fe8,_0x5aec1a,_0x4ff186,_0x21a460,_0x5c688a)),_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x192)]=_0x30229a,_0x21a460[_0x5d8009(0x198)][_0x5d8009(0x211)]=_0x3bc9c4;};}[_0x1a0229(0x23c)](_0x1354ea,_0x549fc8,_0x34c184,_0x3ea67a,_0x187926){var _0x54c1c6=_0x1a0229,_0x517077=this;_0x187926||(_0x187926=function(_0x560c04,_0x358223){return _0x560c04[_0x358223];});var _0x4b95cc=_0x34c184[_0x54c1c6(0x252)](),_0x2df5ee=_0x3ea67a[_0x54c1c6(0x1e0)]||{},_0x27230e=_0x3ea67a[_0x54c1c6(0x1fe)],_0x58094a=_0x3ea67a[_0x54c1c6(0x1b4)];try{var _0x551f2a=this[_0x54c1c6(0x249)](_0x1354ea),_0x258e78=_0x4b95cc;_0x551f2a&&_0x258e78[0x0]==='\\x27'&&(_0x258e78=_0x258e78[_0x54c1c6(0x193)](0x1,_0x258e78[_0x54c1c6(0x1b6)]-0x2));var _0x167185=_0x3ea67a[_0x54c1c6(0x1e0)]=_0x2df5ee[_0x54c1c6(0x1ab)+_0x258e78];_0x167185&&(_0x3ea67a[_0x54c1c6(0x1fe)]=_0x3ea67a['depth']+0x1),_0x3ea67a[_0x54c1c6(0x1b4)]=!!_0x167185;var _0x5bb1a9=typeof _0x34c184==_0x54c1c6(0x1dc),_0x4b5ab0={'name':_0x5bb1a9||_0x551f2a?_0x4b95cc:this[_0x54c1c6(0x20d)](_0x4b95cc)};if(_0x5bb1a9&&(_0x4b5ab0['symbol']=!0x0),!(_0x549fc8===_0x54c1c6(0x1ee)||_0x549fc8===_0x54c1c6(0x242))){var _0x12e894=this[_0x54c1c6(0x179)](_0x1354ea,_0x34c184);if(_0x12e894&&(_0x12e894['set']&&(_0x4b5ab0[_0x54c1c6(0x1ce)]=!0x0),_0x12e894[_0x54c1c6(0x1e8)]&&!_0x167185&&!_0x3ea67a[_0x54c1c6(0x207)]))return _0x4b5ab0[_0x54c1c6(0x235)]=!0x0,this[_0x54c1c6(0x17b)](_0x4b5ab0,_0x3ea67a),_0x4b5ab0;}var _0x117dac;try{_0x117dac=_0x187926(_0x1354ea,_0x34c184);}catch(_0x552030){return _0x4b5ab0={'name':_0x4b95cc,'type':_0x54c1c6(0x1b0),'error':_0x552030[_0x54c1c6(0x203)]},this['_processTreeNodeResult'](_0x4b5ab0,_0x3ea67a),_0x4b5ab0;}var _0x353809=this[_0x54c1c6(0x20e)](_0x117dac),_0x585700=this[_0x54c1c6(0x20f)](_0x353809);if(_0x4b5ab0[_0x54c1c6(0x21d)]=_0x353809,_0x585700)this[_0x54c1c6(0x17b)](_0x4b5ab0,_0x3ea67a,_0x117dac,function(){var _0x44f506=_0x54c1c6;_0x4b5ab0['value']=_0x117dac['valueOf'](),!_0x167185&&_0x517077[_0x44f506(0x1e7)](_0x353809,_0x4b5ab0,_0x3ea67a,{});});else{var _0x4920c5=_0x3ea67a[_0x54c1c6(0x1a4)]&&_0x3ea67a[_0x54c1c6(0x233)]<_0x3ea67a[_0x54c1c6(0x1b8)]&&_0x3ea67a[_0x54c1c6(0x1cb)][_0x54c1c6(0x224)](_0x117dac)<0x0&&_0x353809!==_0x54c1c6(0x1fa)&&_0x3ea67a[_0x54c1c6(0x19e)]<_0x3ea67a['autoExpandLimit'];_0x4920c5||_0x3ea67a[_0x54c1c6(0x233)]<_0x27230e||_0x167185?(this['serialize'](_0x4b5ab0,_0x117dac,_0x3ea67a,_0x167185||{}),this[_0x54c1c6(0x1ad)](_0x117dac,_0x4b5ab0)):this['_processTreeNodeResult'](_0x4b5ab0,_0x3ea67a,_0x117dac,function(){var _0x57d325=_0x54c1c6;_0x353809===_0x57d325(0x1d9)||_0x353809===_0x57d325(0x20a)||(delete _0x4b5ab0[_0x57d325(0x184)],_0x4b5ab0['capped']=!0x0);});}return _0x4b5ab0;}finally{_0x3ea67a[_0x54c1c6(0x1e0)]=_0x2df5ee,_0x3ea67a[_0x54c1c6(0x1fe)]=_0x27230e,_0x3ea67a[_0x54c1c6(0x1b4)]=_0x58094a;}}[_0x1a0229(0x1e7)](_0x56ea77,_0xe68ac4,_0x19079c,_0x151ab0){var _0x4ce5e3=_0x1a0229,_0x3ddd62=_0x151ab0[_0x4ce5e3(0x1de)]||_0x19079c[_0x4ce5e3(0x1de)];if((_0x56ea77===_0x4ce5e3(0x1e3)||_0x56ea77===_0x4ce5e3(0x1c2))&&_0xe68ac4['value']){let _0x1e81f3=_0xe68ac4[_0x4ce5e3(0x184)][_0x4ce5e3(0x1b6)];_0x19079c['allStrLength']+=_0x1e81f3,_0x19079c[_0x4ce5e3(0x200)]>_0x19079c[_0x4ce5e3(0x1c7)]?(_0xe68ac4[_0x4ce5e3(0x1aa)]='',delete _0xe68ac4[_0x4ce5e3(0x184)]):_0x1e81f3>_0x3ddd62&&(_0xe68ac4[_0x4ce5e3(0x1aa)]=_0xe68ac4[_0x4ce5e3(0x184)]['substr'](0x0,_0x3ddd62),delete _0xe68ac4['value']);}}[_0x1a0229(0x249)](_0x394563){var _0x5a0544=_0x1a0229;return!!(_0x394563&&_0x3fa09f[_0x5a0544(0x1ec)]&&this[_0x5a0544(0x215)](_0x394563)===_0x5a0544(0x23a)&&_0x394563[_0x5a0544(0x22d)]);}[_0x1a0229(0x20d)](_0x182c1e){var _0x45e012=_0x1a0229;if(_0x182c1e[_0x45e012(0x1f4)](/^\\d+$/))return _0x182c1e;var _0x3a5b42;try{_0x3a5b42=JSON['stringify'](''+_0x182c1e);}catch{_0x3a5b42='\\x22'+this[_0x45e012(0x215)](_0x182c1e)+'\\x22';}return _0x3a5b42['match'](/^\"([a-zA-Z_][a-zA-Z_0-9]*)\"$/)?_0x3a5b42=_0x3a5b42[_0x45e012(0x193)](0x1,_0x3a5b42[_0x45e012(0x1b6)]-0x2):_0x3a5b42=_0x3a5b42[_0x45e012(0x220)](/'/g,'\\x5c\\x27')['replace'](/\\\\\"/g,'\\x22')['replace'](/(^\"|\"$)/g,'\\x27'),_0x3a5b42;}[_0x1a0229(0x17b)](_0x42bdc4,_0x2913cb,_0x26c947,_0x1a1ce7){var _0x58d5f8=_0x1a0229;this[_0x58d5f8(0x1c1)](_0x42bdc4,_0x2913cb),_0x1a1ce7&&_0x1a1ce7(),this[_0x58d5f8(0x1ad)](_0x26c947,_0x42bdc4),this[_0x58d5f8(0x1f3)](_0x42bdc4,_0x2913cb);}[_0x1a0229(0x1c1)](_0x4e11a0,_0xbbeada){var _0x1a94cb=_0x1a0229;this[_0x1a94cb(0x181)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x23e)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x22a)](_0x4e11a0,_0xbbeada),this[_0x1a94cb(0x260)](_0x4e11a0,_0xbbeada);}[_0x1a0229(0x181)](_0x19de26,_0x41a25d){}[_0x1a0229(0x23e)](_0x1356cd,_0x4a5fac){}[_0x1a0229(0x1d0)](_0x1cd658,_0x4a1747){}[_0x1a0229(0x1f6)](_0x3cb148){var _0x43c24f=_0x1a0229;return _0x3cb148===this[_0x43c24f(0x268)];}[_0x1a0229(0x1f3)](_0x283677,_0x5afa0e){var _0x7f88c3=_0x1a0229;this[_0x7f88c3(0x1d0)](_0x283677,_0x5afa0e),this['_setNodeExpandableState'](_0x283677),_0x5afa0e[_0x7f88c3(0x1a9)]&&this[_0x7f88c3(0x1fd)](_0x283677),this[_0x7f88c3(0x1d4)](_0x283677,_0x5afa0e),this['_addLoadNode'](_0x283677,_0x5afa0e),this[_0x7f88c3(0x167)](_0x283677);}[_0x1a0229(0x1ad)](_0x13930e,_0x569f4b){var _0x488226=_0x1a0229;try{_0x13930e&&typeof _0x13930e[_0x488226(0x1b6)]==_0x488226(0x1b1)&&(_0x569f4b[_0x488226(0x1b6)]=_0x13930e[_0x488226(0x1b6)]);}catch{}if(_0x569f4b['type']===_0x488226(0x1b1)||_0x569f4b[_0x488226(0x21d)]===_0x488226(0x232)){if(isNaN(_0x569f4b[_0x488226(0x184)]))_0x569f4b[_0x488226(0x1df)]=!0x0,delete _0x569f4b[_0x488226(0x184)];else switch(_0x569f4b[_0x488226(0x184)]){case Number[_0x488226(0x236)]:_0x569f4b[_0x488226(0x239)]=!0x0,delete _0x569f4b['value'];break;case Number[_0x488226(0x228)]:_0x569f4b[_0x488226(0x1fc)]=!0x0,delete _0x569f4b['value'];break;case 0x0:this[_0x488226(0x19b)](_0x569f4b[_0x488226(0x184)])&&(_0x569f4b[_0x488226(0x178)]=!0x0);break;}}else _0x569f4b[_0x488226(0x21d)]===_0x488226(0x1fa)&&typeof _0x13930e['name']==_0x488226(0x1e3)&&_0x13930e[_0x488226(0x229)]&&_0x569f4b[_0x488226(0x229)]&&_0x13930e['name']!==_0x569f4b['name']&&(_0x569f4b['funcName']=_0x13930e[_0x488226(0x229)]);}[_0x1a0229(0x19b)](_0x2e602c){var _0x3d950b=_0x1a0229;return 0x1/_0x2e602c===Number[_0x3d950b(0x228)];}[_0x1a0229(0x1fd)](_0x429dd2){var _0x312c75=_0x1a0229;!_0x429dd2[_0x312c75(0x18f)]||!_0x429dd2['props'][_0x312c75(0x1b6)]||_0x429dd2[_0x312c75(0x21d)]===_0x312c75(0x1ee)||_0x429dd2[_0x312c75(0x21d)]==='Map'||_0x429dd2[_0x312c75(0x21d)]===_0x312c75(0x1af)||_0x429dd2[_0x312c75(0x18f)]['sort'](function(_0x612321,_0x1df7f8){var _0x3c5dab=_0x312c75,_0x1fba1b=_0x612321[_0x3c5dab(0x229)][_0x3c5dab(0x1ed)](),_0x1143f9=_0x1df7f8[_0x3c5dab(0x229)][_0x3c5dab(0x1ed)]();return _0x1fba1b<_0x1143f9?-0x1:_0x1fba1b>_0x1143f9?0x1:0x0;});}[_0x1a0229(0x1d4)](_0x3895f9,_0x48aadd){var _0x351d89=_0x1a0229;if(!(_0x48aadd['noFunctions']||!_0x3895f9[_0x351d89(0x18f)]||!_0x3895f9['props'][_0x351d89(0x1b6)])){for(var _0x4d9e5c=[],_0x23eb96=[],_0xd62b75=0x0,_0x5a2dfe=_0x3895f9[_0x351d89(0x18f)][_0x351d89(0x1b6)];_0xd62b75<_0x5a2dfe;_0xd62b75++){var _0x4c17b7=_0x3895f9[_0x351d89(0x18f)][_0xd62b75];_0x4c17b7[_0x351d89(0x21d)]===_0x351d89(0x1fa)?_0x4d9e5c[_0x351d89(0x26e)](_0x4c17b7):_0x23eb96[_0x351d89(0x26e)](_0x4c17b7);}if(!(!_0x23eb96[_0x351d89(0x1b6)]||_0x4d9e5c[_0x351d89(0x1b6)]<=0x1)){_0x3895f9[_0x351d89(0x18f)]=_0x23eb96;var _0x2b33a7={'functionsNode':!0x0,'props':_0x4d9e5c};this[_0x351d89(0x181)](_0x2b33a7,_0x48aadd),this['_setNodeLabel'](_0x2b33a7,_0x48aadd),this[_0x351d89(0x1ae)](_0x2b33a7),this[_0x351d89(0x260)](_0x2b33a7,_0x48aadd),_0x2b33a7['id']+='\\x20f',_0x3895f9[_0x351d89(0x18f)]['unshift'](_0x2b33a7);}}}[_0x1a0229(0x243)](_0x4abe08,_0x5b7c75){}['_setNodeExpandableState'](_0x59678d){}[_0x1a0229(0x212)](_0xdf985c){var _0x2524e2=_0x1a0229;return Array[_0x2524e2(0x23d)](_0xdf985c)||typeof _0xdf985c==_0x2524e2(0x206)&&this[_0x2524e2(0x215)](_0xdf985c)==='[object\\x20Array]';}['_setNodePermissions'](_0x3fb9a6,_0x4e6343){}['_cleanNode'](_0x23c336){var _0x1d7070=_0x1a0229;delete _0x23c336[_0x1d7070(0x253)],delete _0x23c336[_0x1d7070(0x1e2)],delete _0x23c336[_0x1d7070(0x18b)];}[_0x1a0229(0x22a)](_0x1acfab,_0x4597d6){}}let _0x3c89ee=new _0x111409(),_0x5ec458={'props':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x18f)]||0x64,'elements':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x16d)]||0x64,'strLength':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1de)]||0x400*0x32,'totalStrLength':_0x3b9fc4['defaultLimits'][_0x1a0229(0x1c7)]||0x400*0x32,'autoExpandLimit':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1a3)]||0x1388,'autoExpandMaxDepth':_0x3b9fc4[_0x1a0229(0x223)][_0x1a0229(0x1b8)]||0xa},_0x3a09dd={'props':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x18f)]||0x5,'elements':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x16d)]||0x5,'strLength':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x1de)]||0x100,'totalStrLength':_0x3b9fc4['reducedLimits'][_0x1a0229(0x1c7)]||0x100*0x3,'autoExpandLimit':_0x3b9fc4['reducedLimits']['autoExpandLimit']||0x1e,'autoExpandMaxDepth':_0x3b9fc4[_0x1a0229(0x1cd)][_0x1a0229(0x1b8)]||0x2};function _0x4b3a63(_0x205bfc,_0x18b986,_0x503f06,_0x274aab,_0x31f6c4,_0x454f1c){var _0x290454=_0x1a0229;let _0x2396c5,_0x2aa929;try{_0x2aa929=_0xac187d(),_0x2396c5=_0x12e5a6[_0x18b986],!_0x2396c5||_0x2aa929-_0x2396c5['ts']>_0x151ea4['perLogpoint'][_0x290454(0x1f8)]&&_0x2396c5[_0x290454(0x1d6)]&&_0x2396c5[_0x290454(0x26a)]/_0x2396c5[_0x290454(0x1d6)]<_0x151ea4[_0x290454(0x18d)]['resetOnProcessingTimeAverageMs']?(_0x12e5a6[_0x18b986]=_0x2396c5={'count':0x0,'time':0x0,'ts':_0x2aa929},_0x12e5a6[_0x290454(0x257)]={}):_0x2aa929-_0x12e5a6[_0x290454(0x257)]['ts']>_0x151ea4[_0x290454(0x1be)][_0x290454(0x1f8)]&&_0x12e5a6[_0x290454(0x257)][_0x290454(0x1d6)]&&_0x12e5a6['hits'][_0x290454(0x26a)]/_0x12e5a6['hits'][_0x290454(0x1d6)]<_0x151ea4['global'][_0x290454(0x19c)]&&(_0x12e5a6[_0x290454(0x257)]={});let _0x465570=[],_0x401ade=_0x2396c5['reduceLimits']||_0x12e5a6[_0x290454(0x257)][_0x290454(0x1f1)]?_0x3a09dd:_0x5ec458,_0x5527b0=_0x17275e=>{var _0x16c392=_0x290454;let _0x3d2b1a={};return _0x3d2b1a[_0x16c392(0x18f)]=_0x17275e[_0x16c392(0x18f)],_0x3d2b1a[_0x16c392(0x16d)]=_0x17275e[_0x16c392(0x16d)],_0x3d2b1a[_0x16c392(0x1de)]=_0x17275e[_0x16c392(0x1de)],_0x3d2b1a['totalStrLength']=_0x17275e[_0x16c392(0x1c7)],_0x3d2b1a['autoExpandLimit']=_0x17275e[_0x16c392(0x1a3)],_0x3d2b1a[_0x16c392(0x1b8)]=_0x17275e[_0x16c392(0x1b8)],_0x3d2b1a[_0x16c392(0x1a9)]=!0x1,_0x3d2b1a[_0x16c392(0x175)]=!_0x44ab87,_0x3d2b1a[_0x16c392(0x1fe)]=0x1,_0x3d2b1a[_0x16c392(0x233)]=0x0,_0x3d2b1a[_0x16c392(0x176)]=_0x16c392(0x24a),_0x3d2b1a[_0x16c392(0x1e6)]=_0x16c392(0x18c),_0x3d2b1a[_0x16c392(0x1a4)]=!0x0,_0x3d2b1a[_0x16c392(0x1cb)]=[],_0x3d2b1a[_0x16c392(0x19e)]=0x0,_0x3d2b1a[_0x16c392(0x207)]=_0x3b9fc4['resolveGetters'],_0x3d2b1a[_0x16c392(0x200)]=0x0,_0x3d2b1a[_0x16c392(0x198)]={'current':void 0x0,'parent':void 0x0,'index':0x0},_0x3d2b1a;};for(var _0x7c60bb=0x0;_0x7c60bb<_0x31f6c4[_0x290454(0x1b6)];_0x7c60bb++)_0x465570['push'](_0x3c89ee[_0x290454(0x245)]({'timeNode':_0x205bfc===_0x290454(0x26a)||void 0x0},_0x31f6c4[_0x7c60bb],_0x5527b0(_0x401ade),{}));if(_0x205bfc===_0x290454(0x255)||_0x205bfc===_0x290454(0x195)){let _0x37f42a=Error[_0x290454(0x188)];try{Error[_0x290454(0x188)]=0x1/0x0,_0x465570[_0x290454(0x26e)](_0x3c89ee[_0x290454(0x245)]({'stackNode':!0x0},new Error()[_0x290454(0x217)],_0x5527b0(_0x401ade),{'strLength':0x1/0x0}));}finally{Error[_0x290454(0x188)]=_0x37f42a;}}return{'method':_0x290454(0x186),'version':_0x24945e,'args':[{'ts':_0x503f06,'session':_0x274aab,'args':_0x465570,'id':_0x18b986,'context':_0x454f1c}]};}catch(_0x4d9d42){return{'method':'log','version':_0x24945e,'args':[{'ts':_0x503f06,'session':_0x274aab,'args':[{'type':'unknown','error':_0x4d9d42&&_0x4d9d42[_0x290454(0x203)]}],'id':_0x18b986,'context':_0x454f1c}]};}finally{try{if(_0x2396c5&&_0x2aa929){let _0x120976=_0xac187d();_0x2396c5[_0x290454(0x1d6)]++,_0x2396c5['time']+=_0x3e3008(_0x2aa929,_0x120976),_0x2396c5['ts']=_0x120976,_0x12e5a6['hits'][_0x290454(0x1d6)]++,_0x12e5a6['hits'][_0x290454(0x26a)]+=_0x3e3008(_0x2aa929,_0x120976),_0x12e5a6[_0x290454(0x257)]['ts']=_0x120976,(_0x2396c5[_0x290454(0x1d6)]>_0x151ea4[_0x290454(0x18d)][_0x290454(0x237)]||_0x2396c5['time']>_0x151ea4[_0x290454(0x18d)]['reduceOnAccumulatedProcessingTimeMs'])&&(_0x2396c5[_0x290454(0x1f1)]=!0x0),(_0x12e5a6[_0x290454(0x257)][_0x290454(0x1d6)]>_0x151ea4[_0x290454(0x1be)][_0x290454(0x237)]||_0x12e5a6[_0x290454(0x257)][_0x290454(0x26a)]>_0x151ea4[_0x290454(0x1be)][_0x290454(0x1e9)])&&(_0x12e5a6['hits'][_0x290454(0x1f1)]=!0x0);}}catch{}}}return _0x4b3a63;}((_0x128c8b,_0x130c59,_0x2d3050,_0xddf41c,_0x441d00,_0x1b84a8,_0x2217b2,_0x5b051f,_0x2b48ca,_0x490710,_0x5ab68a,_0xebfbce)=>{var _0x48efd0=_0x306708;if(_0x128c8b[_0x48efd0(0x1bd)])return _0x128c8b[_0x48efd0(0x1bd)];let _0x2831c5={'consoleLog':()=>{},'consoleTrace':()=>{},'consoleTime':()=>{},'consoleTimeEnd':()=>{},'autoLog':()=>{},'autoLogMany':()=>{},'autoTraceMany':()=>{},'coverage':()=>{},'autoTrace':()=>{},'autoTime':()=>{},'autoTimeEnd':()=>{}};if(!J(_0x128c8b,_0x5b051f,_0x441d00))return _0x128c8b[_0x48efd0(0x1bd)]=_0x2831c5,_0x128c8b[_0x48efd0(0x1bd)];let _0x363e28=B(_0x128c8b),_0x2309ed=_0x363e28['elapsed'],_0x2a1744=_0x363e28['timeStamp'],_0x50681b=_0x363e28[_0x48efd0(0x1fb)],_0x3b9026={'hits':{},'ts':{}},_0x194465=Y(_0x128c8b,_0x2b48ca,_0x3b9026,_0x1b84a8,_0xebfbce),_0x4462b9=(_0x4cfe49,_0x35915b,_0x58ab0e,_0x24999c,_0x16c273,_0x2d2fae)=>{var _0x10dcd2=_0x48efd0;let _0x25b8f1=_0x128c8b[_0x10dcd2(0x1bd)];try{return _0x128c8b['_console_ninja']=_0x2831c5,_0x194465(_0x4cfe49,_0x35915b,_0x58ab0e,_0x24999c,_0x16c273,_0x2d2fae);}finally{_0x128c8b[_0x10dcd2(0x1bd)]=_0x25b8f1;}},_0x45c9b2=_0xa045db=>{_0x3b9026['ts'][_0xa045db]=_0x2a1744();},_0x5dfe65=(_0x18fdeb,_0x1126f8)=>{let _0x42fddb=_0x3b9026['ts'][_0x1126f8];if(delete _0x3b9026['ts'][_0x1126f8],_0x42fddb){let _0x998f88=_0x2309ed(_0x42fddb,_0x2a1744());_0x246d72(_0x4462b9('time',_0x18fdeb,_0x50681b(),_0x26bea9,[_0x998f88],_0x1126f8));}},_0x10aede=_0x195925=>{var _0x5c4181=_0x48efd0,_0x425e04;return _0x441d00===_0x5c4181(0x25a)&&_0x128c8b['origin']&&((_0x425e04=_0x195925==null?void 0x0:_0x195925['args'])==null?void 0x0:_0x425e04[_0x5c4181(0x1b6)])&&(_0x195925[_0x5c4181(0x23b)][0x0]['origin']=_0x128c8b[_0x5c4181(0x1a2)]),_0x195925;};_0x128c8b[_0x48efd0(0x1bd)]={'consoleLog':(_0xda0a9f,_0x9190d7)=>{var _0x257b86=_0x48efd0;_0x128c8b[_0x257b86(0x1ba)][_0x257b86(0x186)][_0x257b86(0x229)]!==_0x257b86(0x21c)&&_0x246d72(_0x4462b9('log',_0xda0a9f,_0x50681b(),_0x26bea9,_0x9190d7));},'consoleTrace':(_0x28e90d,_0x115a45)=>{var _0x3f5b82=_0x48efd0,_0x59297f,_0x582cd0;_0x128c8b['console'][_0x3f5b82(0x186)][_0x3f5b82(0x229)]!==_0x3f5b82(0x22c)&&((_0x582cd0=(_0x59297f=_0x128c8b[_0x3f5b82(0x25e)])==null?void 0x0:_0x59297f[_0x3f5b82(0x263)])!=null&&_0x582cd0['node']&&(_0x128c8b[_0x3f5b82(0x1da)]=!0x0),_0x246d72(_0x10aede(_0x4462b9(_0x3f5b82(0x255),_0x28e90d,_0x50681b(),_0x26bea9,_0x115a45))));},'consoleError':(_0x1719a2,_0x50f700)=>{var _0x18be19=_0x48efd0;_0x128c8b[_0x18be19(0x1da)]=!0x0,_0x246d72(_0x10aede(_0x4462b9(_0x18be19(0x195),_0x1719a2,_0x50681b(),_0x26bea9,_0x50f700)));},'consoleTime':_0x1b91af=>{_0x45c9b2(_0x1b91af);},'consoleTimeEnd':(_0x5e3ece,_0x45fcba)=>{_0x5dfe65(_0x45fcba,_0x5e3ece);},'autoLog':(_0x396285,_0xaf0672)=>{_0x246d72(_0x4462b9('log',_0xaf0672,_0x50681b(),_0x26bea9,[_0x396285]));},'autoLogMany':(_0xa0fc0e,_0x3df880)=>{var _0x52d754=_0x48efd0;_0x246d72(_0x4462b9(_0x52d754(0x186),_0xa0fc0e,_0x50681b(),_0x26bea9,_0x3df880));},'autoTrace':(_0x5928c5,_0x5778f0)=>{var _0x3aca45=_0x48efd0;_0x246d72(_0x10aede(_0x4462b9(_0x3aca45(0x255),_0x5778f0,_0x50681b(),_0x26bea9,[_0x5928c5])));},'autoTraceMany':(_0x214c88,_0x10d946)=>{var _0x369ebf=_0x48efd0;_0x246d72(_0x10aede(_0x4462b9(_0x369ebf(0x255),_0x214c88,_0x50681b(),_0x26bea9,_0x10d946)));},'autoTime':(_0x168d5e,_0x59e4be,_0x3bcf2b)=>{_0x45c9b2(_0x3bcf2b);},'autoTimeEnd':(_0x17c08f,_0x347576,_0x4ac253)=>{_0x5dfe65(_0x347576,_0x4ac253);},'coverage':_0x269f7a=>{var _0x4a27b2=_0x48efd0;_0x246d72({'method':_0x4a27b2(0x1a6),'version':_0x1b84a8,'args':[{'id':_0x269f7a}]});}};let _0x246d72=X(_0x128c8b,_0x130c59,_0x2d3050,_0xddf41c,_0x441d00,_0x490710,_0x5ab68a),_0x26bea9=_0x128c8b[_0x48efd0(0x24d)];return _0x128c8b['_console_ninja'];})(globalThis,_0x306708(0x16b),'62341',\"c:\\\\Users\\\\reshm\\\\.vscode\\\\extensions\\\\wallabyjs.console-ninja-1.0.467\\\\node_modules\",_0x306708(0x1ef),'1.0.0','1755951558781',_0x306708(0x177),'','',_0x306708(0x1a8),_0x306708(0x1bb));");
-}
-catch (e) {
-    console.error(e);
-} }
-; /* istanbul ignore next */
-function oo_oo(i, ...v) { try {
-    oo_cm().consoleLog(i, v);
-}
-catch (e) { } return v; }
-;
-oo_oo; /* istanbul ignore next */
-function oo_tr(i, ...v) { try {
-    oo_cm().consoleTrace(i, v);
-}
-catch (e) { } return v; }
-;
-oo_tr; /* istanbul ignore next */
-function oo_tx(i, ...v) { try {
-    oo_cm().consoleError(i, v);
-}
-catch (e) { } return v; }
-;
-oo_tx; /* istanbul ignore next */
-function oo_ts(v) { try {
-    oo_cm().consoleTime(v);
-}
-catch (e) { } return v; }
-;
-oo_ts; /* istanbul ignore next */
-function oo_te(v, i) { try {
-    oo_cm().consoleTimeEnd(v, i);
-}
-catch (e) { } return v; }
-;
-oo_te; /*eslint unicorn/no-abusive-eslint-disable:,eslint-comments/disable-enable-pair:,eslint-comments/no-unlimited-disable:,eslint-comments/no-aggregating-enable:,eslint-comments/no-duplicate-disable:,eslint-comments/no-unused-disable:,eslint-comments/no-unused-enable:,*/
 
 
 /***/ }),
@@ -50669,7 +50145,7 @@ function useAuth() {
     const { data: authState, isLoading: isAuthLoading } = (0,_tanstack_react_query__WEBPACK_IMPORTED_MODULE_3__.useQuery)({
         queryKey: ["auth"],
         queryFn: () => __awaiter(this, void 0, void 0, function* () {
-            const storedUser = localStorage.getItem("wf_hybrid_user");
+            const storedUser = localStorage.getItem("consentbit-userinfo");
             const wasExplicitlyLoggedOut = localStorage.getItem("explicitly_logged_out");
             // Return initial state if no stored user or logged out
             if (!storedUser || wasExplicitlyLoggedOut) {
@@ -50684,7 +50160,7 @@ function useAuth() {
                 const decodedToken = (0,jwt_decode__WEBPACK_IMPORTED_MODULE_0__.jwtDecode)(userData.sessionToken);
                 if (decodedToken.exp * 1000 <= Date.now()) {
                     // Token expired - clear storage
-                    localStorage.removeItem("wf_hybrid_user");
+                    localStorage.removeItem("consentbit-userinfo");
                     return { user: { firstName: "", email: "" }, sessionToken: "" };
                 }
                 // Return valid auth state
@@ -50698,7 +50174,7 @@ function useAuth() {
             }
             catch (error) {
                 // Clear invalid data
-                localStorage.removeItem("wf_hybrid_user");
+                localStorage.removeItem("consentbit-userinfo");
                 return { user: { firstName: "", email: "" }, sessionToken: "" };
             }
         }),
@@ -50740,7 +50216,7 @@ function useAuth() {
                     exp: decodedToken.exp,
                 };
                 // Update localStorage
-                localStorage.setItem("wf_hybrid_user", JSON.stringify(userData));
+                localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
                 localStorage.removeItem("explicitly_logged_out");
                 // Directly update the query data instead of invalidating
                 queryClient.setQueryData(["auth"], {
@@ -50792,7 +50268,7 @@ function useAuth() {
                 email: data.email,
                 exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
             };
-            localStorage.setItem("wf_hybrid_user", JSON.stringify(userData));
+            localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
             localStorage.removeItem("explicitly_logged_out");
             // Update React Query cache
             queryClient.setQueryData(["auth"], {
@@ -50805,7 +50281,7 @@ function useAuth() {
             return data;
         }
         catch (error) {
-            localStorage.removeItem("wf_hybrid_user");
+            localStorage.removeItem("consentbit-userinfo");
             throw error;
         }
     });
@@ -50813,7 +50289,7 @@ function useAuth() {
     const logout = () => {
         // Set logout flag and clear storage
         localStorage.setItem("explicitly_logged_out", "true");
-        localStorage.removeItem("wf_hybrid_user");
+        localStorage.removeItem("consentbit-userinfo");
         queryClient.setQueryData(["auth"], {
             user: { firstName: "", email: "" },
             sessionToken: "",
@@ -50831,7 +50307,7 @@ function useAuth() {
             }
             catch (error) {
                 // Clear any partial auth state
-                localStorage.removeItem("wf_hybrid_user");
+                localStorage.removeItem("consentbit-userinfo");
                 localStorage.setItem("explicitly_logged_out", "true");
             }
         });
@@ -51115,7 +50591,6 @@ const customCodeApi = {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = yield response.json();
-            console.log('getVisitorsData response:', data);
             return data;
         }
         catch (error) {
@@ -51375,7 +50850,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 // src/util/session.ts
 function getSessionTokenFromLocalStorage() {
-    const userinfo = localStorage.getItem("wf_hybrid_user");
+    const userinfo = localStorage.getItem("consentbit-userinfo");
     if (!userinfo)
         return null;
     try {
@@ -51384,7 +50859,7 @@ function getSessionTokenFromLocalStorage() {
     }
     catch (_a) {
         // Invalid JSON, clear it
-        localStorage.removeItem("wf_hybrid_user");
+        localStorage.removeItem("consentbit-userinfo");
         return null;
     }
 }
@@ -52197,16 +51672,6 @@ module.exports = __webpack_require__.p + "56a01b7a6a5dd5f6f771.svg";
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = __webpack_require__.p + "e1e9028fefd1f05424b9.jpg";
-
-/***/ }),
-
-/***/ "./src/assets/thumbnail.svg":
-/*!**********************************!*\
-  !*** ./src/assets/thumbnail.svg ***!
-  \**********************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-module.exports = __webpack_require__.p + "e32e0a567c4ca83597c9.svg";
 
 /***/ }),
 

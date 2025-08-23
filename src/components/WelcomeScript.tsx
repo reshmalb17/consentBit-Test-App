@@ -7,7 +7,7 @@ import "../style/welcomescript.css";
 const infologo = new URL("../assets/info-logo.svg", import.meta.url).href;
 const questionmark = new URL("../assets/question.svg", import.meta.url).href;
 const uparrow = new URL("../assets/blue up arrow.svg", import.meta.url).href;
-const thumbnail = new URL("../assets/thumbnail.svg", import.meta.url).href;
+const thumbnail = new URL("../assets/thumb.jpg", import.meta.url).href;
 
 type WelcomeScriptProps = {
   isFetchScripts: boolean;
@@ -15,7 +15,7 @@ type WelcomeScriptProps = {
 };
 
 const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ isFetchScripts,setFetchScripts }) => {
-  console.log("isFetchScripts prop in WelcomeScript:", isFetchScripts);
+
    const {bannerBooleans, popups} = useAppState();
 
   const handleNextButton = () => {

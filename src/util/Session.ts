@@ -1,13 +1,13 @@
 // src/util/session.ts
 export function getSessionTokenFromLocalStorage() {
-  const userinfo = localStorage.getItem("wf_hybrid_user");
+  const userinfo = localStorage.getItem("consentbit-userinfo");
   if (!userinfo) return null;
   try {
     const tokenss = JSON.parse(userinfo);
     return tokenss?.sessionToken || null;
   } catch {
     // Invalid JSON, clear it
-    localStorage.removeItem("wf_hybrid_user");
+    localStorage.removeItem("consentbit-userinfo");
     return null;
   }
 }

@@ -104,7 +104,7 @@ export const useAppState = () => {
   const [isCSVButtonLoading, setIsCSVButtonLoading] = useState(false);
 
   // Local storage data
-  const userinfo = localStorage.getItem("wf_hybrid_user");
+  const userinfo = localStorage.getItem("consentbit-userinfo");
   const tokenss = JSON.parse(userinfo || '{}');
   //Aniamation states 
   const [animation, setAnimation] = usePersistentState('animation', "fade");
