@@ -2680,9 +2680,7 @@ input:checked+.toggle::before {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background:
-    url('../assets/background\ dots.svg') no-repeat center/cover,
-    linear-gradient(14deg, #0B091D 18.17%, #6007E6 127.91%);
+  background: linear-gradient(14deg, #0B091D 18.17%, #6007E6 127.91%);
   border-radius: 4px;
   padding: 24px;
   text-align: center;

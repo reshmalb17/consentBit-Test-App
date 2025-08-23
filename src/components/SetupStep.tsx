@@ -26,7 +26,7 @@ const SetupStep: React.FC<SetupStepProps> = ({ onGoBack, onProceed }) => {
   const leftLines = new URL("../assets/leftlines.svg", import.meta.url).href;
   const rightLines = new URL("../assets/rightlines.svg", import.meta.url).href;
   const infologo = new URL("../assets/info-logo.svg", import.meta.url).href;
-  const youtubethumbnail = new URL("../assets/thumbnail.svg", import.meta.url).href;
+  const youtubethumbnail = new URL("../assets/Cover.jpg", import.meta.url).href;
 
   const onNeedHelp = () => {
     // Open help modal or redirect to help page
