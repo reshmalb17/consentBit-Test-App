@@ -15,7 +15,7 @@ type WelcomeScriptProps = {
 };
 
 const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ isFetchScripts,setFetchScripts }) => {
-  console.log("isFetchScripts prop in WelcomeScript:", isFetchScripts);
+
    const {bannerBooleans, popups} = useAppState();
 
   const handleNextButton = () => {
@@ -66,7 +66,7 @@ const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ isFetchScripts,setFetchScr
             <p className="ws-info-subtitle">
               Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow.
             </p>
-            <a target="_blank" className="ws-docs-link">
+            <a href="https://www.consentbit.com/help-document" target="_blank" className="ws-docs-link">
               Need help? See the docs <img src={uparrow} alt="↗" />
             </a>
           </div>

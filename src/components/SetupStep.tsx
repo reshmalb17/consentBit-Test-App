@@ -121,7 +121,7 @@ const SetupStep: React.FC<SetupStepProps> = ({ onGoBack, onProceed }) => {
                     <span className="need-help-text">Need help?</span>
                   </div>
                   <div className="setup-card-youtube-thumbnail">
-                    <a href="" target="_blank"><img src={youtubethumbnail} alt="Tutorial Video" className="setup-video-thumbnail" /></a>
+                    <a href="https://vimeo.com/1112446810?share=copy" target="_blank"><img src={youtubethumbnail} alt="Tutorial Video" className="setup-video-thumbnail" /></a>
                   </div>
 
 
@@ -141,7 +141,7 @@ const SetupStep: React.FC<SetupStepProps> = ({ onGoBack, onProceed }) => {
                   <p className="setup-card-info-title">Update the scripts in your project that handle cookie creation</p>
                   <p className="setup-card-info-subtitle">Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow.</p>
 
-                  <div className="subscribe help"><a className="link" href="#">Need help? See the docs <i><img src={uparrow} alt="" /></i></a></div>
+                  <div className="subscribe help"><a className="link" target="_blank" href="https://www.consentbit.com/help-document">Need help? See the docs <i><img src={uparrow} alt="" /></i></a></div>
                 </div>
               </div>
 

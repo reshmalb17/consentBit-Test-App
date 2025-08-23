@@ -18,8 +18,6 @@ type WelcomeScreenProps = {
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,authenticated}) => {
      const {bannerBooleans} = useAppState();
-  console.log("Authenticated prop:", authenticated);
-console.log("fetch scripts:",bannerBooleans.fetchScripts);
   const base_url = "https://cb-server.web-8fb.workers.dev"
 const { user, exchangeAndVerifyIdToken } = useAuth();
 

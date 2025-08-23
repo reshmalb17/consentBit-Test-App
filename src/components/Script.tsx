@@ -34,12 +34,12 @@ const Script: React.FC<{
 
     // Debug scripts state changes
     useEffect(() => {
-        // Removed console.log for production
+    
     }, [scripts]);
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<{ success: boolean; message: string } | null>(null);
     const categories = ["Essential", "Personalization", "Analytics", "Marketing"];
-    const userinfo = localStorage.getItem("wf_hybrid_user");
+    const userinfo = localStorage.getItem("consentbit-userinfo");
     const [showPopup, setShowPopup] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showAuthPopup, setShowAuthPopup] = useState(false);
@@ -322,7 +322,7 @@ const Script: React.FC<{
                         setFetchScripts(false);
                     }
                 } catch (error) {
-                    console.error("Error fetching script data:", error);
+            
                     // Reset flag even on error if not in welcome mode
                     if (!isWelcome) {
                         setFetchScripts(false);

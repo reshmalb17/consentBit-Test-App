@@ -287,7 +287,7 @@ getVisitorsData: async (token: string, siteName: string, year?: number, month?: 
     }
 
     const data = await response.json();
-    console.log('getVisitorsData response:', data);
+
     return data;
   } catch (error) {
     throw error;

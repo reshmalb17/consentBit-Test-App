@@ -1,6 +1,17 @@
 .publish-container {
   display: flex;
   gap: 2rem;
+  /* padding: 0px 24px 24px 24px; */
+  background: rgba(10, 8, 27, 1);
+  /* dark bg */
+  color: #fff;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.publish-c{
+    display: flex;
+  gap: 2rem;
   padding: 0px 24px 24px 24px;
   background: rgba(10, 8, 27, 1);
   /* dark bg */
@@ -230,7 +241,7 @@
   max-height: 105px;
 }
 
-.cookie-title {
+.cookie-title1 {
   font-weight: 500;
   font-style: Medium;
   font-size: 13.97px;

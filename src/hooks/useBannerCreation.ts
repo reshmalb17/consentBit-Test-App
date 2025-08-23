@@ -160,7 +160,7 @@ export const useBannerCreation = () => {
   };
 
   const handleBannerError = (error: any) => {
-    console.error("Banner creation error:", error);
+    // Error handling
     webflow.notify({ type: "error", message: "An error occurred while creating the banner." });
   };
 
@@ -175,25 +175,19 @@ export const useBannerCreation = () => {
   };
 
   const fetchAnalyticsBlockingsScripts = async () => {
-    console.log("Starting V1 analytics blocking script registration...");
+
     try {
       const token = getSessionTokenFromLocalStorage();
       if (!token) {
         throw new Error("No token available");
       }
-      console.log("Token retrieved successfully");
-
       const siteIdinfo = await webflow.getSiteInfo();
-      console.log("Site info retrieved:", siteIdinfo);
       
       const hostingScript = await customCodeApi.registerAnalyticsBlockingScript(token);
-      console.log("V1 analytics blocking script registered:", hostingScript);
 
       if (hostingScript) {
         const scriptId = hostingScript.result.id;
         const version = hostingScript.result.version;
-        console.log("Script ID:", scriptId, "Version:", version);
-
         const params: CodeApplication = {
           targetType: 'site',
           targetId: siteIdinfo.siteId,
@@ -202,38 +196,28 @@ export const useBannerCreation = () => {
           version: version
         };
         
-        console.log("Applying V1 script with params:", params);
         await customCodeApi.applyScript(params, token);
-        console.log("V1 analytics blocking script applied successfully");
-      } else {
-        console.log("No hosting script returned from registration");
       }
     } catch (error) {
-      console.error("Error in fetchAnalyticsBlockingsScripts:", error);
+      throw error;
       throw error;
     }
   };
 
   const fetchAnalyticsBlockingsScriptsV2 = async () => {
-    console.log("Starting V2 analytics blocking script registration...");
     try {
       const token = getSessionTokenFromLocalStorage();
       if (!token) {
         throw new Error("No token available");
       }
-      console.log("Token retrieved successfully");
 
       const siteIdinfo = await webflow.getSiteInfo();
-      console.log("Site info retrieved:", siteIdinfo);
       
       const hostingScript = await customCodeApi.registerV2BannerCustomCode(token);
-      console.log("V2 analytics blocking script registered:", hostingScript);
 
       if (hostingScript) {
         const scriptId = hostingScript.result.id;
         const version = hostingScript.result.version;
-        console.log("Script ID:", scriptId, "Version:", version);
-
         const params: CodeApplication = {
           targetType: 'site',
           targetId: siteIdinfo.siteId,
@@ -242,63 +226,36 @@ export const useBannerCreation = () => {
           version: version
         };
         
-        console.log("Applying V2 script with params:", params);
         await customCodeApi.applyV2Script(params, token);
-        console.log("V2 analytics blocking script applied successfully");
-      } else {
-        console.log("No hosting script returned from V2 registration");
       }
     } catch (error) {
-      console.error("Error in fetchAnalyticsBlockingsScriptsV2:", error);
+      throw error;
       throw error;
     }
   };
 
      const createGDPRBanner = async (config: BannerConfig, skipCommonDiv: boolean = false) => {
-     console.log("=== GDPR BANNER CREATION START ===");
      setIsCreating(true);
      setShowLoading(true);
-     
-           // Add overall timeout for the entire process
-      const overallTimeout = setTimeout(() => {
-        console.error("GDPR banner creation timed out after 20 seconds");
-        setIsCreating(false);
-        setShowLoading(false);
-      }, 20000);
-    
-    console.log("Creating GDPR banner with config:", config);
-    console.log("Language:", config.language);
-    console.log("SkipCommonDiv:", skipCommonDiv);
-    console.log("bannerAnimation object:", bannerAnimation);
-    console.log("bannerAnimation.animation:", bannerAnimation.animation);
     
     try {
-      console.log("Starting GDPR banner creation process...");
       // Cleanup existing banners
-      console.log("Getting all elements for cleanup...");
       const allElements = await webflow.getAllElements();
-      console.log("All elements retrieved:", allElements.length);
       
       const idsToCheck = ["consent-banner", "main-banner", "toggle-consent-btn"];
-      console.log("Checking for existing banners with IDs:", idsToCheck);
 
-      const domIdPromises = allElements.map(async (el) => {
+            const domIdPromises = allElements.map(async (el) => {
         const domId = await el.getDomId?.();
         return { el, domId };
       });
 
-      console.log("Getting DOM IDs for all elements...");
       const elementsWithDomIds = await Promise.all(domIdPromises);
-      console.log("DOM IDs retrieved for all elements");
-      
+
       const matchingElements = elementsWithDomIds
         .filter(({ domId }) => domId && idsToCheck.includes(domId))
         .map(({ el }) => el);
-      
-      console.log("Found matching elements to remove:", matchingElements.length);
 
       if (matchingElements.length > 0) {
-        console.log("Removing existing banner elements...");
         await Promise.all(matchingElements.map(async (el) => {
           try {
             const children = await el.getChildren?.();
@@ -307,38 +264,24 @@ export const useBannerCreation = () => {
             }
             await el.remove();
           } catch (err) {
-            console.error("Error removing element:", err);
+            // Error handling
           }
         }));
-        console.log("Existing banner elements removed");
-             } else {
-         console.log("No existing banner elements found to remove");
-       }
+      }
 
-              console.log("Getting selected element for GDPR banner...");
-       const selectedElement = await webflow.getSelectedElement();
-       console.log("Selected element retrieved:", selectedElement);
-       console.log("Selected element methods:", Object.keys(selectedElement || {}));
+      const selectedElement = await webflow.getSelectedElement();
        if (!selectedElement) {
          throw new Error("No element selected in the Designer.");
        }
 
-       console.log("Creating newDiv for GDPR banner...");
-       console.log("webflow.elementPresets.DivBlock:", webflow.elementPresets.DivBlock);
-       const newDiv = await selectedElement.before(webflow.elementPresets.DivBlock);
-       console.log("newDiv created:", newDiv);
-       console.log("newDiv methods:", Object.keys(newDiv || {}));
+             const newDiv = await selectedElement.before(webflow.elementPresets.DivBlock);
       if (!newDiv) {
         throw new Error("Failed to create div.");
       }
 
              if ((newDiv as any).setDomId) {
-         console.log("Setting DOM ID for newDiv...");
          await (newDiv as any).setDomId("consent-banner");
-         console.log("DOM ID set successfully");
        }
-
-       console.log("Creating style names object...");
        const styleNames = {
         divStyleName: "consentbit-gdpr_banner_div",
         paragraphStyleName: "consentbit-gdpr_banner_text",
@@ -366,7 +309,6 @@ export const useBannerCreation = () => {
 
       
       const animationAttribute = bannerAnimation.animation || "fade";
-      console.log("GDPR animationAttribute value:", animationAttribute);
 
       const divPropertyMap: Record<string, string> = {
         "background-color": config.color,
@@ -556,112 +498,62 @@ export const useBannerCreation = () => {
         "font-family": "'Montserrat', sans-serif",
       };
 
-             console.log("Setting style properties...");
-       console.log("Setting divStyle properties...");
        await divStyle.setProperties(divPropertyMap);
-       console.log("Setting divStyle responsive properties...");
        await divStyle.setProperties(responsivePropertyMap, responsiveOptions);
-       console.log("Setting paragraphStyle properties...");
        await paragraphStyle.setProperties(paragraphPropertyMap);
-       console.log("Setting buttonContainerStyle properties...");
        await buttonContainerStyle.setProperties(buttonContainerPropertyMap);
-       console.log("Setting buttonContainerStyle responsive properties...");
        await buttonContainerStyle.setProperties(responsivebuttonPropertyMap, responsiveOptions);
-       console.log("Setting buttonStyle properties...");
        await buttonStyle.setProperties(buttonPropertyMap);
-       console.log("Setting declineButtonStyle properties...");
        await declineButtonStyle.setProperties(declineButtonPropertyMap);
-       console.log("Setting prefrenceButtonStyle properties...");
        await prefrenceButtonStyle.setProperties(declineButtonPropertyMap);
-       console.log("Setting headingStyle properties...");
        await headingStyle.setProperties(headingPropertyMap);
-       console.log("Setting secondBackgroundStyle properties...");
        await secondBackgroundStyle.setProperties(secondbackgroundPropertyMap);
-       console.log("Setting innerDivStyle properties...");
        await innerDivStyle.setProperties(innerdivPropertyMap);
-       console.log("Setting closebutton properties...");
        await closebutton.setProperties(CloseButtonPropertyMap);
-              console.log("All style properties set successfully");
 
-              console.log("Applying styles to newDiv...");
-       if (newDiv.setStyles) {
-         await newDiv.setStyles([divStyle]);
-         console.log("Styles applied to newDiv successfully");
-       } else {
-         console.log("newDiv.setStyles not available");
-       }
+                      if (newDiv.setStyles) {
+          await newDiv.setStyles([divStyle]);
+        }
 
-                               console.log("Setting custom attributes...");
          if (newDiv.setCustomAttribute) {
            // Only set animation attribute if it has a valid value
            if (animationAttribute && animationAttribute.trim() !== "") {
-             console.log("Setting data-animation attribute:", animationAttribute);
              try {
                const animationPromise = newDiv.setCustomAttribute("data-animation", animationAttribute);
                const animationTimeout = new Promise((_, reject) => 
                  setTimeout(() => reject(new Error("Animation attribute timeout")), 5000)
                );
                await Promise.race([animationPromise, animationTimeout]);
-               console.log("data-animation attribute set successfully");
              } catch (error) {
-               console.error("Error setting data-animation attribute:", error);
                throw error;
              }
-           } else {
-             console.log("Skipping data-animation attribute - no valid animation value");
            }
           
-          console.log("Setting data-cookie-banner attribute:", config.toggleStates.disableScroll ? "true" : "false");
           try {
             const cookieBannerPromise = newDiv.setCustomAttribute("data-cookie-banner", config.toggleStates.disableScroll ? "true" : "false");
             const cookieBannerTimeout = new Promise((_, reject) => 
               setTimeout(() => reject(new Error("Cookie banner attribute timeout")), 5000)
             );
             await Promise.race([cookieBannerPromise, cookieBannerTimeout]);
-            console.log("data-cookie-banner attribute set successfully");
           } catch (error) {
-            console.error("Error setting data-cookie-banner attribute:", error);
             throw error;
           }
-          
-          console.log("Custom attributes set successfully");
-        } else {
-          console.log("newDiv.setCustomAttribute not available");
         }
 
-             console.log("=== ELEMENT CREATION PHASE START ===");
-       console.log("Creating innerdiv for GDPR banner...");
-       console.log("About to call selectedElement.before for innerdiv...");
-       console.log("Testing if selectedElement.before is available...");
-       console.log("selectedElement.before exists:", !!selectedElement.before);
-       console.log("webflow.elementPresets.DivBlock exists:", !!webflow.elementPresets.DivBlock);
-       console.log("selectedElement type:", typeof selectedElement);
-       console.log("selectedElement keys:", Object.keys(selectedElement || {}));
-       
-              // Test if we can call the method without hanging
-       console.log("About to test selectedElement.before call...");
        let innerdiv: any;
        try {
-         console.log("Calling selectedElement.before with DivBlock...");
          // Add timeout to prevent hanging
          const innerdivPromise = selectedElement.before(webflow.elementPresets.DivBlock);
-         console.log("innerdivPromise created, waiting for result...");
          const timeoutPromise = new Promise((_, reject) => 
            setTimeout(() => reject(new Error("Element creation timeout")), 10000)
          );
          
          innerdiv = await Promise.race([innerdivPromise, timeoutPromise]) as any;
-         console.log("innerdiv created:", innerdiv);
-         console.log("innerdiv methods:", Object.keys(innerdiv || {}));
          
          if (innerdiv && innerdiv.setStyles) {
            await innerdiv.setStyles([innerDivStyle]);
-           console.log("innerdiv styles applied");
-         } else {
-           console.log("Failed to apply styles to innerdiv");
          }
        } catch (error) {
-         console.error("Error creating innerdiv:", error);
          throw new Error(`Failed to create innerdiv: ${error}`);
        }
 
@@ -686,7 +578,6 @@ export const useBannerCreation = () => {
       if (tempHeading.setTextContent) {
         const language = config.language || "English";
         const headingText = translations[language as keyof typeof translations]?.heading || "Cookie Settings";
-        console.log("Setting heading text:", headingText, "for language:", language);
         await tempHeading.setTextContent(headingText);
       }
 
@@ -713,7 +604,7 @@ export const useBannerCreation = () => {
       if (tempParagraph.setTextContent) {
         const language = config.language || "English";
         const paragraphText = translations[language as keyof typeof translations]?.description || "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.";
-        console.log("Setting paragraph text:", paragraphText, "for language:", language);
+
         await tempParagraph.setTextContent(paragraphText);
       }
 
@@ -754,82 +645,52 @@ export const useBannerCreation = () => {
         await (declineButton as any).setDomId("decline-btn");
       }
 
-      console.log("Starting to append elements to GDPR banner...");
-      console.log("newDiv.append exists:", !!newDiv.append);
-      console.log("innerdiv exists:", !!innerdiv);
-      console.log("tempHeading exists:", !!tempHeading);
-      console.log("tempParagraph exists:", !!tempParagraph);
-      console.log("buttonContainer exists:", !!buttonContainer);
+
+
+
+
+
+
       
       if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
-        console.log("Appending innerdiv to newDiv...");
+
         await newDiv.append(innerdiv);
-        console.log("innerdiv appended successfully");
+
         
         if (Closebuttons) {
-          console.log("Appending Closebuttons...");
+
           await newDiv.append(Closebuttons);
         }
         
         if (SecondDiv) {
-          console.log("Appending SecondDiv to innerdiv...");
+
           await innerdiv.append(SecondDiv);
         }
         
-        console.log("Appending tempHeading to innerdiv...");
+
         await innerdiv.append(tempHeading);
-        console.log("Appending tempParagraph to innerdiv...");
+
         await innerdiv.append(tempParagraph);
-        console.log("Appending buttonContainer to innerdiv...");
+
         await innerdiv.append(buttonContainer);
 
         if (buttonContainer.append && prefrenceButton && declineButton && acceptButton) {
-          console.log("Appending buttons to buttonContainer...");
+
           await buttonContainer.append(prefrenceButton);
           await buttonContainer.append(declineButton);
           await buttonContainer.append(acceptButton);
-          console.log("All buttons appended successfully");
-        } else {
-          console.log("Button append failed - missing elements:", {
-            buttonContainerAppend: !!buttonContainer.append,
-            prefrenceButton: !!prefrenceButton,
-            declineButton: !!declineButton,
-            acceptButton: !!acceptButton
-          });
+
         }
-      } else {
-        console.log("Main append failed - missing elements:", {
-          newDivAppend: !!newDiv.append,
-          innerdiv: !!innerdiv,
-          tempHeading: !!tempHeading,
-          tempParagraph: !!tempParagraph,
-          buttonContainer: !!buttonContainer
-        });
       }
 
-             console.log("=== CALLING createCookiePreferences ===");
-             console.log("Parameters:", {
-               selectedPreferences: ["essential", "analytics", "marketing", "preferences"],
-               language: bannerLanguages.language,
-               color: bannerStyles.color,
-               btnColor: bannerStyles.btnColor,
-               headColor: bannerStyles.headColor,
-               paraColor: bannerStyles.paraColor,
-               secondcolor: bannerStyles.secondcolor,
-               buttonRadius: bannerConfig.buttonRadius,
-               animation: bannerAnimation.animation,
-               customToggle: bannerToggleStates.toggleStates.customToggle,
-               primaryButtonText: bannerStyles.primaryButtonText,
-               secondbuttontext: bannerStyles.secondbuttontext,
-               skipCommonDiv,
-               disableScroll: bannerToggleStates.toggleStates.disableScroll,
-               closebutton: bannerToggleStates.toggleStates.closebutton,
-               donotshare: bannerToggleStates.toggleStates.donotshare ? "true" : "false"
-             });
+
+
              
              try {
-               console.log("Starting createCookiePreferences with timeout...");
-               const cookiePreferencesPromise = createCookiePreferences(
+
+
+               
+               await createCookiePreferences(
                  ["essential", "analytics", "marketing", "preferences"],
                  bannerLanguages.language,
                  bannerStyles.color,
@@ -844,226 +705,133 @@ export const useBannerCreation = () => {
                  bannerStyles.secondbuttontext,
                  skipCommonDiv,
                  bannerToggleStates.toggleStates.disableScroll,
-                 bannerToggleStates.toggleStates.closebutton,
-                 bannerStyles.Font
+                 bannerToggleStates.toggleStates.closebutton,                
                );
                
-               const cookiePreferencesTimeout = new Promise((_, reject) => 
-                 setTimeout(() => reject(new Error("createCookiePreferences timeout after 15 seconds")), 15000)
-               );
+
                
-               await Promise.race([cookiePreferencesPromise, cookiePreferencesTimeout]);
-               console.log("createCookiePreferences completed successfully");
+               // Display list of created DOM elements with IDs
+
+               try {
+                 const allElements = await webflow.getAllElements();
+                 const elementsWithIds = [];
+                 
+                 for (const element of allElements) {
+                   try {
+                     const domId = await element.getDomId?.();
+                     if (domId) {
+                       elementsWithIds.push({
+                         id: domId,
+                         element: element
+                       });
+                     }
+                   } catch (err) {
+                     // Skip elements that don't have getDomId method
+                   }
+                 }
+                 
+
+                 elementsWithIds.forEach((item, index) => {
+
+                 });
+                 
+                 // Show specific banner-related IDs
+                 const bannerIds = elementsWithIds.filter(item => 
+                   item.id.includes('consent') || 
+                   item.id.includes('banner') || 
+                   item.id.includes('preference') ||
+                   item.id.includes('toggle') ||
+                   item.id.includes('accept') ||
+                   item.id.includes('decline') ||
+                   item.id.includes('preferences')
+                 );
+                 
+                 if (bannerIds.length > 0) {
+
+                   bannerIds.forEach((item, index) => {
+
+                   });
+                 }
+                 
+               } catch (error) {
+
+               }
+               
              } catch (error) {
-               console.error("Error in createCookiePreferences:", error);
+
+
+
                throw error;
              }
 
-      console.log("=== ANALYTICS BLOCKING SCRIPT PHASE ===");
-      console.log("Current app version:", appVersion);
+
+
       try {
         if (appVersion === '1.0.0') {
-          console.log("Using V1 analytics blocking script...");
+
           await fetchAnalyticsBlockingsScripts();
-          console.log("V1 analytics blocking script applied successfully");
+
         } else {
-          console.log("Using V2 analytics blocking script...");
+
           await fetchAnalyticsBlockingsScriptsV2();
-          console.log("V2 analytics blocking script applied successfully");
+
         }
         
         // Add a delay to ensure script is loaded
-        console.log("Waiting for script to load...");
+
         await new Promise(resolve => setTimeout(resolve, 3000));
-        console.log("Script loading delay completed");
+
         
         // Check if the script is loaded
         const scripts = document.querySelectorAll('script[src*="consent"]');
-        console.log("Found consent scripts:", scripts.length);
+
         scripts.forEach((script, index) => {
           const scriptElement = script as HTMLScriptElement;
-          console.log(`Script ${index}:`, scriptElement.src);
+
         });
         
                  // Check if the script is loaded in the head
          const headScripts = document.head.querySelectorAll('script');
-         console.log("Total scripts in head:", headScripts.length);
+
          headScripts.forEach((script, index) => {
            const scriptElement = script as HTMLScriptElement;
            if (scriptElement.src && scriptElement.src.includes('consent')) {
-             console.log(`Consent script ${index} in head:`, scriptElement.src);
+
            }
          });
          
-         // Add the script directly to the page for immediate functionality
-         console.log("Adding GDPR script directly to page for immediate functionality...");
-         const scriptContent = `
-           (function () {
-             window.dataLayer = window.dataLayer || [];
-             function gtag() { dataLayer.push(arguments); }
-             
-             gtag('consent', 'default', {
-               'analytics_storage': 'denied',
-               'ad_storage': 'denied',
-               'ad_personalization': 'denied',
-               'ad_user_data': 'denied',
-               'personalization_storage': 'denied',
-               'functionality_storage': 'granted',
-               'security_storage': 'granted'
-             });
-             
-             function showBanner(banner) {
-               if (banner) {
-                 console.log('Showing banner:', banner.id);
-                 // Remove all conflicting styles and set to visible
-                 banner.style.removeProperty("display");
-                 banner.style.removeProperty("visibility");
-                 banner.style.removeProperty("opacity");
-                 banner.style.setProperty("display", "block", "important");
-                 banner.classList.add("show-banner");
-                 banner.classList.remove("hidden");
-                 console.log('Banner display after show:', banner.style.display);
-               }
-             }
-             
-             function hideBanner(banner) {
-               if (banner) {
-                 console.log('Hiding banner:', banner.id);
-                 // Only set display to none, don't set conflicting opacity/visibility
-                 banner.style.setProperty("display", "none", "important");
-                 banner.classList.remove("show-banner");
-                 banner.classList.add("hidden");
-                 console.log('Banner display after hide:', banner.style.display);
-               }
-             }
-             
-             // Set up event listeners when DOM is ready
-             document.addEventListener('DOMContentLoaded', function () {
-               console.log('DOM Content Loaded - Setting up event listeners');
-               
-               // Preferences button functionality
-               const preferencesBtn = document.getElementById('preferences-btn');
-               if (preferencesBtn) {
-                 console.log('Preferences button found, adding click listener');
-                 preferencesBtn.onclick = function (e) {
-                   e.preventDefault();
-                   console.log('Preferences button clicked');
-                   const mainBanner = document.getElementById("main-banner");
-                   console.log('Main banner element:', mainBanner);
-                   if (mainBanner) {
-                     console.log('Main banner current display:', mainBanner.style.display);
-                     showBanner(mainBanner);
-                     console.log('Main banner display after show:', mainBanner.style.display);
-                   } else {
-                     console.log('Main banner not found');
-                   }
-                 };
-               } else {
-                 console.log('Preferences button not found');
-               }
-               
-               // Accept button functionality
-               const acceptBtn = document.getElementById('accept-btn');
-               if (acceptBtn) {
-                 acceptBtn.onclick = function (e) {
-                   e.preventDefault();
-                   console.log('Accept button clicked');
-                   hideBanner(document.getElementById("consent-banner"));
-                   hideBanner(document.getElementById("main-banner"));
-                 };
-               }
-               
-               // Decline button functionality
-               const declineBtn = document.getElementById('decline-btn');
-               if (declineBtn) {
-                 declineBtn.onclick = function (e) {
-                   e.preventDefault();
-                   console.log('Decline button clicked');
-                   hideBanner(document.getElementById("consent-banner"));
-                   hideBanner(document.getElementById("main-banner"));
-                 };
-               }
-               
-               // Save preferences button functionality
-               const savePreferencesBtn = document.getElementById('save-preferences-btn');
-               if (savePreferencesBtn) {
-                 savePreferencesBtn.onclick = function (e) {
-                   e.preventDefault();
-                   console.log('Save preferences button clicked');
-                   hideBanner(document.getElementById("main-banner"));
-                 };
-               }
-               
-               // Cancel button functionality
-               const cancelBtn = document.getElementById('cancel-btn');
-               if (cancelBtn) {
-                 cancelBtn.onclick = function (e) {
-                   e.preventDefault();
-                   console.log('Cancel button clicked');
-                   hideBanner(document.getElementById("main-banner"));
-                   showBanner(document.getElementById("consent-banner"));
-                 };
-               }
-               
-               // Close button functionality
-               const closeButtons = document.querySelectorAll('[consentbit="close"]');
-               closeButtons.forEach(function (closeBtn) {
-                 closeBtn.onclick = function (e) {
-                   e.preventDefault();
-                   console.log('Close button clicked');
-                   const banners = [
-                     document.getElementById("consent-banner"),
-                     document.getElementById("main-banner"),
-                     document.getElementById("initial-consent-banner"),
-                     document.getElementById("main-consent-banner")
-                   ];
-                   banners.forEach(banner => {
-                     if (banner) hideBanner(banner);
-                   });
-                 };
-               });
-               
-               console.log('GDPR Banner script loaded and event listeners attached');
-             });
-           })();
-         `;
-         
-         // Create and add the script to the page
-         const scriptElement = document.createElement('script');
-         scriptElement.type = 'text/javascript';
-         scriptElement.textContent = scriptContent;
-         document.head.appendChild(scriptElement);
-         console.log("GDPR Script added directly to page for immediate functionality");
+        
+       
+       
          
        } catch (error) {
-         console.error("Error applying analytics blocking script:", error);
+
          throw error;
        }
 
-             console.log("GDPR banner creation completed, setting success timeout...");
+
        setTimeout(() => {
-         console.log("GDPR banner success timeout triggered");
+
          handleBannerSuccess();
        }, 30000);
 
     } catch (error) {
       handleBannerError(error);
     } finally {
-      clearTimeout(overallTimeout);
       setIsCreating(false);
       setShowLoading(false);
     }
   };
 
   const createCCPABanner = async (config: BannerConfig) => {
-    console.log("=== CCPA BANNER CREATION START ===");
+
     setIsCreating(true);
     setShowLoading(true);
     
-    console.log("Creating CCPA banner with config:", config);
-    console.log("Language:", config.language);
-    console.log("CCPA bannerAnimation object:", bannerAnimation);
-    console.log("CCPA bannerAnimation.animation:", bannerAnimation.animation);
+
+
+
+
     
     try {
       // Cleanup existing banners
@@ -1088,7 +856,7 @@ export const useBannerCreation = () => {
           }
           await el.remove();
         } catch (err) {
-          console.error("Error removing element:", err);
+
         }
       }));
 
@@ -1130,7 +898,7 @@ export const useBannerCreation = () => {
 
       
       const animationAttribute = bannerAnimation.animation || "fade";
-      console.log("CCPA animationAttribute value:", animationAttribute);
+
 
       const divPropertyMap: Record<string, string> = {
         "background-color":bannerStyles.color,
@@ -1312,42 +1080,42 @@ export const useBannerCreation = () => {
              if (newDiv.setCustomAttribute) {
          // Only set animation attribute if it has a valid value
          if (animationAttribute && animationAttribute.trim() !== "") {
-           console.log("Setting CCPA data-animation attribute:", animationAttribute);
+
            try {
              const animationPromise = newDiv.setCustomAttribute("data-animation", animationAttribute);
              const animationTimeout = new Promise((_, reject) => 
                setTimeout(() => reject(new Error("CCPA animation attribute timeout")), 5000)
              );
              await Promise.race([animationPromise, animationTimeout]);
-             console.log("CCPA data-animation attribute set successfully");
+
            } catch (error) {
-             console.error("Error setting CCPA data-animation attribute:", error);
+
              throw error;
            }
          } else {
-           console.log("Skipping CCPA data-animation attribute - no valid animation value");
+
          }
          
-         console.log("Setting CCPA data-cookie-banner attribute:", bannerToggleStates.toggleStates.disableScroll ? "true" : "false");
+
          try {
            const cookieBannerPromise = newDiv.setCustomAttribute("data-cookie-banner", bannerToggleStates.toggleStates.disableScroll ? "true" : "false");
            const cookieBannerTimeout = new Promise((_, reject) => 
              setTimeout(() => reject(new Error("CCPA cookie banner attribute timeout")), 5000)
            );
            await Promise.race([cookieBannerPromise, cookieBannerTimeout]);
-           console.log("CCPA data-cookie-banner attribute set successfully");
+
          } catch (error) {
-           console.error("Error setting CCPA data-cookie-banner attribute:", error);
+
            throw error;
          }
        }
 
       // Create inner elements following App_backup.tsx pattern
-      console.log("Creating innerdiv for CCPA banner...");
+
       const innerdiv = await selectedElement.before(webflow.elementPresets.DivBlock);
-      console.log("CCPA innerdiv created:", innerdiv);
+
       await innerdiv.setStyles([innerDivStyle]);
-      console.log("CCPA innerdiv styles applied");
+
 
       let SecondDiv;
       if (config.style === "alignstyle") {
@@ -1370,7 +1138,7 @@ export const useBannerCreation = () => {
       if (tempHeading.setTextContent) {
         const language = config.language || "English";
         const headingText = translations[language as keyof typeof translations]?.ccpa.heading || "We value your Privacy";
-        console.log("Setting CCPA heading text:", headingText, "for language:", language);
+
         await tempHeading.setTextContent(headingText);
       }
 
@@ -1397,7 +1165,7 @@ export const useBannerCreation = () => {
       if (tempParagraph.setTextContent) {
         const language = config.language || "English";
         const paragraphText = translations[language as keyof typeof translations]?.ccpa.description || "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.";
-        console.log("Setting CCPA paragraph text:", paragraphText, "for language:", language);
+
         await tempParagraph.setTextContent(paragraphText);
       }
 
@@ -1418,75 +1186,48 @@ export const useBannerCreation = () => {
         await (prefrenceButton as any).setDomId("do-not-share-link");
       }
 
-      console.log("Starting to append elements to CCPA banner...");
-      console.log("CCPA newDiv.append exists:", !!newDiv.append);
-      console.log("CCPA innerdiv exists:", !!innerdiv);
-      console.log("CCPA tempHeading exists:", !!tempHeading);
-      console.log("CCPA tempParagraph exists:", !!tempParagraph);
-      console.log("CCPA buttonContainer exists:", !!buttonContainer);
+
+
+
+
+
+
       
       if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
-        console.log("Appending CCPA innerdiv to newDiv...");
+
         await newDiv.append(innerdiv);
-        console.log("CCPA innerdiv appended successfully");
+
         
         if (Closebuttons) {
-          console.log("Appending CCPA Closebuttons...");
+
           await newDiv.append(Closebuttons);
         }
         
         if (SecondDiv) {
-          console.log("Appending CCPA SecondDiv to innerdiv...");
+
           await innerdiv.append(SecondDiv);
         }
         
-        console.log("Appending CCPA tempHeading to innerdiv...");
+
         await innerdiv.append(tempHeading);
-        console.log("Appending CCPA tempParagraph to innerdiv...");
+
         await innerdiv.append(tempParagraph);
-        console.log("Appending CCPA buttonContainer to innerdiv...");
+
         await innerdiv.append(buttonContainer);
 
         if (buttonContainer.append && prefrenceButton) {
-          console.log("Appending CCPA button to buttonContainer...");
+
           await buttonContainer.append(prefrenceButton);
-          console.log("CCPA button appended successfully");
-        } else {
-          console.log("CCPA button append failed - missing elements:", {
-            buttonContainerAppend: !!buttonContainer.append,
-            prefrenceButton: !!prefrenceButton
-          });
+
         }
-      } else {
-        console.log("CCPA main append failed - missing elements:", {
-          newDivAppend: !!newDiv.append,
-          innerdiv: !!innerdiv,
-          tempHeading: !!tempHeading,
-          tempParagraph: !!tempParagraph,
-          buttonContainer: !!buttonContainer
-        });
       }
 
-      console.log("=== CALLING createCookieccpaPreferences ===");
-      console.log("CCPA Parameters:", {
-        language: bannerLanguages.language,
-        color: bannerStyles.color,
-        btnColor: bannerStyles.btnColor,
-        headColor: bannerStyles.headColor,
-        paraColor: bannerStyles.paraColor,
-        secondcolor: bannerStyles.secondcolor,
-        buttonRadius: bannerConfig.buttonRadius,
-        animation: bannerAnimation.animation,
-        primaryButtonText: bannerStyles.primaryButtonText,
-        secondbuttontext: bannerStyles.secondbuttontext,
-        disableScroll: bannerToggleStates.toggleStates.disableScroll,
-        closebutton: bannerToggleStates.toggleStates.closebutton,
-        Font: bannerStyles.Font
-      });
+
+
       
       try {
-        console.log("Starting createCookieccpaPreferences with timeout...");
-        const ccpaPreferencesPromise = createCookieccpaPreferences(
+
+        await createCookieccpaPreferences(
           bannerLanguages.language,
           bannerStyles.color,
           bannerStyles.btnColor,
@@ -1503,61 +1244,104 @@ export const useBannerCreation = () => {
           bannerStyles.Font
         );
         
-        const ccpaPreferencesTimeout = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("createCookieccpaPreferences timeout after 15 seconds")), 15000)
-        );
+
         
-        await Promise.race([ccpaPreferencesPromise, ccpaPreferencesTimeout]);
-        console.log("createCookieccpaPreferences completed successfully");
+        // Display list of created DOM elements with IDs for CCPA
+
+        try {
+          const allElements = await webflow.getAllElements();
+          const elementsWithIds = [];
+          
+          for (const element of allElements) {
+            try {
+              const domId = await element.getDomId?.();
+              if (domId) {
+                elementsWithIds.push({
+                  id: domId,
+                  element: element
+                });
+              }
+            } catch (err) {
+              // Skip elements that don't have getDomId method
+            }
+          }
+          
+
+          elementsWithIds.forEach((item, index) => {
+
+          });
+          
+          // Show specific CCPA banner-related IDs
+          const ccpaBannerIds = elementsWithIds.filter(item => 
+            item.id.includes('consent') || 
+            item.id.includes('banner') || 
+            item.id.includes('preference') ||
+            item.id.includes('toggle') ||
+            item.id.includes('ccpa') ||
+            item.id.includes('initial') ||
+            item.id.includes('do-not-share')
+          );
+          
+          if (ccpaBannerIds.length > 0) {
+
+            ccpaBannerIds.forEach((item, index) => {
+
+            });
+          }
+          
+        } catch (error) {
+
+        }
+        
       } catch (error) {
-        console.error("Error in createCookieccpaPreferences:", error);
+
         throw error;
       }
 
-      console.log("=== CCPA ANALYTICS BLOCKING SCRIPT PHASE ===");
-      console.log("Current app version:", appVersion);
+
+
       try {
         if (appVersion === '1.0.0') {
-          console.log("Using V1 analytics blocking script for CCPA...");
+
           await fetchAnalyticsBlockingsScripts();
-          console.log("V1 analytics blocking script applied successfully for CCPA");
+
         } else {
-          console.log("Using V2 analytics blocking script for CCPA...");
+
           await fetchAnalyticsBlockingsScriptsV2();
-          console.log("V2 analytics blocking script applied successfully for CCPA");
+
         }
         
         // Add a delay to ensure script is loaded
-        console.log("Waiting for CCPA script to load...");
+
         await new Promise(resolve => setTimeout(resolve, 3000));
-        console.log("CCPA script loading delay completed");
+
         
         // Check if the script is loaded
         const scripts = document.querySelectorAll('script[src*="consent"]');
-        console.log("Found consent scripts for CCPA:", scripts.length);
+
         scripts.forEach((script, index) => {
           const scriptElement = script as HTMLScriptElement;
-          console.log(`CCPA Script ${index}:`, scriptElement.src);
+
         });
         
         // Check if the script is loaded in the head
         const headScripts = document.head.querySelectorAll('script');
-        console.log("Total scripts in head for CCPA:", headScripts.length);
+
         headScripts.forEach((script, index) => {
           const scriptElement = script as HTMLScriptElement;
           if (scriptElement.src && scriptElement.src.includes('consent')) {
-            console.log(`CCPA Consent script ${index} in head:`, scriptElement.src);
+
           }
         });
         
       } catch (error) {
-        console.error("Error applying CCPA analytics blocking script:", error);
+
         throw error;
       }
 
-             console.log("CCPA banner creation completed, setting success timeout...");
+
        setTimeout(() => {
-         console.log("CCPA banner success timeout triggered");
+
          handleBannerSuccess();
        }, 20000);
 
@@ -1570,45 +1354,48 @@ export const useBannerCreation = () => {
   };
 
   const createBothBanners = async (config: BannerConfig) => {
-    console.log("Starting createBothBanners...");
+
     try {
-      console.log("Creating GDPR banner first...");
+
       await createGDPRBanner(config, true);
-      console.log("GDPR banner created successfully, now creating CCPA banner...");
+
       await createCCPABanner(config);
-      console.log("Both banners created successfully!");
+
       
       // Show success page after both banners are created
-      console.log("Showing SuccessPublish component...");
+
       setShowSuccessPublish(true);
+      
+      // Set localStorage to indicate banner was added through welcome flow
+      localStorage.setItem("bannerAddedThroughWelcome", "true");
     } catch (error) {
-      console.error("Error in createBothBanners:", error);
+
       throw error;
     }
   };
 
   // Simple test function to isolate the issue
   const testSimpleBannerCreation = async () => {
-    console.log("=== TESTING SIMPLE BANNER CREATION ===");
+
     try {
       const selectedElement = await webflow.getSelectedElement();
       if (!selectedElement) {
         throw new Error("No element selected");
       }
       
-      console.log("Creating simple div...");
+
       const simpleDiv = await selectedElement.before(webflow.elementPresets.DivBlock);
-      console.log("Simple div created:", simpleDiv);
+
       
       if (simpleDiv && (simpleDiv as any).setDomId) {
-        console.log("Setting DOM ID...");
+
         await (simpleDiv as any).setDomId("test-banner");
-        console.log("DOM ID set successfully");
+
       }
       
-      console.log("Simple banner creation test completed successfully");
+
     } catch (error) {
-      console.error("Simple banner creation test failed:", error);
+
       throw error;
     }
   };

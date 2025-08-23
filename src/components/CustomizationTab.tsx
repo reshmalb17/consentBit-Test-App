@@ -60,9 +60,10 @@ type UserData = {
 
 interface CustomizationTabProps {
   onAuth: () => void;
+  initialActiveTab?: string;
 }
 
-const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
+const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActiveTab = "Settings" }) => {
   const [color, setColor] = usePersistentState("color", "#ffffff");
   const [bgColor, setBgColor] = usePersistentState("bgColor", "#ffffff");
   const [btnColor, setBtnColor] = usePersistentState("btnColor", "#C9C9C9");
@@ -72,7 +73,14 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
   const [headColor, setHeadColor] = usePersistentState("headColor", "#000000");
   const [secondbuttontext, setsecondbuttontext] = usePersistentState("secondbuttontext", "#000000");
   const [primaryButtonText, setPrimaryButtonText] = usePersistentState("primaryButtonText", "#FFFFFF");
-  const [activeTab, setActiveTab] = usePersistentState("activeTab", "Settings");
+  const [activeTab, setActiveTab] = usePersistentState("activeTab", initialActiveTab);
+  
+  // Override activeTab with initialActiveTab prop when provided (only on mount)
+  useEffect(() => {
+    if (initialActiveTab && initialActiveTab !== activeTab) {
+      setActiveTab(initialActiveTab);
+    }
+  }, [initialActiveTab]); // Remove activeTab and setActiveTab from dependencies
   const [expires, setExpires] = usePersistentState("expires", "");
   const [size, setSize] = usePersistentState("size", "12");
   const [isActive, setIsActive] = usePersistentState("isActive", false);
@@ -88,10 +96,8 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
 
   // Ensure default state is properly set on component mount
   useEffect(() => {
-    console.log("selectedOptions current value:", selectedOptions);
     // Force set default values if not already set
     if (selectedOptions.length === 0 || !selectedOptions.includes("GDPR") || !selectedOptions.includes("U.S. State Laws")) {
-      console.log("Setting default selectedOptions");
       setSelectedOptions(["GDPR", "U.S. State Laws"]);
     }
   }, [selectedOptions, setSelectedOptions]);
@@ -111,7 +117,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
   const [cookieExpiration, setCookieExpiration] = usePersistentState("cookieExpiration", "120");
   const [showTooltip, setShowTooltip] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
-  const userinfo = localStorage.getItem("wf_hybrid_user");
+  const userinfo = localStorage.getItem("consentbit-userinfo");
   const tokenss = JSON.parse(userinfo);
   const [sessionTokenFromLocalStorage, setSessionToken] = useState(getSessionTokenFromLocalStorage());
   const [showChoosePlan, setShowChoosePlan] = useState(false);
@@ -346,7 +352,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
     const fetchPages = async () => {
       try {
 
-        const localstoragedata = localStorage.getItem("wf_hybrid_user");
+        const localstoragedata = localStorage.getItem("consentbit-userinfo");
         if (localstoragedata) {
           try {
             const parsed = JSON.parse(localstoragedata);
@@ -505,7 +511,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
 
   //authentication
   useEffect(() => {
-    const stored = localStorage.getItem("wf_hybrid_user");
+    const stored = localStorage.getItem("consentbit-userinfo");
 
     if (!user?.firstName && stored) {
       const parsed = JSON.parse(stored);
@@ -527,9 +533,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
 
   //authentication
   useEffect(() => {
-    const data = localStorage.getItem('wf_hybrid_user')
+    const data = localStorage.getItem('consentbit-userinfo')
     if (data) {
-      // localStorage.removeItem("wf_hybrid_user"); // ❌ REMOVED: This was clearing settings after auth
+      // localStorage.removeItem("consentbit-userinfo"); // ❌ REMOVED: This was clearing settings after auth
     }
     const onAuth = async () => {
       await exchangeAndVerifyIdToken();
@@ -549,7 +555,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
       }
 
       await createCookiePreferences(
-        selectedPreferences, language, color, btnColor, headColor, paraColor, secondcolor, buttonRadius, animation, toggleStates.customToggle, primaryButtonText, secondbuttontext, skipCommonDiv, toggleStates.disableScroll, toggleStates.closebutton, Font
+        selectedPreferences, language, color, btnColor, headColor, paraColor, secondcolor, buttonRadius, animation, toggleStates.customToggle, primaryButtonText, secondbuttontext, skipCommonDiv, toggleStates.disableScroll, toggleStates.closebutton
       );
     } catch (error) {
       // Error creating cookie preferences
@@ -616,20 +622,18 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
             await Promise.all(children.map(child => child.remove()));
           }
 
-          await el.remove();
-        } catch (err) {
-          console.error("⚠️ Error removing element:", err);
-          webflow.notify({ type: "error", message: "Failed to remove a banner." });
-        }
+                     await el.remove();
+         } catch (err) {
+           webflow.notify({ type: "error", message: "Failed to remove a banner." });
+         }
       }));
 
 
-      const selectedElement = await webflow.getSelectedElement();
-      if (!selectedElement) {
-        console.error("❌ No element selected.");
-        webflow.notify({ type: "error", message: "No element selected in the Designer." });
-        return;
-      }
+             const selectedElement = await webflow.getSelectedElement();
+       if (!selectedElement) {
+         webflow.notify({ type: "error", message: "No element selected in the Designer." });
+         return;
+       }
 
       const newDiv = await selectedElement.before(webflow.elementPresets.DivBlock);
       if (!newDiv) {
@@ -872,12 +876,10 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         await newDiv.setStyles([divStyle]);
       }
 
-      if (newDiv.setCustomAttribute) {
-        await newDiv.setCustomAttribute("data-animation", animationAttribute);
-        await newDiv.setCustomAttribute("data-cookie-banner", toggleStates.disableScroll ? "true" : "false");
-      } else {
-        console.error("❌ setCustomAttribute method not available on newDiv element");
-      }
+             if (newDiv.setCustomAttribute) {
+         await newDiv.setCustomAttribute("data-animation", animationAttribute);
+         await newDiv.setCustomAttribute("data-cookie-banner", toggleStates.disableScroll ? "true" : "false");
+       }
 
       const innerdiv = await selectedElement.before(webflow.elementPresets.DivBlock);
       await innerdiv.setStyles([innerDivStyle]);
@@ -902,11 +904,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         if (tempHeading.setStyles) {
           await tempHeading.setStyles([headingStyle]);
         }
-        if (tempHeading.setTextContent) {
-          await tempHeading.setTextContent(translations[language as keyof typeof translations].ccpa.heading);
-        } else {
-          console.error("❌ setText method not available on heading element");
-        }
+                 if (tempHeading.setTextContent) {
+           await tempHeading.setTextContent(translations[language as keyof typeof translations].ccpa.heading);
+         }
 
         // Conditionally add close button only if toggleStates.closebutton is true
         let Closebuttons = null;
@@ -932,11 +932,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
           await tempParagraph.setStyles([paragraphStyle]);
         }
 
-        if (tempParagraph.setTextContent) {
-          await tempParagraph.setTextContent(translations[language as keyof typeof translations].ccpa.description);
-        } else {
-          console.error("❌ setText method not available on paragraph element");
-        }
+                 if (tempParagraph.setTextContent) {
+           await tempParagraph.setTextContent(translations[language as keyof typeof translations].ccpa.description);
+         }
 
         const buttonContainer = await selectedElement.before(webflow.elementPresets.DivBlock);
         if (!buttonContainer) {
@@ -952,11 +950,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         await prefrenceButton.setTextContent(translations[language as keyof typeof translations].ccpa.doNotShare);
 
 
-        if ((prefrenceButton as any).setDomId) {
-          await (prefrenceButton as any).setDomId("do-not-share-link"); // Type assertion
-        } else {
-          console.error("❌ setDomId method not available on accept button element");
-        }
+                 if ((prefrenceButton as any).setDomId) {
+           await (prefrenceButton as any).setDomId("do-not-share-link"); // Type assertion
+         }
 
         if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
           await newDiv.append(innerdiv);
@@ -966,15 +962,11 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
           await innerdiv.append(tempParagraph);
           await innerdiv.append(buttonContainer);
 
-          if (buttonContainer.append && prefrenceButton) {
+                     if (buttonContainer.append && prefrenceButton) {
 
-            await buttonContainer.append(prefrenceButton)
-          } else {
-            console.error("❌ Failed to append buttons to the button container.");
-          }
-        } else {
-          console.error("❌ Failed to append elements to the main div.");
-        }
+             await buttonContainer.append(prefrenceButton)
+           }
+         }
 
 
 
@@ -992,14 +984,12 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         }, 20000);
         saveBannerDetails()
 
-      } catch (error) {
-        console.error("❌ Error creating cookie banner:", error);
-        webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
-      }
-    } catch (error) {
-      console.error("❌ Unexpected error:", error);
-      webflow.notify({ type: "error", message: "Unexpected error occurred." });
-    }
+             } catch (error) {
+         webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
+       }
+     } catch (error) {
+       webflow.notify({ type: "error", message: "Unexpected error occurred." });
+     }
   }
 
 
@@ -1034,33 +1024,16 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
           const applyScriptResponse = await customCodeApi.applyV2Script(params, token);
 
         }
-        catch (error) {
-          // More detailed error logging
-          console.error("Failed to apply script:", {
-            error: error instanceof Error ? error.message : 'Unknown error',
-            stack: error instanceof Error ? error.stack : undefined,
-            params: {
-              scriptId: hostingScript?.result?.id,
-              siteId: siteIdinfo?.siteId,
-              version: hostingScript?.result?.version
-            }
-          });
-
-          throw error; // or handle it differently based on your needs
-        }
-      } else {
-        console.warn("No hosting script data available");
-      }
-    }
+                 catch (error) {
+           throw error; // or handle it differently based on your needs
+         }
+       }
+     }
 
 
-    catch (error) {
-      console.error('=== Component Error ===');
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Full error object:', error);
-    }
+     catch (error) {
+       // Component error handling
+     }
   }
 
 
@@ -1122,12 +1095,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
       }
 
 
-      if ((newDiv as any).setDomId) {
-        await (newDiv as any).setDomId("consent-banner"); // Type assertion
-
-      } else {
-        console.error("❌ setDomId method not available on accept button element");
-      }
+             if ((newDiv as any).setDomId) {
+         await (newDiv as any).setDomId("consent-banner"); // Type assertion
+       }
 
 
       const styleNames = {
@@ -1408,11 +1378,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         if (tempHeading.setStyles) {
           await tempHeading.setStyles([headingStyle]);
         }
-        if (tempHeading.setTextContent) {
-          await tempHeading.setTextContent(translations[language as keyof typeof translations].heading);
-        } else {
-          console.error("❌ setText method not available on heading element");
-        }
+                 if (tempHeading.setTextContent) {
+           await tempHeading.setTextContent(translations[language as keyof typeof translations].heading);
+         }
 
         // Conditionally add close button only if toggleStates.closebutton is true
         let Closebuttons = null;
@@ -1438,12 +1406,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
 
         }
 
-        if (tempParagraph.setTextContent) {
-          await tempParagraph.setTextContent(translations[language as keyof typeof translations].description);
-
-        } else {
-          console.error("❌ setText method not available on paragraph element");
-        }
+                 if (tempParagraph.setTextContent) {
+           await tempParagraph.setTextContent(translations[language as keyof typeof translations].description);
+         }
 
         const buttonContainer = await selectedElement.before(webflow.elementPresets.DivBlock);
         if (!buttonContainer) {
@@ -1459,12 +1424,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         await prefrenceButton.setTextContent(translations[language as keyof typeof translations].preferences);
 
 
-        if ((prefrenceButton as any).setDomId) {
-          await (prefrenceButton as any).setDomId("preferences-btn"); // Type assertion
-
-        } else {
-          console.error("❌ setDomId method not available on accept button element");
-        }
+                 if ((prefrenceButton as any).setDomId) {
+           await (prefrenceButton as any).setDomId("preferences-btn"); // Type assertion
+         }
 
         const acceptButton = await selectedElement.before(webflow.elementPresets.Button);
         if (!acceptButton) {
@@ -1474,12 +1436,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         await acceptButton.setTextContent(translations[language as keyof typeof translations].accept);
 
 
-        if ((acceptButton as any).setDomId) {
-          await (acceptButton as any).setDomId("accept-btn"); // Type assertion
-
-        } else {
-          console.error("❌ setDomId method not available on accept button element");
-        }
+                 if ((acceptButton as any).setDomId) {
+           await (acceptButton as any).setDomId("accept-btn"); // Type assertion
+         }
 
         const declineButton = await selectedElement.before(webflow.elementPresets.Button);
         if (!declineButton) {
@@ -1489,12 +1448,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         await declineButton.setTextContent(translations[language as keyof typeof translations].reject);
 
 
-        if ((declineButton as any).setDomId) {
-          await (declineButton as any).setDomId("decline-btn"); // Type assertion
-
-        } else {
-          console.error("❌ setDomId method not available on accept button element");
-        }
+                 if ((declineButton as any).setDomId) {
+           await (declineButton as any).setDomId("decline-btn"); // Type assertion
+         }
 
 
 
@@ -1507,18 +1463,12 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
           await innerdiv.append(tempParagraph);
           await innerdiv.append(buttonContainer);
 
-          if (buttonContainer.append && prefrenceButton && declineButton && acceptButton) {
-            await buttonContainer.append(prefrenceButton)
-            await buttonContainer.append(declineButton);
-            await buttonContainer.append(acceptButton);
-
-
-          } else {
-            console.error("❌ Failed to append buttons to the button container.");
-          }
-        } else {
-          console.error("❌ Failed to append elements to the main div.");
-        }
+                     if (buttonContainer.append && prefrenceButton && declineButton && acceptButton) {
+             await buttonContainer.append(prefrenceButton)
+             await buttonContainer.append(declineButton);
+             await buttonContainer.append(acceptButton);
+           }
+         }
 
 
         handleCreatePreferences(skipCommonDiv);
@@ -1536,16 +1486,15 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
 
         saveBannerDetails()
 
-      } catch (error) {
+             } catch (error) {
 
-        webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
+         webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
 
-      }
-    } catch (error) {
-      console.error("❌ Unexpected error:", error);
-      webflow.notify({ type: "error", message: "Unexpected error occurred." });
-      setIsLoading(false);
-    }
+       }
+     } catch (error) {
+       webflow.notify({ type: "error", message: "Unexpected error occurred." });
+       setIsLoading(false);
+     }
   }
 
 
@@ -1563,7 +1512,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
   //banner details
   const saveBannerDetails = async () => {
     try {
-      const userinfo = localStorage.getItem("wf_hybrid_user");
+      const userinfo = localStorage.getItem("consentbit-userinfo");
       if (!userinfo) {
         return;
       }
@@ -1634,7 +1583,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
       // More comprehensive check for no data
       if (!hasDataRows || lines.length <= 1 || isEmptyDataMessage ||
         (hasHeader && lines.length === 2 && lines[1].trim().startsWith('#'))) {
-        console.warn('No consent data available for export');
         alert('No user consent data found for export. CSV file will not be generated.');
         setIsExporting(false);
         return; // Exit without generating CSV
@@ -1648,7 +1596,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
       ).length;
 
       if (dataRowsCount === 0) {
-        console.warn('No actual consent data rows found');
         alert('No user consent data found for export. CSV file will not be generated.');
         setIsExporting(false);
         return; // Exit without generating CSV
@@ -1679,7 +1626,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
       URL.revokeObjectURL(url);
 
     } catch (error) {
-      console.error('Failed to export CSV:', error);
       alert(`Failed to export CSV report: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsExporting(false);
@@ -1710,7 +1656,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
       // More comprehensive check for no data
       if (!hasDataRows || lines.length <= 1 || isEmptyDataMessage ||
         (hasHeader && lines.length === 2 && lines[1].trim().startsWith('#'))) {
-        console.warn('No consent data available for export');
         alert('No user consent data found for export. CSV file will not be generated.');
         setIsExporting(false);
         return; // Exit without generating CSV
@@ -1724,7 +1669,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
       ).length;
 
       if (dataRowsCount === 0) {
-        console.warn('No actual consent data rows found');
         alert('No user consent data found for export. CSV file will not be generated.');
         setIsExporting(false);
         return; // Exit without generating CSV
@@ -1761,7 +1705,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
 
 
     } catch (error) {
-      console.error('Failed to export CSV:', error);
       alert(`Failed to export CSV report: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsExporting(false);
@@ -1787,10 +1730,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
       }
 
       return data;
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-      throw error;
-    }
+         } catch (error) {
+       throw error;
+     }
   }
 
 
@@ -1809,10 +1751,10 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
           (status: { isSubscribed: boolean }) => status.isSubscribed === true
         );
 
-        setIsSubscribed(Boolean(hasSubscription));
-      } catch (error) {
-        console.error('Failed to check subscription:', error);
-      }
+                 setIsSubscribed(Boolean(hasSubscription));
+       } catch (error) {
+         // Error handling
+       }
     };
 
     fetchSubscription();
@@ -1835,10 +1777,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
         currentSiteInfo = await webflow.getSiteInfo();
         setSiteInfo(currentSiteInfo);
       }
-      if (!currentSiteInfo?.siteId) {
-        console.error("No siteId available for script check");
-        return;
-      }
+             if (!currentSiteInfo?.siteId) {
+         return;
+       }
 
 
 
@@ -1863,30 +1804,22 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
           };
           const applyScriptResponse = await customCodeApi.applyV2Script(params, token);
 
-        }
-        catch (error) {
-          console.error("Error applying script:", error);
-        }
-      }
-    }
+                 }
+         catch (error) {
+           // Error handling
+         }
+       }
+     }
 
-    catch (error) {
-      console.error("Error updating consent script:", error);
-    }
+     catch (error) {
+       // Error handling
+     }
   }
 
   useEffect(() => {
 
-    // Check if the script has already been registered in this browser
-    // const hasRun = localStorage.getItem("v2ConsentScriptRegistered");
-    // console.log("hasRun:", hasRun);
-    // if (!hasRun) {
-    //   console.log("Calling checkAndRegisterV2ConsentScript");
-    checkAndRegisterV2ConsentScript();
-    //   localStorage.setItem("v2ConsentScriptRegistered", "true");
-    // } else {
-    //   console.log("Script already registered, skipping");
-    // }
+         // Check if the script has already been registered in this browser
+     checkAndRegisterV2ConsentScript();
   }, []);
 
 
@@ -1987,10 +1920,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
                           setShowTooltip(true);
                         }
                       }
-                    } catch (error) {
-                      setShowTooltip(false);
-                      console.error("Error checking selected element:", error);
-                    }
+                                         } catch (error) {
+                       setShowTooltip(false);
+                     }
                   }}
                 >
                   {isBannerAdded ? "Publish your changes" : "Create Component"}
@@ -2224,9 +2156,8 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth }) => {
 
                   <div className="checkbox-group">
                     {["U.S. State Laws", "GDPR"].map((option) => { //U.S. State Laws
-                      const isChecked = selectedOptions.includes(option);
-                      console.log(`Checkbox ${option}:`, isChecked, "selectedOptions:", selectedOptions);
-                      return (
+                                             const isChecked = selectedOptions.includes(option);
+                       return (
                         <label key={option} className="custom-checkboxs">
                           <input
                             type="checkbox"

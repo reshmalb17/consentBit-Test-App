@@ -43,7 +43,7 @@ export function useAuth() {
   const { data: authState, isLoading: isAuthLoading } = useQuery<AuthState>({
     queryKey: ["auth"],
     queryFn: async () => {
-      const storedUser = localStorage.getItem("wf_hybrid_user");
+      const storedUser = localStorage.getItem("consentbit-userinfo");
       const wasExplicitlyLoggedOut = localStorage.getItem(
         "explicitly_logged_out"
       );
@@ -63,7 +63,7 @@ export function useAuth() {
         const decodedToken = jwtDecode(userData.sessionToken) as DecodedToken;
         if (decodedToken.exp * 1000 <= Date.now()) {
           // Token expired - clear storage
-          localStorage.removeItem("wf_hybrid_user");
+          localStorage.removeItem("consentbit-userinfo");
           return { user: { firstName: "", email: "" }, sessionToken: "" };
         }
 
@@ -77,7 +77,7 @@ export function useAuth() {
         };
       } catch (error) {
         // Clear invalid data
-        localStorage.removeItem("wf_hybrid_user");
+        localStorage.removeItem("consentbit-userinfo");
         return { user: { firstName: "", email: "" }, sessionToken: "" };
       }
     },
@@ -127,7 +127,7 @@ export function useAuth() {
         };
 
         // Update localStorage
-        localStorage.setItem("wf_hybrid_user", JSON.stringify(userData));
+        localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
         localStorage.removeItem("explicitly_logged_out");
 
         // Directly update the query data instead of invalidating
@@ -187,7 +187,7 @@ export function useAuth() {
         exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
       };
 
-      localStorage.setItem("wf_hybrid_user", JSON.stringify(userData));
+      localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
       localStorage.removeItem("explicitly_logged_out");
 
       // Update React Query cache
@@ -202,7 +202,7 @@ export function useAuth() {
       return data;
 
     } catch (error) {
-      localStorage.removeItem("wf_hybrid_user");
+      localStorage.removeItem("consentbit-userinfo");
       throw error;
     }
   };
@@ -211,7 +211,7 @@ export function useAuth() {
   const logout = () => {
     // Set logout flag and clear storage
     localStorage.setItem("explicitly_logged_out", "true");
-    localStorage.removeItem("wf_hybrid_user");
+    localStorage.removeItem("consentbit-userinfo");   
     queryClient.setQueryData(["auth"], {
       user: { firstName: "", email: "" },
       sessionToken: "",
@@ -235,7 +235,7 @@ export function useAuth() {
         await exchangeAndVerifyIdToken();
       } catch (error) {
         // Clear any partial auth state
-        localStorage.removeItem("wf_hybrid_user");
+        localStorage.removeItem("consentbit-userinfo");
         localStorage.setItem("explicitly_logged_out", "true");
       }
     };

@@ -25,11 +25,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
     }
 
 
-    // if ((newDiv as any).setDomId) {
-    //   await (newDiv as any).setDomId("main-banner");
-    // } else {
-    //   console.error("setDomId method not available on accept button element");
-    // }
     const timestamp = Date.now();
 
     const styleNames = {
@@ -263,7 +258,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       await newDiv.setCustomAttribute("data-cookie-banner", disableScroll ? "true" : "false");
 
     } else {
-      console.error("❌ setCustomAttribute method not available on newDiv element");
     }
 
     try {
@@ -277,7 +271,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       if (tempHeading.setTextContent) {
         await tempHeading.setTextContent(translation.heading);
       } else {
-        console.error("❌ setText method not available on heading element");
       }
 
       const tempParagraph = await selectedElement.before(webflow.elementPresets.Paragraph);
@@ -292,28 +285,40 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       if (tempParagraph.setTextContent) {
         await tempParagraph.setTextContent(translation.description);
       } else {
-        console.error("❌ setText method not available on paragraph element");
       }
 
       //divblock///////////////////////////////////////////////////////////////////
 
-      const prefrenceContainer = await selectedElement.before(webflow.elementPresets.DivBlock);
-      if (!prefrenceContainer) {
-        throw new Error("Failed to create button container");
-      }
-      await prefrenceContainer.setStyles([prefrenceDiv]);
+             // Create the main banner container with class consentbit-preference
+       const mainBanner = await selectedElement.before(webflow.elementPresets.DivBlock);
+       if (!mainBanner) {
+         throw new Error("Failed to create main banner");
+       }
+       await mainBanner.setStyles([maindivs]);
 
-      const Maincontainer = await selectedElement.before(webflow.elementPresets.DivBlock);
-      if (!Maincontainer) {
-        throw new Error("Failed to create button container");
-      }
-      await Maincontainer.setStyles([maindivs]);
+       // Set DOM ID to main-banner
+       if ((mainBanner as any).setDomId) {
+         await (mainBanner as any).setDomId("main-banner");
+       } else {
+       }
 
-    if ((Maincontainer as any).setDomId) {
-      await (Maincontainer as any).setDomId("main-banner");
-    } else {
-      console.error("setDomId method not available on accept button element");
-    }
+       // Create the preference div with class consentbit-preference_div
+       const preferenceDiv = await selectedElement.before(webflow.elementPresets.DivBlock);
+       if (!preferenceDiv) {
+         throw new Error("Failed to create preference div");
+       }
+       await preferenceDiv.setStyles([prefrenceDiv]);
+
+       // Set DOM ID to consentbit-preference_div
+       if ((preferenceDiv as any).setDomId) {
+         await (preferenceDiv as any).setDomId("consentbit-preference_div");
+       } else {
+       }
+
+       // Append preference div to main banner
+       if (mainBanner.append && preferenceDiv) {
+         await mainBanner.append(preferenceDiv);
+       }
 
 
 
@@ -427,7 +432,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
         if (checkboxField.setDomId) {
           await checkboxField.setDomId(section.id);
         } else {
-          console.error(`❌ setDomId method not available on checkbox element for ${section.label}`);
         }
 
 
@@ -436,7 +440,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
           await checkboxField.setCustomAttribute("customtoggle", customToggle ? "true" : "false");
 
         } else {
-          console.error(`❌ setCustomAttribute method not available on checkbox element for ${section.label}`);
         }
 
 
@@ -453,7 +456,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
         if (wrapperParagraph.setTextContent) {
           await wrapperParagraph.setTextContent(section.description);
         } else {
-          console.error(`❌ setTextContent method not available on wrapper paragraph for ${section.label}`);
         }
 
       }
@@ -477,7 +479,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
           await mainDivBlock.setCustomAttribute("scroll-control", "true");
           await (mainDivBlock as any).setDomId("toggle-consent-btn");
         } else {
-          console.error("ccpa banner id setteled");
         }
       }
 
@@ -526,24 +527,23 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       if ((declineButton as any).setDomId) {
         await (declineButton as any).setDomId("cancel-btn"); // Type assertion
       } else {
-        console.error("❌ setDomId method not available on accept button element");
       }
 
-      if (Maincontainer.append && newDiv) {
-        await Maincontainer.append(newDiv);
-      }
+             if (mainBanner.append && newDiv) {
+         await mainBanner.append(newDiv);
+       }
 
-      if (newDiv.append && tempHeading && tempParagraph && buttonContainer && prefrenceContainer) {
-        await newDiv.append(tempHeading);
-        await newDiv.append(tempParagraph);
-        await newDiv.append(prefrenceContainer)
-        await newDiv.append(buttonContainer);
-        if (Closebuttons) await newDiv.append(Closebuttons)
+       if (newDiv.append && tempHeading && tempParagraph && buttonContainer && preferenceDiv) {
+         await newDiv.append(tempHeading);
+         await newDiv.append(tempParagraph);
+         await newDiv.append(preferenceDiv)
+         await newDiv.append(buttonContainer);
+         if (Closebuttons) await newDiv.append(Closebuttons)
 
-        if (prefrenceContainer.append && prefrenceContainerinner) {
-          // await prefrenceContainer.append(prefrenceContainertoggle)
-          await prefrenceContainer.append(prefrenceContainerinner)
-        }
+         if (preferenceDiv.append && prefrenceContainerinner) {
+           // await preferenceDiv.append(prefrenceContainertoggle)
+           await preferenceDiv.append(prefrenceContainerinner)
+         }
 
         if (prefrenceContainerinner.append && formBlock) {
           await prefrenceContainerinner.append(formBlock)
@@ -555,22 +555,16 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
           await buttonContainer.append(declineButton);
           // await buttonContainer.append(prefrenceButton)
         } else {
-          console.error("❌ Failed to append buttons to the button container.");
         }
       } else {
-        console.error("❌ Failed to append elements to the main div.");
       }
 
       // webflow.notify({ type: "Success", message: "ConsentBit banner added successfully!" }
 
 
     } catch (error) {
-      console.error("❌ Error creating cookie banner:", error);
-      webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
     }
   } catch (error) {
-    console.error("❌ Error creating cookie banner:", error);
-    webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
   } finally {
 
   }
