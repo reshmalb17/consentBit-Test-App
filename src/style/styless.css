@@ -17,6 +17,8 @@ body {
   font-family: 'DM Sans', sans-serif;
   width: 800px;
   overflow-x: hidden;
+  overflow-y: hidden;
+
 }
 
 .username {
@@ -153,7 +155,7 @@ h4 {
 }
 
 .subscribe a {
-  color: #8C8C9A;
+  color: rgba(140, 121, 255, 1)
 }
 
 .editimage {
@@ -1759,7 +1761,13 @@ input:checked+.toggle::before {
 .script-container {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
-
+.gotto-settings{
+      display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    color: rgba(140, 121, 255, 1);
+    text-decoration: underline;
+}
 .fade-in {
   opacity: 1;
   transform: translateY(0);
@@ -2382,7 +2390,7 @@ input:checked+.toggle::before {
   justify-content: center;
   z-index: 9999;
   transition: opacity 0.3s ease-in-out;
-  backdrop-filter: blur(15.7px);
+  backdrop-filter: blur(62px);
   /* Add this line for background blur */
   background: rgba(0, 0, 0, 0.3);
 }
@@ -4618,8 +4626,8 @@ text-align: center;
 /* Welcome Screen Styles */
 .welcome-screen {
   position: relative;
-  width: 100vw;
-  height: 100vh;
+  width:800px;
+  height: 600px;
   background-color: #0A081B;
   overflow: hidden;
   display: flex;
@@ -4923,7 +4931,25 @@ letter-spacing: -3%;
 
 .setup-checkbox {
   display: none;
+}
 
+/* Create custom checkbox box */
+.custom-checkbox3 {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(110, 102, 157, 1);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+/* Tick icon should fit nicely */
+.tick-icon3 {
+  width: 14px;
+  height: 14px;
 }
 
 .setup-checkmark {
@@ -5025,7 +5051,7 @@ position: absolute;
   padding: 10px 51px;
   border-radius: 3px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.3s ease;
   opacity: 1;
@@ -5131,7 +5157,7 @@ letter-spacing: -0.36px;
   height: 16px;
   font-size: 12px;
   font-weight: 300;
-  gap: 2px;
+  gap: 7px;
 
 }
 .setup-card-img{
@@ -5151,15 +5177,31 @@ letter-spacing: -0.36px;
     left: 120px;
 }
 .setup-video-thumbnail {
- width: 100%;
-  height: 100%;
+width:99px;
+height:54px
 
+}
+
+.nextbutton{
+      background: #262e84;
+    width: 91px;
+    position: relative;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 100%;
+    letter-spacing: -3%;
+    border-radius: 5px;
 }
 .setup-card-info{
   display: flex;
   flex-direction: row;
   gap: 4px;
-  padding:12px;
+  padding:4px 12px 12px 12px;
   background-color: #8C79FF;
   border-radius: 8px;
 }
@@ -5174,7 +5216,6 @@ letter-spacing: -3%;
 .setup-card-info-logo{
   width: 16px;
   height: 16px;
-  filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(200deg);
   flex-shrink: 0;
   margin-right: 4px;
 }
@@ -5260,7 +5301,6 @@ color: #ffffff;
 .setup-card-icon {
   width: 20px;
   height: 20px;
-  filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(200deg);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -5306,14 +5346,14 @@ color: #ffffff;
 .welcome-script-actions-container{
   position: absolute;
   width:96%;
-  left: -14px!important;
+  /* left: -14px!important; */
   top: 0;
 }
 .welcome-screen.script{
   position: relative; 
-  width: 100vw;
-  height: 100vh;
-  padding: 25px
+  /* width: 100vw;
+  height: 100vh; */
+  /* padding: 25px */
 }
 .setup-info-cards.welcome-script{
   position: relative;
@@ -5327,23 +5367,22 @@ color: #ffffff;
  left: 11px;
  bottom: 20px;;
  right: 20px;
- padding-left: 25px;
-  padding-right: 25px;
-  
+    padding-left: 7px;
+    padding-right: 7px;
 
 }
 .next-step-section{
-  width: 91%;
-  height: 50px;
-  position: relative;
-  bottom: 20px;
-  left: 50px;
-  right: 20px;
-  top: 11%;
-  display: flex;
-  flex-direction: row;
-  right: 20px;
-  gap: 16px;
+    width: 98%;
+    height: 50px;
+    position: relative;
+    bottom: 5px;
+    left: 17px;
+    right: 20px;
+    top: 11%;
+    display: flex;
+    flex-direction: row;
+    right: -5px;
+    gap: 16px;
 }
 .welcome-script-buttons{
   position: absolute;
@@ -5356,9 +5395,9 @@ color: #ffffff;
   position: absolute;
   font-size: 20px;
 }
-
-/* Responsive Design */
-@media (max-width: 768px) {
+/* 
+Responsive Design
+/* @media (max-width: 768px) {
   .setup-main-content {
     padding: 20px;
   }
@@ -5376,4 +5415,4 @@ color: #ffffff;
   .setup-card {
     padding: 20px;
   }
-}
+} */ 

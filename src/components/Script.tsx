@@ -21,15 +21,17 @@ const uparrow = new URL("../assets/blue up arrow.svg", import.meta.url).href;
 const line2 = new URL("../assets/line.svg", import.meta.url).href;
 const copyScript = new URL("../assets/copy script.svg", import.meta.url).href;
 const tickmarkcopy = new URL("../assets/Vector 23.svg", import.meta.url).href;
+const goto = new URL("../assets/gotosetting.svg", import.meta.url).href;
+
 
 
 const Script: React.FC<{
     fetchScripts: boolean;
     setFetchScripts: React.Dispatch<React.SetStateAction<boolean>>;
     isWelcome?: boolean;
-}> = ({ fetchScripts, setFetchScripts ,isWelcome}) => {
+}> = ({ fetchScripts, setFetchScripts, isWelcome }) => {
     const { scripts, setScripts } = useScriptContext();
-    
+
     // Debug scripts state changes
     useEffect(() => {
         // Removed console.log for production
@@ -74,7 +76,7 @@ const Script: React.FC<{
         try {
             const userInfo = JSON.parse(userinfo || "{}");
             const tokens = userInfo?.sessionToken;
-            
+
             if (!tokens) {
                 setIsLoading(false);
                 return;
@@ -94,7 +96,7 @@ const Script: React.FC<{
             if (!result.data) {
                 throw new Error('No data in API response');
             }
-            
+
             const scriptsResponse = result.data.analyticsScripts ?? [];
             const validScripts = scriptsResponse.filter(script => script.fullTag?.trim() !== "");
 
@@ -103,11 +105,11 @@ const Script: React.FC<{
                 let modifiedTag = script.fullTag || '';
                 const tagRegex = /<script\b([^>]*)>/i;
                 const match = modifiedTag.match(tagRegex);
-                
+
                 // Parse existing data-category attribute to set selectedCategories (only if it exists)
                 let existingCategories: string[] = [];
                 let hasDataCategoryAttribute = false;
-                
+
                 if (script.fullTag) {
                     const categoryMatch = script.fullTag.match(/data-category\s*=\s*"([^"]*)"/i);
                     if (categoryMatch && categoryMatch[1]) {
@@ -119,19 +121,19 @@ const Script: React.FC<{
                             .filter(cat => cat.length > 0); // Don't exclude Essential anymore
                     }
                 }
-                
+
                 if (match) {
                     let attrs = match[1];
                     // Remove consent-related attributes
                     attrs = attrs.replace(/\s*data-cb-consent[^"'\s]*\s*/g, '');
-                    
+
                     // Update or add type attribute
                     if (attrs.includes('type=')) {
                         attrs = attrs.replace(/type\s*=\s*"[^"]*"/i, 'type="text/plain"');
                     } else {
                         attrs += ' type="text/plain"';
                     }
-                    
+
                     const newTag = `<script${attrs}>`;
                     modifiedTag = modifiedTag.replace(tagRegex, newTag);
                 }
@@ -152,21 +154,21 @@ const Script: React.FC<{
 
             // For custom scripts and single-instance scripts, keep them separate. For other scripts, group by category
             const groupedScripts: any[] = [];
-            
+
             // Separate custom scripts and single-instance scripts
             const customScripts = formattedScripts.filter(script => script.group === 'custom');
-            const singleInstanceScripts = formattedScripts.filter(script => 
-                script.group === 'Heap' || 
-                script.group === 'Umami' || 
+            const singleInstanceScripts = formattedScripts.filter(script =>
+                script.group === 'Heap' ||
+                script.group === 'Umami' ||
                 script.group === 'PostHog'
             );
-            const otherScripts = formattedScripts.filter(script => 
-                script.group !== 'custom' && 
-                script.group !== 'Heap' && 
-                script.group !== 'Umami' && 
+            const otherScripts = formattedScripts.filter(script =>
+                script.group !== 'custom' &&
+                script.group !== 'Heap' &&
+                script.group !== 'Umami' &&
                 script.group !== 'PostHog'
             );
-            
+
             // Add each custom script as a separate block
             customScripts.forEach((script, index) => {
                 groupedScripts.push({
@@ -190,7 +192,7 @@ const Script: React.FC<{
                     crossorigin: script.crossorigin || null,
                 });
             });
-            
+
             // Add each single-instance script as a separate block
             singleInstanceScripts.forEach((script, index) => {
                 groupedScripts.push({
@@ -214,7 +216,7 @@ const Script: React.FC<{
                     crossorigin: script.crossorigin || null,
                 });
             });
-            
+
             // Group other scripts by their group name
             const scriptGroups = new Map<string, typeof otherScripts>();
             otherScripts.forEach(script => {
@@ -230,19 +232,19 @@ const Script: React.FC<{
                 // Combine all scripts in the group
                 const combinedFullTag = scripts.map(s => s.fullTag).filter(Boolean).join('\n');
                 const combinedScript = scripts.map(s => s.script).filter(Boolean).join('\n');
-                
+
                 // Don't merge categories - use categories only if all scripts in group have the same categories
                 let groupCategories: string[] = [];
                 let hasAutoDetected = false;
-                
+
                 // Check if all scripts have the same categories (only if they have data-category attributes)
                 const scriptsWithCategories = scripts.filter(s => s.hasAutoDetectedCategories);
                 if (scriptsWithCategories.length > 0) {
                     const firstScriptCategories = scriptsWithCategories[0].selectedCategories.sort().join(',');
-                    const allSameCategories = scriptsWithCategories.every(s => 
+                    const allSameCategories = scriptsWithCategories.every(s =>
                         s.selectedCategories.sort().join(',') === firstScriptCategories
                     );
-                    
+
                     if (allSameCategories) {
                         groupCategories = scriptsWithCategories[0].selectedCategories;
                         hasAutoDetected = true;
@@ -272,30 +274,33 @@ const Script: React.FC<{
                 });
             });
 
-            setScripts(prevScripts => {
-                const existingScriptsMap = new Map(prevScripts.map(script => [script.identifier, script]));
-                const mergedScripts = groupedScripts.map(newScript => {
-                    const existingScript = existingScriptsMap.get(newScript.identifier);
-                    if (existingScript) {
-                        // For existing scripts, keep user selections unless the script has a different data-category attribute
-                        // Check if the new script has different categories from data-category attribute
-                        const hasNewCategories = newScript.selectedCategories.length > 0 && 
-                            JSON.stringify(newScript.selectedCategories.sort()) !== JSON.stringify(existingScript.selectedCategories.sort());
-                        
-                        return {
-                            ...newScript,
-                            isSaved: existingScript.isSaved,
-                            selectedCategories: hasNewCategories ? newScript.selectedCategories : existingScript.selectedCategories,
-                            isDismissed: existingScript.isDismissed,
-                            hasAutoDetectedCategories: hasNewCategories ? newScript.hasAutoDetectedCategories : existingScript.hasAutoDetectedCategories,
-                        };
-                    }
-                    // For new scripts, use the categories parsed from data-category attribute
-                    return newScript;
+            // Use setTimeout to defer the state update and avoid the render warning
+            setTimeout(() => {
+                setScripts(prevScripts => {
+                    const existingScriptsMap = new Map(prevScripts.map(script => [script.identifier, script]));
+                    const mergedScripts = groupedScripts.map(newScript => {
+                        const existingScript = existingScriptsMap.get(newScript.identifier);
+                        if (existingScript) {
+                            // For existing scripts, keep user selections unless the script has a different data-category attribute
+                            // Check if the new script has different categories from data-category attribute
+                            const hasNewCategories = newScript.selectedCategories.length > 0 &&
+                                JSON.stringify(newScript.selectedCategories.sort()) !== JSON.stringify(existingScript.selectedCategories.sort());
+
+                            return {
+                                ...newScript,
+                                isSaved: existingScript.isSaved,
+                                selectedCategories: hasNewCategories ? newScript.selectedCategories : existingScript.selectedCategories,
+                                isDismissed: existingScript.isDismissed,
+                                hasAutoDetectedCategories: hasNewCategories ? newScript.hasAutoDetectedCategories : existingScript.hasAutoDetectedCategories,
+                            };
+                        }
+                        // For new scripts, use the categories parsed from data-category attribute
+                        return newScript;
+                    });
+                    setIsLoading(false);
+                    return mergedScripts.filter(script => script.identifier !== null);
                 });
-                setIsLoading(false);
-                return mergedScripts.filter(script => script.identifier !== null);
-            });
+            }, 0);
         } catch (error) {
             setSaveStatus({
                 success: false,
@@ -305,15 +310,23 @@ const Script: React.FC<{
         }
     }, [setScripts, userinfo, getScriptIdentifier, siteInfo]);
 
-  
+
 
     useEffect(() => {
         if (fetchScripts) {
             const fetchDataAndResetFlag = async () => {
-                await fetchScriptData();
-                // Only reset the flag if not in welcome mode
-                if (!isWelcome) {
-                    setFetchScripts(false);
+                try {
+                    await fetchScriptData();
+                    // Only reset the flag if not in welcome mode
+                    if (!isWelcome) {
+                        setFetchScripts(false);
+                    }
+                } catch (error) {
+                    console.error("Error fetching script data:", error);
+                    // Reset flag even on error if not in welcome mode
+                    if (!isWelcome) {
+                        setFetchScripts(false);
+                    }
                 }
             };
             fetchDataAndResetFlag();
@@ -357,17 +370,17 @@ const Script: React.FC<{
                 setScripts(prevScripts =>
                     prevScripts.map(script => {
                         if (!script.identifier) {
-                            return script; 
+                            return script;
                         }
                         const wasJustSaved = scriptsToSave.some(savedScript =>
                             savedScript.content === (script.fullTag || script.script) &&
                             savedScript.src === (script.src || script.url)
                         );
-                        
+
                         // Debug logging for save process
                         if (wasJustSaved) {
                         }
-                        
+
                         return { ...script, isSaved: script.isSaved || wasJustSaved };
                     })
                 );
@@ -389,9 +402,9 @@ const Script: React.FC<{
         setScripts(prevScripts =>
             prevScripts.map((script, i) => {
                 if (i === index) {
-                    return { 
-                        ...script, 
-                        isSaved: false 
+                    return {
+                        ...script,
+                        isSaved: false
                     };
                 }
                 return script;
@@ -423,14 +436,14 @@ const Script: React.FC<{
                                 // Remove consent-related attributes and data-category
                                 attrs = attrs.replace(/\s*data-cb-consent[^"'\s]*\s*/g, '');
                                 attrs = attrs.replace(/\s*data-category\s*=\s*"[^"]*"/i, '');
-                                
+
                                 // Update or add type attribute
                                 if (attrs.includes('type=')) {
                                     attrs = attrs.replace(/type\s*=\s*"[^"]*"/i, 'type="text/plain"');
                                 } else {
                                     attrs += ' type="text/plain"';
                                 }
-                                
+
                                 // Add category attribute if needed (including Essential)
                                 const categoryAttr = updatedCategories.length > 0
                                     ? ` data-category="${updatedCategories.join(',')}"`
@@ -477,14 +490,14 @@ const Script: React.FC<{
                     let originalTag = s.fullTag || '';
                     const tagRegex = /<script\b([^>]*)>/i;
                     const match = originalTag.match(tagRegex);
-                    
+
                     if (match) {
                         let attrs = match[1];
                         // Remove all consent-related attributes and type
                         attrs = attrs.replace(/\s*data-cb-consent[^"'\s]*\s*/g, '');
                         attrs = attrs.replace(/\s*data-category\s*=\s*"[^"]*"/gi, '');
                         attrs = attrs.replace(/\s*type\s*=\s*"[^"]*"/gi, '');
-                        
+
                         // Create clean script tag
                         originalTag = originalTag.replace(tagRegex, `<script${attrs}>`);
                     }
@@ -537,27 +550,27 @@ const Script: React.FC<{
         // Clean up the script tag before copying
         const tagRegex = /<script\b([^>]*)>/i;
         const match = script.match(tagRegex);
-        
+
         let cleanScript = script;
         if (match) {
             let attrs = match[1];
             // Remove all existing type and consent-related attributes
             attrs = attrs.replace(/\s*type\s*=\s*"[^"]*"/gi, '');
             attrs = attrs.replace(/\s*data-cb-consent[^"'\s]*\s*/g, '');
-            
+
             // Remove any existing data-category attributes
             attrs = attrs.replace(/\s*data-category\s*=\s*"[^"]*"/gi, '');
-            
+
             // Add type attribute
             attrs += ' type="text/plain"';
-            
+
             // Get the categories from the script's selectedCategories (including Essential)
             const scriptObj = scripts[index];
             if (scriptObj?.selectedCategories?.length > 0) {
                 // Add all selected categories including Essential
                 attrs += ` data-category="${scriptObj.selectedCategories.join(',')}"`;
             }
-            
+
             // Create clean script tag
             cleanScript = script.replace(tagRegex, `<script${attrs}>`);
         }
@@ -604,7 +617,7 @@ const Script: React.FC<{
 
     return (
         <div className="container-script">
-          {!isWelcome && (   <div className="section back-color">
+            {!isWelcome && (<div className="section back-color">
                 <div className="flexings">
                     <div>
                         <img src={sheild} alt="catogery image" />
@@ -644,7 +657,7 @@ const Script: React.FC<{
             {(() => { return null; })()}
             {isLoading ? (
                 <div className="pulse-overlays">
-                    <PulseAnimation />
+                    <PulseAnimation />                   
                 </div>
             ) : scripts.length === 0 ? (
                 <div className="sections">
@@ -658,139 +671,150 @@ const Script: React.FC<{
                 })()
                     .map((script, index) => {
                         return (
-                        <div key={script.identifier || index} className={`section-script script-container ${script.transitionState || ''}`}>
-                            {script.isSaved && !script.isDismissed ? (
-                                // --- EDIT CONFIRMATION VIEW ---
-                                <div className="flexing">
-                                    <div>
-                                        <img src={tickmark} alt="checkmark" className="flex-image" />
-                                    </div>
-                                    <div className="editdiv">
-                                        <div className="editname">
-                                            <h4 className="heading-text">{script.category.charAt(0).toUpperCase() + script.category.slice(1) || 'Script'} is implemented correctly.</h4>
+                            <div key={script.identifier || index} className={`section-script script-container ${script.transitionState || ''}`}>
+                                {script.isSaved && !script.isDismissed ? (
+                                    // --- EDIT CONFIRMATION VIEW ---
+                                    <div className="flexing">
+                                        <div>
+                                            <img src={tickmark} alt="checkmark" className="flex-image" />
                                         </div>
-                                        <div className="bottom-row">
-                                            <p className="category-text">Categories: <span className="category-highlight">{script.selectedCategories.join(', ')}</span></p>
-                                            <div className="edit-flex" onClick={() => handleToggleEdit(index)} style={{ cursor: 'pointer' }}>
-                                                <img className="editimage" src={edit} alt="edit icon" />
-                                                <p className="edit-text">Edit</p>
+                                        <div className="editdiv">
+                                            <div className="editname">
+                                                <h4 className="heading-text">{script.category.charAt(0).toUpperCase() + script.category.slice(1) || 'Script'} is implemented correctly.</h4>
+                                            </div>
+                                            <div className="bottom-row">
+                                                <p className="category-text">Categories: <span className="category-highlight">{script.selectedCategories.join(', ')}</span></p>
+                                                <div className="edit-flex" onClick={() => handleToggleEdit(index)} style={{ cursor: 'pointer' }}>
+                                                    <img className="editimage" src={edit} alt="edit icon" />
+                                                    <p className="edit-text">Edit</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <>
-                                    {script.isDismissed ? (
-                                        <div className="dismissed-message">
-                                            <p>
-                                                <span>
-                                                    {script.category
-                                                        ? script.category.charAt(0).toUpperCase() + script.category.slice(1)
-                                                        : script.src
-                                                            ? script.src.charAt(0).toUpperCase() + script.src.slice(1)
-                                                            : 'Unknown'}
-                                                </span>{' '}
-                                                Script is Dismissed!
-                                            </p>
+                                ) : (
+                                    <>
+                                        {script.isDismissed ? (
+                                            <div className="dismissed-message">
+                                                <p>
+                                                    <span>
+                                                        {script.category
+                                                            ? script.category.charAt(0).toUpperCase() + script.category.slice(1)
+                                                            : script.src
+                                                                ? script.src.charAt(0).toUpperCase() + script.src.slice(1)
+                                                                : 'Unknown'}
+                                                    </span>{' '}
+                                                    Script is Dismissed!
+                                                </p>
 
-                                            <button className="dismiss-btn" onClick={() => handleActivate(index)}> <img src={Active} alt="activate icon" style={{ marginRight: '8px', width: "14px", height: "14px" }} />Activate</button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="flexings">
-                                                <div style={{paddingTop:"6px"}}>
-                                                    <img src={explain} alt="catogery image" />
-                                                </div>
-                                                <div className="width-100">
-                                                    <div className="header">
-                                                        <div>
-                                                            <span className="text-[12px] font-bold">
-                                                                {script.category
-                                                                    ? `Update the ${script.category.charAt(0).toUpperCase() + script.category.slice(1)} Script`
-                                                                    : 'Unknown Script'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex">
-                                                            <img src={settings} alt="settingsimage" />
-                                                            {siteInfo?.shortName ? (
-                                                                <a 
-                                                                    href={`https://webflow.com/dashboard/sites/${siteInfo.shortName}/custom-code`}
-                                                                    target="_blank" 
-                                                                    rel="noopener noreferrer"
-                                                                    className="font-14 light"
-                                                                    style={{ cursor: 'pointer' }}
-                
-                                                                >
-                                                                    Site Settings &gt; Custom Code
-                                                                </a>
-                                                            ) : (
+                                                <button className="dismiss-btn" onClick={() => handleActivate(index)}> <img src={Active} alt="activate icon" style={{ marginRight: '8px', width: "14px", height: "14px" }} />Activate</button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="flexings">
+                                                    <div style={{ paddingTop: "6px" }}>
+                                                        <img src={explain} alt="catogery image" />
+                                                    </div>
+                                                    <div className="width-100">
+                                                        <div className="header">
+                                                            <div>
+                                                                <span className="text-[12px] font-bold">
+                                                                    {script.category
+                                                                        ? `Update the ${script.category.charAt(0).toUpperCase() + script.category.slice(1)} Script`
+                                                                        : 'Unknown Script'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex">
+                                                                {/* <img src={settings} alt="settingsimage" />
+
                                                                 <span className="font-14 light">
                                                                     Site Settings &gt; Custom Code
-                                                                </span>
-                                                            )}
+                                                                </span> */}
+
+                                                            </div>
+                                                            <button className="dismiss-btn" onClick={() => handleDismiss(index)}>  <img src={dismiss} alt="Dismiss icon" style={{ marginRight: '8px' }} />Dismiss</button>
                                                         </div>
-                                                        <button className="dismiss-btn" onClick={() => handleDismiss(index)}>  <img src={dismiss} alt="Dismiss icon" style={{ marginRight: '8px' }} />Dismiss</button>
-                                                    </div>
-                                                    <p>Select a category for this script, remove the current script, and add the updated script to the Site head:</p>
-                                                    <div><img src={line} alt="lineimage" /></div>
-                                                    <div className="category-code-block">
-                                                        <div className="category">
-                                                            <span>Category:</span>
-                                                            {categories.map((category) => {
-                                                                const isChecked = script.selectedCategories.includes(category);
-                                                                
-                                                                return (
-                                                                    <label key={category} className="toggle-switch">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            value={category}
-                                                                            checked={isChecked}
-                                                                            onChange={() => handleToggle(category, index)}
+                                                        <p>Select a category for this script, remove the current script, and add the updated script to the Site head:</p>
+                                                        <div><img src={line} alt="lineimage" /></div>
+                                                        <div className="category-code-block">
+                                                            <div className="category">
+                                                                <span>Category:</span>
+                                                                {categories.map((category) => {
+                                                                    const isChecked = script.selectedCategories.includes(category);
+
+                                                                    return (
+                                                                        <label key={category} className="toggle-switch">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                value={category}
+                                                                                checked={isChecked}
+                                                                                onChange={() => handleToggle(category, index)}
+                                                                            />
+                                                                            <span className="slider"></span>
+                                                                            <span className="category-label">{category}</span>
+                                                                            <div className="tooltip-containers">
+                                                                                <img src={questionmark} alt="info" className="tooltip-icon" />
+                                                                                <span className="tooltip-text">Categorize this script based on its purpose.</span>
+                                                                            </div>
+                                                                        </label>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                            <div>
+                                                                <div className="code-block">
+                                                                    <div className="script-header">
+                                                                        <textarea
+                                                                            value={script.fullTag || ''}
+                                                                            readOnly
+                                                                            className={`script-input ${copiedScriptIndex === index ? 'copied' : ''}`}
+                                                                            rows={8}
+                                                                            placeholder="Script content..."
                                                                         />
-                                                                        <span className="slider"></span>
-                                                                        <span className="category-label">{category}</span>
-                                                                        <div className="tooltip-containers">
-                                                                            <img src={questionmark} alt="info" className="tooltip-icon" />
-                                                                            <span className="tooltip-text">Categorize this script based on its purpose.</span>
-                                                                        </div>
-                                                                    </label>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                        <div className="code-block">
-                                                            <div className="script-header">
-                                                                <textarea
-                                                                    value={script.fullTag || ''}
-                                                                    readOnly
-                                                                    className={`script-input ${copiedScriptIndex === index ? 'copied' : ''}`}
-                                                                    rows={8}
-                                                                    placeholder="Script content..."
-                                                                />
-                                                               
-                                                                {copiedScriptIndex === index ? (
-                                                                     <img
-                                                                        src={tickmarkcopy}
-                                                                        className="copy-button"
-                                                                        alt="Copy icon"
-                                                                    />
-                                                                ) : (
-                                                                    <img
-                                                                        src={copyScript}
-                                                                        className="copy-button"
-                                                                        onClick={() => handleCopyScript(script.fullTag || '', index)}
-                                                                        alt="Copy icon"
-                                                                    />
-                                                                )}
+
+                                                                        {copiedScriptIndex === index ? (
+                                                                            <img
+                                                                                src={tickmarkcopy}
+                                                                                className="copy-button"
+                                                                                alt="Copy icon"
+                                                                            />
+                                                                        ) : (
+                                                                            <img
+                                                                                src={copyScript}
+                                                                                className="copy-button"
+                                                                                onClick={() => handleCopyScript(script.fullTag || '', index)}
+                                                                                alt="Copy icon"
+                                                                            />
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="gotto-settings">
+                                                                    {siteInfo?.shortName ? (
+                                                                        <a
+                                                                            href={`https://webflow.com/dashboard/sites/${siteInfo.shortName}/custom-code`}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="font-14 light flex items-center gap-2"
+                                                                            style={{ cursor: "pointer", color: "rgba(140, 121, 255, 1)" }}
+                                                                        >
+                                                                            <span>Open the page to paste script</span>
+                                                                            <img src={goto} alt="" className="w-4 h-4" />
+                                                                        </a>
+
+                                                                    ) : (
+                                                                        <span className="font-14 light">
+                                                                            Open the page to paste script <img src={goto} alt="" />
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         );
                     })
             )}

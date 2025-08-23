@@ -1,121 +1,95 @@
 import React from "react";
-import { useState } from "react";
-import "../style/styless.css";
-import Script from "./Script";
 import { useAppState } from "../hooks/useAppState";
-import { s } from "framer-motion/dist/types.d-6pKw1mTI";
+import Script from "./Script";
 import SetupStep from "./SetupStep";
-const youtubethumbnail=new URL("../assets/youtube-thumbnail.svg", import.meta.url).href;
+import "../style/welcomescript.css";
+
 const infologo = new URL("../assets/info-logo.svg", import.meta.url).href;
 const questionmark = new URL("../assets/question.svg", import.meta.url).href;
+const uparrow = new URL("../assets/blue up arrow.svg", import.meta.url).href;
+const thumbnail = new URL("../assets/thumbnail.svg", import.meta.url).href;
 
 type WelcomeScriptProps = {
-isFetchScripts: boolean;
-setFetchScripts: (value: boolean) => void;
+  isFetchScripts: boolean;
+  setFetchScripts: (value: boolean) => void;
 };
 
-const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ isFetchScripts,setFetchScripts }) => {
-  console.log("isFetchScripts prop in WelcomeScript:", isFetchScripts);
-    const {
-        colors,
-        ui,
-        config,
-        booleans,
-        popups,
-        tooltips,
-        data,
-        buttons,
-        animation,
-        localStorage: localStorageData
-      } = useAppState();
+const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ isFetchScripts, setFetchScripts }) => {
+  const { popups } = useAppState();
 
   const handleNextButton = () => {
-   popups.setShowPopupWelcomeSetup(true);
-  }
+    popups.setShowPopupWelcomeSetup(true);
+  };
 
   const handleGoBack = () => {
-   popups.setShowPopupWelcomeSetup(false);
-  }
+    popups.setShowPopupWelcomeSetup(false);
+  };
 
   const handleProceed = () => {
-   popups.setShowPopupWelcomeSetup(false);
-   popups.setShowSetUpStep(true);
-  } 
+    popups.setShowPopupWelcomeSetup(false);
+    popups.setShowSetUpStep(true);
+  };
 
   return (
-    <div className="welcome-screen script">     
-              {/* Bottom information cards */}
-        <div className="setup-info-cards welcome-script">
-          <div className="setup-card">
-            <div className="setup-card-top">
-            <div className="setup-card-title">
-              Facing any issues?
-              </div>
-              <div className="setup-card-content">  
-                Check our tutorial video to help yourself
-                </div>
-                </div>
-                <div className="setup-card-bottom">
-             <div className="setup-card-help"  >
-              <div className="setup-card-img">
-              <img src={questionmark} alt="Need help?" style={{width:"100%", height:"100%"}}  />
-              </div>
-               
-            <span className="need-help-text">Need help?</span>
-          </div>
-             <div className="setup-card-youtube-thumbnail">
-              <img src={youtubethumbnail} alt="Tutorial Video" className="setup-video-thumbnail" />
-              </div>
-              
-
-                </div>
-               
+    <div className="ws-container">
+      {/* Top grid info cards */}
+      <div className="ws-info-grid">
+        {/* Card 1 */}
+        <div className="ws-help-card">
+          <div style={{display:"flex"}}>
+            <div className="ws-card-header">
+              <h3 className="ws-card-title">Facing any issues?</h3>
+              <p className="ws-card-desc">Check our tutorial video to help yourself</p>
             </div>
-            <div className="setup-card-info">
-              <div className="setup-card-info-logo">
-                <img src={infologo} alt="Info" className="setup-card-info-icon" />
-
-
-                
-              
-               </div>
-
-              <div className="setup-card-info-text">
-                <p className="setup-card-info-title">Update the scripts in your project that handle cookie creation</p>
-                <p className="setup-card-info-subtitle">Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow.</p>
-
-            <div className="subscribe help"><a className="link" href="#">Need help? See the docs <i><img src="https://67c7218243770a3d2c39fb20.webflow-ext.com/689d09e47269fe2b0de4ee70/58620d0d66fe581478f9.svg" alt=""/></i></a></div>
-               </div>
-               </div>
-        
-         
+            <div>
+               <img src={thumbnail} alt="Tutorial Video" className="ws-thumbnail" />
+            </div>
+          </div>
+          <div className="ws-card-footer">
+            <div className="ws-help-link">
+              <img style={{width:"18px"}} src={questionmark} alt="Help" className="ws-help-icon" />
+              <span>Need help?</span>
+            </div>
+          </div>
         </div>
-         <div className="next-step-section">
-            <div className="welcome-script-title">
-                List of scripts to update                 
+
+        {/* Card 2 */}
+        <div className="ws-card ws-info-card">
+          <div className="ws-info-icon">
+            <img src={infologo} alt="Info" />
           </div>
-          <div className="welcome-script-buttons">
-            <button className="publish-buttons"  onClick={handleNextButton}>Next</button>
+          <div className="ws-info-text">
+            <h3 className="ws-info-title">
+              Update the scripts in your project that handle cookie creation
+            </h3>
+            <p className="ws-info-subtitle">
+              Check your project scripts for any that create cookies. Organize them, replace with our snippet, and follow our tutorial to streamline your workflow.
+            </p>
+            <a href="#" className="ws-docs-link">
+              Need help? See the docs <img src={uparrow} alt="↗" />
+            </a>
+          </div>
+        </div>
+      </div>
 
-            </div>
-         </div>
-         <div className="welcome-script-actions">
-            <div className="welcome-script-actions-container">
-                 <Script fetchScripts={isFetchScripts}
-                 setFetchScripts={setFetchScripts} 
-                 isWelcome={true} />
+      {/* Scripts Section Header */}
+      <div className="ws-scripts-header">
+        <h2 className="ws-scripts-title">List of scripts to update</h2>
+        <button className="ws-next-btn" onClick={handleNextButton}>
+          Next
+        </button>
+      </div>
 
-            </div>
-           
-           
-         </div>
-           {popups.showPopupWelcomeSetup && (
-        <div className="popup">
-          <div className="popup-loading-content">
-             <SetupStep 
-              onGoBack={handleGoBack}
-              onProceed={handleProceed}  
-              />
+      {/* Scrollable Scripts Area */}
+      <div className="ws-scripts-scroll">
+        <Script fetchScripts={isFetchScripts} setFetchScripts={setFetchScripts} isWelcome={true} />
+      </div>
+
+      {/* Popup Setup */}
+      {popups.showPopupWelcomeSetup && (
+        <div className="ws-popup">
+          <div className="ws-popup-content">
+            <SetupStep onGoBack={handleGoBack} onProceed={handleProceed} />
           </div>
         </div>
       )}
