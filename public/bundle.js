@@ -47033,7 +47033,6 @@ const Script = ({ fetchScripts, isWelcome }) => {
     }, []);
     const fetchScriptData = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
-        console.time('Script Loading Total Time');
         setIsLoading(true);
         try {
             const userInfo = JSON.parse(userinfo || "{}");
@@ -47043,9 +47042,7 @@ const Script = ({ fetchScripts, isWelcome }) => {
                 return;
             }
             // Log token for debugging (remove in production)
-            console.time('API Call Time');
             const result = yield _services_api__WEBPACK_IMPORTED_MODULE_2__.customCodeApi.analyticsScript(tokens);
-            console.timeEnd('API Call Time');
             if (!result) {
                 throw new Error('No response from API');
             }
@@ -47056,8 +47053,6 @@ const Script = ({ fetchScripts, isWelcome }) => {
                 throw new Error('No data in API response');
             }
             const scriptsResponse = (_a = result.data.analyticsScripts) !== null && _a !== void 0 ? _a : [];
-            console.log(`Found ${scriptsResponse.length} scripts from API`);
-            console.time('Script Processing Time');
             const validScripts = scriptsResponse.filter(script => { var _a; return ((_a = script.fullTag) === null || _a === void 0 ? void 0 : _a.trim()) !== ""; });
             const formattedScripts = validScripts.map(script => {
                 // Add or update type attribute in the script tag
@@ -48843,30 +48838,20 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                 }
             ];
             // const sections = allSections.filter(section => selectedPreferences.includes(section.label.toLowerCase()));
-            console.log('gdprPreference - selectedPreferences received:', selectedPreferences);
-            console.log('gdprPreference - allSections available:', allSections.map(s => s.label));
             const sections = allSections.filter(section => selectedPreferences.map(pref => pref.toLowerCase()).includes(section.label.toLowerCase()));
-            console.log('gdprPreference - filtered sections to create:', sections.map(s => s.label));
-            console.log('gdprPreference - number of sections to create:', sections.length);
             // Loop to create multiple sections
             for (const section of sections) {
-                console.log(`gdprPreference - Creating section: ${section.label} with ID: ${section.id}`);
                 // 🏗️ Create a wrapper DivBlock inside the form
-                console.log(`gdprPreference - Creating wrapper div for ${section.label}`);
                 const wrapperDiv = yield form.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.DivBlock);
                 if (!wrapperDiv) {
                     throw new Error(`Failed to create wrapper div for ${section.label}`);
                 }
-                console.log(`gdprPreference - Successfully created wrapper div for ${section.label}`);
-                console.log(`gdprPreference - Creating preference container for ${section.label}`);
                 const prefrenceContainertoggle = yield wrapperDiv.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.DivBlock);
                 if (!prefrenceContainertoggle) {
                     throw new Error(`Failed to create div block for ${section.label}`);
                 }
                 yield prefrenceContainertoggle.setStyles([togglediv]);
-                console.log(`gdprPreference - Successfully created preference container for ${section.label}`);
                 // 📝 Create Paragraph inside the preference container (Checkbox Label)
-                console.log(`gdprPreference - Creating paragraph label for ${section.label}`);
                 const toggleParagraph = yield prefrenceContainertoggle.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.Paragraph);
                 if (!toggleParagraph) {
                     throw new Error(`Failed to create paragraph for ${section.label}`);
@@ -48875,40 +48860,31 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                 if (toggleParagraph.setTextContent) {
                     yield toggleParagraph.setTextContent(section.label);
                 }
-                console.log(`gdprPreference - Successfully created paragraph for ${section.label}`);
                 // Create the actual checkbox field
-                console.log(`gdprPreference - Creating FormCheckboxInput for ${section.label}`);
                 const checkboxField = yield prefrenceContainertoggle.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.FormCheckboxInput);
                 if (!checkboxField) {
                     throw new Error(`Failed to create checkbox field for ${section.label}`);
                 }
-                console.log(`gdprPreference - Successfully created FormCheckboxInput for ${section.label}`);
                 yield checkboxField.setStyles([checkboxContainerStyle]);
                 const children = yield checkboxField.getChildren();
-                console.log(`gdprPreference - Checkbox children count for ${section.label}: ${children.length}`);
                 for (const child of children) {
                     if (child.type.includes("Label") && child.setTextContent) {
-                        console.log(`gdprPreference - Setting label text for ${section.label}`);
                         yield child.setTextContent("");
                     }
                 }
                 for (const child of children) {
                     if (child.type.includes("FormCheckboxInput") && child.setCustomAttribute) {
-                        console.log(`gdprPreference - Setting data-consent-id for ${section.label}`);
                         yield child.setCustomAttribute("data-consent-id", section.id);
                     }
                 }
                 // ✅ Set the ID for the checkbox
-                console.log(`gdprPreference - Setting DOM ID for ${section.label}: ${section.id}`);
                 if (checkboxField.setDomId) {
                     yield checkboxField.setDomId(section.id);
                 }
-                console.log(`gdprPreference - Setting customtoggle attribute for ${section.label}`);
                 if (checkboxField.setCustomAttribute) {
                     yield checkboxField.setCustomAttribute("customtoggle", customToggle ? "true" : "false");
                 }
                 // Create description paragraph
-                console.log(`gdprPreference - Creating description paragraph for ${section.label}`);
                 const wrapperParagraph = yield wrapperDiv.append(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.Paragraph);
                 if (!wrapperParagraph) {
                     throw new Error(`Failed to create wrapper paragraph for ${section.label}`);
@@ -48920,7 +48896,6 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
                 if (wrapperParagraph.setTextContent) {
                     yield wrapperParagraph.setTextContent(section.description);
                 }
-                console.log(`gdprPreference - ✅ Successfully completed ALL elements for section: ${section.label}`);
             }
             //////////////////////
             const prefrenceContainerinner = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].elementPresets.DivBlock);
@@ -49015,12 +48990,10 @@ const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(
             // webflow.notify({ type: "Success", message: "ConsentBit banner added successfully!" }
         }
         catch (error) {
-            console.error('Error in createCookiePreferences inner try block:', error);
             _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].notify({ type: "error", message: `Error creating preferences: ${error.message}` });
         }
     }
     catch (error) {
-        console.error('Error in createCookiePreferences outer try block:', error);
         _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].notify({ type: "error", message: `Error creating cookie preferences: ${error.message}` });
     }
     finally {
