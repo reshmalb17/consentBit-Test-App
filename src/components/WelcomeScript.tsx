@@ -40,7 +40,7 @@ const WelcomeScipt: React.FC<WelcomeScriptProps> = ({ isFetchScripts, handleWelc
           <div className="ws-card-footer">
             <div className="ws-help-link">
               <img style={{width:"18px"}} src={questionmark} alt="Help" className="ws-help-icon" />
-              <span>Need help?</span>
+              <span><a style={{textDecoration:"none",color:"rgba(255, 255, 255, 0.6)"}} href="https://www.consentbit.com/help-document" target="_blank">Need help?</a></span>
             </div>
           </div>
         </div>

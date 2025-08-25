@@ -60,8 +60,8 @@ export const useAppState = () => {
   const [size, setSize] = usePersistentState("size", "12");
   const [Font, SetFont] = usePersistentState("font", "");
   const [weight, setWeight] = usePersistentState("weight", "semibold");
-  const [borderRadius, setBorderRadius] = usePersistentState<number>("borderRadius", 16);
-  const [buttonRadius, setButtonRadius] = usePersistentState<number>("buttonRadius", 2);
+  const [borderRadius, setBorderRadius] = usePersistentState<number>("borderRadius", 3);
+  const [buttonRadius, setButtonRadius] = usePersistentState<number>("buttonRadius", 3);
   const [cookieExpiration, setCookieExpiration] = usePersistentState("cookieExpiration", "120");
 
   // Boolean states

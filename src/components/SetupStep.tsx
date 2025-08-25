@@ -103,7 +103,7 @@ const SetupStep: React.FC<SetupStepProps> = ({ onGoBack,handleSetUpStep }) => {
                       <img src={questionmark} alt="Need help?" style={{ width: "100%", height: "100%" }} />
                     </div>
 
-                    <span className="need-help-text">Need help?</span>
+                 <span><a style={{textDecoration:"none",color:"rgba(255, 255, 255, 0.6)"}} href="https://www.consentbit.com/help-document" target="_blank">Need help?</a></span>
                   </div>
                   <div className="setup-card-youtube-thumbnail">
                     <a href="https://vimeo.com/1112446810?share=copy" target="_blank"><img src={youtubethumbnail} alt="Tutorial Video" className="setup-video-thumbnail" /></a>
