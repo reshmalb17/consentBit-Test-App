@@ -621,6 +621,8 @@ input[type="text"] {
     /* Size dropdown specific width */
     .custom-select.size-dropdown {
       width: 87px;
+      background-color: rgba(46, 43, 69, 1);
+      border-radius: 5px;
     }
 
 /* Style the spinner buttons (Chrome, Edge, Safari) */
@@ -2667,7 +2669,7 @@ input:checked+.toggle::before {
 
 .flexx {
   display: flex;
-  gap: 10px;
+  gap: 9px;
   align-items: center;
   justify-content: space-between;
   align-content: space-around;
