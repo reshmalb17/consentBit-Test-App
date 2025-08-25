@@ -8,6 +8,8 @@ type BreakpointAndPseudo = {
 };
 
 const createCookiePreferences = async (selectedPreferences: string[], language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, customToggle: boolean, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", skipCommonDiv: boolean = false, disableScroll: boolean, closebutton: boolean = false) => {
+  console.log('🔥🔥🔥 GDPR createCookiePreferences FUNCTION CALLED WITH:', selectedPreferences);
+  
   try {
     const translation = getTranslation(language);
 
@@ -56,7 +58,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
 
 
     const collection = await webflow.getDefaultVariableCollection();
-    const webflowBlue = await collection?.createColorVariable("Webflow Blue", "rgba(255, 255, 255, 1)");
 
     const animationAttributeMap = {
       "fade": "fade",
@@ -370,26 +371,39 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       ];
 
       // const sections = allSections.filter(section => selectedPreferences.includes(section.label.toLowerCase()));
+      console.log('gdprPreference - selectedPreferences received:', selectedPreferences);
+      console.log('gdprPreference - allSections available:', allSections.map(s => s.label));
+      
       const sections = allSections.filter(section =>
         selectedPreferences.map(pref => pref.toLowerCase()).includes(section.label.toLowerCase())
       );
+      
+      console.log('gdprPreference - filtered sections to create:', sections.map(s => s.label));
+      console.log('gdprPreference - number of sections to create:', sections.length);
 
 
       // Loop to create multiple sections
       for (const section of sections) {
+        console.log(`gdprPreference - Creating section: ${section.label} with ID: ${section.id}`);
+        
         // 🏗️ Create a wrapper DivBlock inside the form
+        console.log(`gdprPreference - Creating wrapper div for ${section.label}`);
         const wrapperDiv = await form.append(webflow.elementPresets.DivBlock);
         if (!wrapperDiv) {
           throw new Error(`Failed to create wrapper div for ${section.label}`);
         }
+        console.log(`gdprPreference - Successfully created wrapper div for ${section.label}`);
 
+        console.log(`gdprPreference - Creating preference container for ${section.label}`);
         const prefrenceContainertoggle = await wrapperDiv.append(webflow.elementPresets.DivBlock);
         if (!prefrenceContainertoggle) {
           throw new Error(`Failed to create div block for ${section.label}`);
         }
         await prefrenceContainertoggle.setStyles([togglediv]);
+        console.log(`gdprPreference - Successfully created preference container for ${section.label}`);
 
         // 📝 Create Paragraph inside the preference container (Checkbox Label)
+        console.log(`gdprPreference - Creating paragraph label for ${section.label}`);
         const toggleParagraph = await prefrenceContainertoggle.append(webflow.elementPresets.Paragraph);
         if (!toggleParagraph) {
           throw new Error(`Failed to create paragraph for ${section.label}`);
@@ -398,51 +412,53 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
 
         if (toggleParagraph.setTextContent) {
           await toggleParagraph.setTextContent(section.label);
-        } else {
         }
+        console.log(`gdprPreference - Successfully created paragraph for ${section.label}`);
 
 
+        // Create the actual checkbox field
+        console.log(`gdprPreference - Creating FormCheckboxInput for ${section.label}`);
         const checkboxField = await prefrenceContainertoggle.append(webflow.elementPresets.FormCheckboxInput);
 
         if (!checkboxField) {
           throw new Error(`Failed to create checkbox field for ${section.label}`);
         }
+        console.log(`gdprPreference - Successfully created FormCheckboxInput for ${section.label}`);
 
         await checkboxField.setStyles([checkboxContainerStyle]);
 
         const children = await checkboxField.getChildren();
-        //checkboxContainerStyle
+        console.log(`gdprPreference - Checkbox children count for ${section.label}: ${children.length}`);
+        
         for (const child of children) {
-
           if (child.type.includes("Label") && child.setTextContent) {
+            console.log(`gdprPreference - Setting label text for ${section.label}`);
             await child.setTextContent("");
           }
         }
 
         for (const child of children) {
-
           if (child.type.includes("FormCheckboxInput") && child.setCustomAttribute) {
+            console.log(`gdprPreference - Setting data-consent-id for ${section.label}`);
             await child.setCustomAttribute("data-consent-id", section.id);
-            // await child.setStyles([checkboxContainerStyle]);
           }
         }
 
 
         // ✅ Set the ID for the checkbox
+        console.log(`gdprPreference - Setting DOM ID for ${section.label}: ${section.id}`);
         if (checkboxField.setDomId) {
           await checkboxField.setDomId(section.id);
-        } else {
         }
 
-
-
+        console.log(`gdprPreference - Setting customtoggle attribute for ${section.label}`);
         if (checkboxField.setCustomAttribute) {
           await checkboxField.setCustomAttribute("customtoggle", customToggle ? "true" : "false");
-
-        } else {
         }
 
 
+        // Create description paragraph
+        console.log(`gdprPreference - Creating description paragraph for ${section.label}`);
         const wrapperParagraph = await wrapperDiv.append(webflow.elementPresets.Paragraph);
         if (!wrapperParagraph) {
           throw new Error(`Failed to create wrapper paragraph for ${section.label}`);
@@ -450,14 +466,14 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
 
         // Apply text and styles to wrapper paragraph
         if (wrapperParagraph.setStyles) {
-          await wrapperParagraph.setStyles([paragraphStyle]); // Define `wrapperParagraphStyle` before using
+          await wrapperParagraph.setStyles([paragraphStyle]);
         }
 
         if (wrapperParagraph.setTextContent) {
           await wrapperParagraph.setTextContent(section.description);
-        } else {
         }
 
+        console.log(`gdprPreference - ✅ Successfully completed ALL elements for section: ${section.label}`);
       }
 
       //////////////////////
@@ -566,8 +582,12 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
 
 
     } catch (error) {
+      console.error('Error in createCookiePreferences inner try block:', error);
+      webflow.notify({ type: "error", message: `Error creating preferences: ${error.message}` });
     }
   } catch (error) {
+    console.error('Error in createCookiePreferences outer try block:', error);
+    webflow.notify({ type: "error", message: `Error creating cookie preferences: ${error.message}` });
   } finally {
 
   }

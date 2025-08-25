@@ -55,79 +55,89 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
     localStorage: localStorageData
   } = useAppState();
   const { user, exchangeAndVerifyIdToken, isAuthenticatedForCurrentSite } = useAuth();
-  const {
-    
-    createBothBanners,
-    isCreating,
-    
-   
-  } = useBannerCreation();
+  const { createCompleteBannerStructureWithExistingFunctions, isCreating } = useBannerCreation();
 
 
   const handlePublishClick = async () => {
-    const isUserValid = await isAuthenticatedForCurrentSite();
+    console.log('🚀 Publish button clicked - starting handlePublishClick');
+    
     try {
+      const isUserValid = await isAuthenticatedForCurrentSite();
+      console.log('👤 User authentication check result:', isUserValid);
+      
       const selectedElement = await webflow.getSelectedElement() as { type?: string };
+      console.log('🎯 Selected element:', selectedElement);
 
       const isInvalidElement = !selectedElement || selectedElement.type === "Body";
+      console.log('❌ Invalid element check:', isInvalidElement);
 
       if (isUserValid && !isInvalidElement) {
+        console.log('✅ Proceeding with banner creation...');
         tooltips.setShowTooltip(false);
 
         // Create banner configuration using actual state values
         const config: BannerConfig = {
+          language: bannerLanguages.language,
           color: bannerStyles.color,
-          bgColor: bannerStyles.bgColor,
           btnColor: bannerStyles.btnColor,
+          headColor: bannerStyles.headColor,
           paraColor: bannerStyles.paraColor,
           secondcolor: bannerStyles.secondcolor,
-          bgColors: bannerStyles.bgColors,
-          headColor: bannerStyles.headColor,
-          secondbuttontext: bannerStyles.secondbuttontext,
-          primaryButtonText: bannerStyles.primaryButtonText,
-          Font: bannerStyles.Font,
-          style: bannerUI.style,
-          selected: bannerUI.selected,
-          weight: bannerStyles.weight,
-          borderRadius: bannerStyles.borderRadius,
-          buttonRadius: bannerConfig.buttonRadius,
+          buttonRadius: bannerStyles.buttonRadius,
           animation: bannerAnimation.animation,
-          easing: bannerAnimation.easing,
-          language: bannerLanguages.language,
-          selectedOptions: bannerUI.selectedOptions,
+          primaryButtonText: bannerStyles.primaryButtonText,
+          secondbuttontext: bannerStyles.secondbuttontext,
           toggleStates: {
             customToggle: bannerToggleStates.toggleStates.customToggle,
             disableScroll: bannerToggleStates.toggleStates.disableScroll,
             closebutton: bannerToggleStates.toggleStates.closebutton,
-          }
+          },
+          Font: bannerStyles.Font
         };
 
-        // Create banners based on user selection - Default to both banners
-        if (bannerUI.selectedOptions.includes("GDPR") && bannerUI.selectedOptions.includes("U.S. State Laws")) {
-          await createBothBanners(config);
-        } else if (bannerUI.selectedOptions.includes("GDPR")) {
-          await createBothBanners(config);
-        } else if (bannerUI.selectedOptions.includes("U.S. State Laws")) {
-          await createBothBanners(config);
-        } else {
-          // Default to both banners
-          await createBothBanners(config);
+        // Create banners based on user selection
+        console.log('Selected options:', bannerUI.selectedOptions);
+        console.log('Full config being passed:', config);
+        
+        try {
+          console.log('About to call banner creation function...');
+          
+          // Create complete banner structure (both GDPR and CCPA banners)
+          await createCompleteBannerStructureWithExistingFunctions(config);
+          
+          console.log('Banner creation completed successfully');
+        } catch (bannerCreationError) {
+          console.error('Error in banner creation:', bannerCreationError);
+          throw bannerCreationError;
         }
 
         popups.setShowPopup(true);
         // After successful banner creation, call handleConfirmPublish to show SuccessPublish component
         handleConfirmPublish();
       } else {
+        console.log('❌ Cannot proceed with banner creation:');
+        console.log('  - User valid:', isUserValid);
+        console.log('  - Element valid:', !isInvalidElement);
+        
         popups.setShowPopup(false);
         if (!isUserValid) {
+          console.log('🔐 User not authenticated - showing auth popup');
           tooltips.setShowTooltip(false);
           popups.setShowAuthPopup(true);
         } else if (isInvalidElement) {
+          console.log('🎯 Invalid element selected - showing tooltip');
           tooltips.setShowTooltip(true);
         }
       }
     } catch (error) {
+      console.error('Error in handlePublishClick:', error);
       tooltips.setShowTooltip(false);
+      // Show error notification to user
+      if (typeof webflow !== 'undefined' && webflow.notify) {
+        webflow.notify({ type: "error", message: "Failed to publish banners. Please try again." });
+      }
+      // Note: isCreating state is managed by useBannerCreation hook
+      console.log('Current isCreating state:', isCreating);
     }
   };
   const handleCustomizeClick = () => {

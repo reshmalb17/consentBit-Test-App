@@ -70,6 +70,7 @@ const Script: React.FC<{
 
 
     const fetchScriptData = useCallback(async () => {
+        console.time('Script Loading Total Time');
         setIsLoading(true);
         try {
             const userInfo = JSON.parse(userinfo || "{}");
@@ -81,7 +82,9 @@ const Script: React.FC<{
             }
 
             // Log token for debugging (remove in production)
+            console.time('API Call Time');
             const result = await customCodeApi.analyticsScript(tokens);
+            console.timeEnd('API Call Time');
 
             if (!result) {
                 throw new Error('No response from API');
@@ -96,6 +99,8 @@ const Script: React.FC<{
             }
 
             const scriptsResponse = result.data.analyticsScripts ?? [];
+            console.log(`Found ${scriptsResponse.length} scripts from API`);
+            console.time('Script Processing Time');
             const validScripts = scriptsResponse.filter(script => script.fullTag?.trim() !== "");
 
             const formattedScripts = validScripts.map(script => {

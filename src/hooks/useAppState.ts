@@ -23,12 +23,22 @@ type UserData = {
   email: string;
   exp: number;
   sessionToken: string;
+  siteId: string;
 };
 
 // Helper function to get session token from localStorage
 function getSessionTokenFromLocalStorage(): string | null {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('sessionToken');
+    const userinfo = localStorage.getItem("consentbit-userinfo");
+    if (!userinfo) return null;
+    try {
+      const tokenss = JSON.parse(userinfo);
+      return tokenss?.sessionToken || null;
+    } catch {
+      // Invalid JSON, clear it
+      localStorage.removeItem("consentbit-userinfo");
+      return null;
+    }
   }
   return null;
 }
@@ -170,6 +180,8 @@ export const useAppState = () => {
       isConfirmPublish, setIsConfirmPublish,
       isSuccessPublish, setIsSuccessPublish,
       isCustomizationTab, setIsCustomizationTab,
+      buttonRadius, setButtonRadius,
+
     },
 
     // UI/UX states
@@ -187,7 +199,6 @@ export const useAppState = () => {
     bannerConfig: {
       expires, setExpires,
      
-      buttonRadius, setButtonRadius,
       cookieExpiration, setCookieExpiration,
     },
 
