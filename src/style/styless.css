@@ -258,7 +258,7 @@ img {
 }
 
 .link img {
-  opacity: 50%;
+  opacity: 100%;
 }
 
 /* Top Navigation */
@@ -278,7 +278,7 @@ img {
   align-items: left;
   justify-content: space-between;
   background: #0A081B;
-  padding: 12px 20px;
+  /* padding: 12px 20px; */
   border-bottom: 1px solid #242137;
   font-size: 11.5px;
   font-family: 'DM Sans', sans-serif;
@@ -397,7 +397,8 @@ img {
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 0%;
+  /* padding: 0%; */
+  padding: 10px 20px 10px
 }
 
 
@@ -424,16 +425,19 @@ img {
   background: #0A081B;
   border: none;
   padding: 8px;
+  padding-top: 12px;
   cursor: pointer;
+  border-radius: 0px;
+  padding-bottom: 20px;
   color: rgba(255, 255, 255, 0.3);
   border-bottom: 1px solid transparent;
-  /* Default transparent border */
 }
 
 .tabs button.active {
-  border-bottom: 1px solid #8C79FF;
-  /* Active tab bottom border */
-  color: #FFF;
+    border-bottom: 1px solid #8C79FF;
+    color: #FFF;
+    padding-bottom: 20px;
+    border-radius: 0px;
 }
 
 .container {
@@ -554,6 +558,52 @@ input[type="text"] {
 }
 
 
+
+
+    .custom-select {
+      position: relative;
+      width: 140px;
+    }
+    
+    .selected {
+      padding: 8px;
+      border: 1px solid rgba(46, 43, 69, 1);
+      border-radius: 5px;
+      color: #fff;
+      background: rgba(217, 217, 217, 0.02);
+      cursor: pointer;
+    }
+    
+    .options {
+      position: absolute;
+      top: 110%;
+      left: 0;
+      right: 0;
+      background: rgba(50, 44, 90, 0.6);
+      border: 1px solid rgba(46, 43, 69, 1);
+      border-radius: 5px;
+      max-height: 100px; /* Limit height */
+      overflow-y: auto;  /* Scroll when overflow */
+      z-index: 10;
+      backdrop-filter: blur(30.7px);
+    }
+    
+    .options li {
+      padding: 8px;
+      cursor: pointer;
+    }
+    
+    .options li:hover {
+      background: rgba(140, 121, 255, 0.2);
+    }
+    
+
+    .custom-select ul {
+      list-style-type: none;
+      padding-left: 0;
+      margin: 0;
+    }
+
 /* Style the spinner buttons (Chrome, Edge, Safari) */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -589,8 +639,8 @@ input[type="number"]::-webkit-outer-spin-button {
   padding-bottom: 14px;
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: 428px;
-  min-height: 428px;
+  max-height: 442px;
+  min-height: 442px;
   scrollbar-width: thin;
   scrollbar-color: #4a4a5d transparent;
   scroll-behavior: smooth;
@@ -793,7 +843,7 @@ select option:checked {
 .container-script {
   padding-top: 20px;
   overflow-y: scroll;
-  max-height: 427px;
+  max-height: 456px;
   scrollbar-width: none;
 }
 
@@ -2188,6 +2238,7 @@ input:checked+.toggle::before {
   position: relative;
   display: inline-block;
   margin-right: 8px;
+  padding-top: 12px;
 }
 
 .tab-tooltip {
@@ -2680,9 +2731,7 @@ input:checked+.toggle::before {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background:
-    url('../assets/background\ dots.svg') no-repeat center/cover,
-    linear-gradient(14deg, #0B091D 18.17%, #6007E6 127.91%);
+  background: linear-gradient(14deg, #0B091D 18.17%, #6007E6 127.91%);
   border-radius: 4px;
   padding: 24px;
   text-align: center;
@@ -5131,13 +5180,13 @@ letter-spacing: -0.36px;
 
 .setup-card-content {
   font-family: 'DM Sans', sans-serif;
-  font-weight:300;
+  font-weight:400;
   line-height: 10px;
   letter-spacing: -3%;
   font-size: 12px;
   line-height: 100%;
-  color: #ffffff  ;
-  margin: 5px 0!important;
+ color: rgba(255, 255, 255, 0.6);
+   margin: 5px 0!important;
 
   
 }
@@ -5294,6 +5343,7 @@ color: #ffffff;
   align-items: flex-start;
   gap: 12px;
   margin: 16px 0;
+  width: 19ch;
 }
 
 .setup-card-icon {

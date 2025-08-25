@@ -13,6 +13,7 @@ const logo = new URL("../assets/icon.svg", import.meta.url).href;
 const errorsheild = new URL("../assets/warning-2.svg", import.meta.url).href;
 const crossmark = new URL("../assets/group.svg", import.meta.url).href;
 const rightarrow = new URL("../assets/up arrow.svg", import.meta.url).href;
+const uparrow = new URL("../assets/blue up arrow.svg", import.meta.url).href;
 const copyScript = new URL("../assets/copy script.svg", import.meta.url).href;
 
 import { customCodeApi } from "../services/api";
@@ -1829,6 +1830,121 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
     return <ChoosePlan onClose={() => setShowChoosePlan(false)} />;
   }
 
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+
+  const dropdownRefs = {
+    language: useRef<HTMLDivElement>(null),
+    animation: useRef<HTMLDivElement>(null),
+    easing: useRef<HTMLDivElement>(null),
+  };
+
+  const animationOptions = [
+    { label: "Fade", value: "fade" },
+    { label: "Slide Up", value: "slide-up" },
+    { label: "Slide Down", value: "slide-down" },
+    { label: "Slide Left", value: "slide-left" },
+    { label: "Slide Right", value: "slide-right" },
+  ];
+
+  const easingOptions = [
+    { label: "Ease", value: "ease" },
+    { label: "Linear", value: "linear" },
+    { label: "Ease-In", value: "ease-in" },
+    { label: "Ease-Out", value: "ease-out" },
+    { label: "Ease-In-Out", value: "ease-in-out" },
+  ];
+
+  const languageOptions = [
+    "English",
+    "Dutch",
+    "French",
+    "German",
+    "Italian",
+    "Portuguese",
+    "Spanish",
+    "Swedish",
+  ];
+
+  const tooltips = {
+    language: "Indicates the language preference for the cookie banner.",
+    animation: "Shows different types of animations to apply to the banner.",
+    easing: "Controls the smoothness of the animation.",
+  };
+
+  const getLabel = (opts: any[], val: string) =>
+    (opts.find((o) => o.value === val) || {}).label || val;
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      Object.entries(dropdownRefs).forEach(([key, ref]) => {
+        if (ref.current && !ref.current.contains(e.target as Node)) {
+          if (openDropdown === key) setOpenDropdown(null);
+        }
+      });
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openDropdown]);
+
+  const renderDropdown = (
+    type: "language" | "animation" | "easing",
+    label: string,
+    value: string,
+    options: any[],
+    onPick: (val: string) => void
+  ) => (
+    <div className="settings-group">
+      <div className="flex">
+        <label>{label}</label>
+        <div className="tooltip-container">
+          <img src={questionmark} alt="info" className="tooltip-icon" />
+          <span className="tooltip-text">{tooltips[type]}</span>
+        </div>
+      </div>
+
+      <div className="custom-select" ref={dropdownRefs[type]}>
+        <div
+          className="selected"
+          onClick={() =>
+            setOpenDropdown(openDropdown === type ? null : type)
+          }
+        >
+          {typeof options[0] === "string"
+            ? value
+            : getLabel(options, value)}
+        </div>
+
+        {openDropdown === type && (
+          <ul className="options">
+            {typeof options[0] === "string"
+              ? options.map((opt) => (
+                <li
+                  key={opt}
+                  onClick={() => {
+                    onPick(opt);
+                    setOpenDropdown(null);
+                  }}
+                >
+                  {opt}
+                </li>
+              ))
+              : options.map((opt) => (
+                <li
+                  key={opt.value}
+                  onClick={() => {
+                    onPick(opt.value);
+                    setOpenDropdown(null);
+                  }}
+                >
+                  {opt.label}
+                </li>
+              ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="app">
@@ -1892,9 +2008,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                 e.preventDefault();
                 setShowChoosePlan(true);
               }}>
-                You need a subscription to publish the production <i><img src={rightarrow} alt="" /></i>
+                You need a subscription to publish the production <i><img src={uparrow} alt="" /></i>
               </a>
-            </div>) : <div className="subscribe">You have already subscribed, <a className="link" href="https://billing.stripe.com/p/login/00gbIJclf5nz4Hm8ww" target="_blank">Cancel Subscription <img src={rightarrow} alt="" /> </a></div>}
+            </div>) : <div className="subscribe">You have already subscribed, <a className="link" href="https://billing.stripe.com/p/login/00gbIJclf5nz4Hm8ww" target="_blank">Cancel Subscription <img src={uparrow} alt="" /> </a></div>}
           {activeTab !== "Script" && (
             <div>
               <div style={{ position: "relative", display: "inline-block" }}>
@@ -2076,7 +2192,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                   />
                 </div>
 
-                <div className="settings-group">
+                {/* <div className="settings-group">
                   <div className="flex">
                     <label htmlFor="animation">Animation</label>
                     <div className="tooltip-container">
@@ -2142,7 +2258,11 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                     <option>Spanish</option>
                     <option>Swedish</option>
                   </select>
-                </div>
+                </div> */}
+
+                {renderDropdown("animation", "Animation", animation, animationOptions, setAnimation)}
+                {renderDropdown("easing", "Easing", easing, easingOptions, setEasing)}                
+                {renderDropdown("language", "Languages", language, languageOptions, setLanguage)}
 
                 <div className="compliance-container">
                   <label className="compliance">

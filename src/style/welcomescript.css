@@ -63,7 +63,7 @@
     font-size: 12px;
     line-height: 1.4;
     margin: 0;
-    color: #9a9bb3;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .ws-docs-link {
@@ -90,6 +90,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: auto;
 }
 
 .ws-help-link {
@@ -97,6 +98,7 @@
     align-items: center;
     gap: 8px;
     cursor: pointer;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .ws-thumbnail {
@@ -152,6 +154,7 @@
     color: rgba(140, 121, 255, 1);
     margin-top: 2px;
     margin-bottom: 2px;
+    font-size: 12px;
 }
 
 .ws-popup {
@@ -169,4 +172,11 @@
     border-radius: 12px;
     width: 800px;
     height: 600px;
+}
+
+.ws-card-desc {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-weight: 400;
+    margin-top: 0px;
 }
