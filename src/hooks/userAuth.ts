@@ -55,12 +55,14 @@ export function useAuth() {
 
       try {
         const userData = JSON.parse(storedUser);
+        
         if (!userData.sessionToken) {
           return { user: { firstName: "", email: "" }, sessionToken: "" };
         }
 
         // Decode and validate token
         const decodedToken = jwtDecode(userData.sessionToken) as DecodedToken;
+        
         if (decodedToken.exp * 1000 <= Date.now()) {
           // Token expired - clear storage
           localStorage.removeItem("consentbit-userinfo");
@@ -70,8 +72,8 @@ export function useAuth() {
         // Return valid auth state
         return {
           user: {
-            firstName: decodedToken.user.firstName,
-            email: decodedToken.user.email,
+            firstName: decodedToken.user?.firstName || userData.firstName || "",
+            email: decodedToken.user?.email || userData.email || "",
             siteId: userData.siteId, // Include siteId from stored data
           },
           sessionToken: userData.sessionToken,

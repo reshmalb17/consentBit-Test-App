@@ -44252,16 +44252,11 @@ const ConfirmPublish = ({ onGoBack, handleConfirmPublish, handleCustomize }) => 
     const { user, exchangeAndVerifyIdToken, isAuthenticatedForCurrentSite } = (0,_hooks_userAuth__WEBPACK_IMPORTED_MODULE_4__.useAuth)();
     const { createCompleteBannerStructureWithExistingFunctions, isCreating } = (0,_hooks_useBannerCreation__WEBPACK_IMPORTED_MODULE_7__.useBannerCreation)();
     const handlePublishClick = () => __awaiter(void 0, void 0, void 0, function* () {
-        console.log('🚀 Publish button clicked - starting handlePublishClick');
         try {
             const isUserValid = yield isAuthenticatedForCurrentSite();
-            console.log('👤 User authentication check result:', isUserValid);
             const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_5__["default"].getSelectedElement();
-            console.log('🎯 Selected element:', selectedElement);
             const isInvalidElement = !selectedElement || selectedElement.type === "Body";
-            console.log('❌ Invalid element check:', isInvalidElement);
             if (isUserValid && !isInvalidElement) {
-                console.log('✅ Proceeding with banner creation...');
                 tooltips.setShowTooltip(false);
                 // Create banner configuration using actual state values
                 const config = {
@@ -44283,16 +44278,11 @@ const ConfirmPublish = ({ onGoBack, handleConfirmPublish, handleCustomize }) => 
                     Font: bannerStyles.Font
                 };
                 // Create banners based on user selection
-                console.log('Selected options:', bannerUI.selectedOptions);
-                console.log('Full config being passed:', config);
                 try {
-                    console.log('About to call banner creation function...');
                     // Create complete banner structure (both GDPR and CCPA banners)
                     yield createCompleteBannerStructureWithExistingFunctions(config);
-                    console.log('Banner creation completed successfully');
                 }
                 catch (bannerCreationError) {
-                    console.error('Error in banner creation:', bannerCreationError);
                     throw bannerCreationError;
                 }
                 popups.setShowPopup(true);
@@ -44300,30 +44290,23 @@ const ConfirmPublish = ({ onGoBack, handleConfirmPublish, handleCustomize }) => 
                 handleConfirmPublish();
             }
             else {
-                console.log('❌ Cannot proceed with banner creation:');
-                console.log('  - User valid:', isUserValid);
-                console.log('  - Element valid:', !isInvalidElement);
                 popups.setShowPopup(false);
                 if (!isUserValid) {
-                    console.log('🔐 User not authenticated - showing auth popup');
                     tooltips.setShowTooltip(false);
                     popups.setShowAuthPopup(true);
                 }
                 else if (isInvalidElement) {
-                    console.log('🎯 Invalid element selected - showing tooltip');
                     tooltips.setShowTooltip(true);
                 }
             }
         }
         catch (error) {
-            console.error('Error in handlePublishClick:', error);
             tooltips.setShowTooltip(false);
             // Show error notification to user
             if (typeof _types_webflowtypes__WEBPACK_IMPORTED_MODULE_5__["default"] !== 'undefined' && _types_webflowtypes__WEBPACK_IMPORTED_MODULE_5__["default"].notify) {
                 _types_webflowtypes__WEBPACK_IMPORTED_MODULE_5__["default"].notify({ type: "error", message: "Failed to publish banners. Please try again." });
             }
             // Note: isCreating state is managed by useBannerCreation hook
-            console.log('Current isCreating state:', isCreating);
         }
     });
     const handleCustomizeClick = () => {
@@ -46530,7 +46513,6 @@ const CustomizationTab = ({ onAuth, initialActiveTab = "Settings", isAuthenticat
     // Welcome screen logic removed - this component is accessed via Customize link
     // No need to show welcome screen when coming from ConfirmPublish
     const [openDropdown, setOpenDropdown] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
-    console.log("user", user === null || user === void 0 ? void 0 : user.firstName);
     const dropdownRefs = {
         language: (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null),
         animation: (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null),
@@ -48552,7 +48534,6 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 const createCookiePreferences = (selectedPreferences_1, ...args_1) => __awaiter(void 0, [selectedPreferences_1, ...args_1], void 0, function* (selectedPreferences, language = "English", color = "#ffffff", btnColor = "#F1F1F1", headColor = "#483999", paraColor = "#1F1D40", secondcolor = "secondcolor", buttonRadius, animation, customToggle, primaryButtonText = "#ffffff", secondbuttontext = "#4C4A66", skipCommonDiv = false, disableScroll, closebutton = false) {
-    console.log('🔥🔥🔥 GDPR createCookiePreferences FUNCTION CALLED WITH:', selectedPreferences);
     try {
         const translation = (0,_util_translation_utils__WEBPACK_IMPORTED_MODULE_1__.getTranslation)(language);
         const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_0__["default"].getSelectedElement();
@@ -49328,7 +49309,6 @@ const useBannerCreation = () => {
         setIsCreating(false);
     };
     const handleBannerError = (error) => {
-        console.error('Banner creation error:', error);
         setIsCreating(false);
         setShowLoading(false);
     };
@@ -49340,7 +49320,6 @@ const useBannerCreation = () => {
     };
     const createSimpleGDPRBanner = (selectedElement, config, animationAttribute) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            console.log('Creating simple GDPR banner...');
             // Step 1: Create main banner div using selectedElement.before() exactly like GDPR function
             const newDiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_2__["default"].elementPresets.DivBlock);
             if (!newDiv) {
@@ -49608,17 +49587,14 @@ const useBannerCreation = () => {
                         yield buttonContainer.append(acceptButton);
                     }
                 }
-                console.log('Simple GDPR banner created successfully');
             }
         }
         catch (error) {
-            console.error('Error creating simple GDPR banner:', error);
             throw error;
         }
     });
     const createSimpleCCPABanner = (selectedElement, config, animationAttribute) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            console.log('Creating simple CCPA banner...');
             // Step 1: Create main CCPA banner div using selectedElement.before() exactly like CCPA function
             const newDiv = yield selectedElement.before(_types_webflowtypes__WEBPACK_IMPORTED_MODULE_2__["default"].elementPresets.DivBlock);
             if (!newDiv) {
@@ -49823,17 +49799,14 @@ const useBannerCreation = () => {
                     yield buttonContainer.append(prefrenceButton);
                 }
             }
-            console.log('Simple CCPA banner created successfully');
         }
         catch (error) {
-            console.error('Error creating simple CCPA banner:', error);
             throw error;
         }
     });
     const createGDPRPreferencesWithExistingFunction = (selectedElement, config) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c;
         try {
-            console.log('Creating GDPR preferences modal using createCookiePreferences...');
             // Call createCookiePreferences with all required parameters - black text for content, config colors for buttons
             yield (0,_gdprPreference__WEBPACK_IMPORTED_MODULE_3__["default"])(["essential", "analytics", "marketing", "preferences"], // selectedPreferences array
             config.language, // language
@@ -49851,17 +49824,14 @@ const useBannerCreation = () => {
             ((_b = config.toggleStates) === null || _b === void 0 ? void 0 : _b.disableScroll) || false, // disableScroll
             ((_c = config.toggleStates) === null || _c === void 0 ? void 0 : _c.closebutton) || false // closebutton
             );
-            console.log('GDPR preferences modal created successfully');
         }
         catch (error) {
-            console.error('Error creating GDPR preferences:', error);
             throw error;
         }
     });
     const createCCPAPreferencesWithExistingFunction = (selectedElement, config) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         try {
-            console.log('Creating CCPA preferences modal using createCookieccpaPreferences...');
             // Call createCookieccpaPreferences with all required parameters - black text for content, config colors for buttons
             yield (0,_ccpaPreference__WEBPACK_IMPORTED_MODULE_4__["default"])(config.language, // language
             config.color, // color (background)
@@ -49878,17 +49848,14 @@ const useBannerCreation = () => {
             true, // skipCommonDiv (true to avoid duplicate toggle button)
             config.Font // Font
             );
-            console.log('CCPA preferences modal created successfully');
         }
         catch (error) {
-            console.error('Error creating CCPA preferences:', error);
             throw error;
         }
     });
     const createCompleteBannerStructureWithExistingFunctions = (config) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             setIsCreating(true);
-            console.log('Starting complete banner creation with config:', config);
             // Get selected element
             const selectedElement = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_2__["default"].getSelectedElement();
             if (!selectedElement) {
@@ -49897,7 +49864,6 @@ const useBannerCreation = () => {
             // Determine animation attribute
             const animationAttribute = config.animation && config.animation !== 'none' ? config.animation : '';
             // Remove existing banners using correct IDs from your structure
-            console.log('Removing existing banners...');
             const existingBanners = yield _types_webflowtypes__WEBPACK_IMPORTED_MODULE_2__["default"].getAllElements();
             for (const element of existingBanners) {
                 try {
@@ -49907,7 +49873,6 @@ const useBannerCreation = () => {
                         if (domId && (domId === 'consent-banner' || domId === 'initial-consent-banner' ||
                             domId === 'main-banner' || domId === 'main-consent-banner' ||
                             domId === 'toggle-consent-btn')) {
-                            console.log('Removing existing banner with DOM ID:', domId);
                             if (typeof element.remove === 'function') {
                                 yield element.remove();
                             }
@@ -49919,7 +49884,6 @@ const useBannerCreation = () => {
                         if (customId && (customId === 'consent-banner' || customId === 'initial-consent-banner' ||
                             customId === 'main-banner' || customId === 'main-consent-banner' ||
                             customId === 'toggle-consent-btn')) {
-                            console.log('Removing existing banner with custom ID:', customId);
                             if (typeof element.remove === 'function') {
                                 yield element.remove();
                             }
@@ -49927,29 +49891,18 @@ const useBannerCreation = () => {
                     }
                 }
                 catch (cleanupError) {
-                    console.warn('Error checking element for cleanup:', cleanupError);
                     // Continue with next element instead of failing completely
                 }
             }
             // Create simple banners first
-            console.log('🎯 Creating simple GDPR banner...');
             yield createSimpleGDPRBanner(selectedElement, config, animationAttribute);
-            console.log('✅ GDPR banner created successfully');
-            console.log('🎯 Creating GDPR preference modal...');
             yield createGDPRPreferencesWithExistingFunction(selectedElement, config);
-            console.log('✅ GDPR preferences created successfully');
-            console.log('🎯 Creating simple CCPA banner...');
             yield createSimpleCCPABanner(selectedElement, config, animationAttribute);
-            console.log('✅ CCPA banner created successfully');
             // Create preference modals
-            console.log('🎯 Creating CCPA preference modal...');
             yield createCCPAPreferencesWithExistingFunction(selectedElement, config);
-            console.log('✅ CCPA preferences created successfully');
-            console.log('Complete banner structure created successfully');
             setIsCreating(false);
         }
         catch (error) {
-            console.error('Error in createCompleteBannerStructureWithExistingFunctions:', error);
             setIsCreating(false);
             throw error;
         }
@@ -50442,6 +50395,7 @@ function useAuth() {
     const { data: authState, isLoading: isAuthLoading } = (0,_tanstack_react_query__WEBPACK_IMPORTED_MODULE_3__.useQuery)({
         queryKey: ["auth"],
         queryFn: () => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             const storedUser = localStorage.getItem("consentbit-userinfo");
             const wasExplicitlyLoggedOut = localStorage.getItem("explicitly_logged_out");
             // Return initial state if no stored user or logged out
@@ -50463,8 +50417,8 @@ function useAuth() {
                 // Return valid auth state
                 return {
                     user: {
-                        firstName: decodedToken.user.firstName,
-                        email: decodedToken.user.email,
+                        firstName: ((_a = decodedToken.user) === null || _a === void 0 ? void 0 : _a.firstName) || userData.firstName || "",
+                        email: ((_b = decodedToken.user) === null || _b === void 0 ? void 0 : _b.email) || userData.email || "",
                         siteId: userData.siteId, // Include siteId from stored data
                     },
                     sessionToken: userData.sessionToken,
