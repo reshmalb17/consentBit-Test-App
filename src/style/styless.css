@@ -70,7 +70,7 @@ h4 {
 
 .flex {
   display: flex;
-  gap: 10px;
+  gap: 9px;
   align-items: center
 }
 
@@ -2669,7 +2669,7 @@ input:checked+.toggle::before {
 
 .flexx {
   display: flex;
-  gap: 9px;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
   align-content: space-around;
