@@ -33,16 +33,24 @@ const Script: React.FC<{
     const { scripts, setScripts } = useScriptContext();
     const { bannerBooleans } = useAppState();
 
+    // Reset any stuck loading states on component mount
+    useEffect(() => {
+        setIsSaving(false);
+        setIsLoading(false);
+        setShowPopup(false);
+        setSaveStatus(null);
+    }, []);
+
     // Debug scripts state changes
     useEffect(() => {
     
     }, [scripts]);
-    const [isSaving, setIsSaving] = usePersistentState("script_isSaving", false);
-    const [saveStatus, setSaveStatus] = usePersistentState<{ success: boolean; message: string } | null>("script_saveStatus", null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<{ success: boolean; message: string } | null>(null);
     const categories = ["Essential", "Personalization", "Analytics", "Marketing"];
     const userinfo = localStorage.getItem("consentbit-userinfo");
-    const [showPopup, setShowPopup] = usePersistentState("script_showPopup", false);
-    const [isLoading, setIsLoading] = usePersistentState("script_isLoading", false);
+    const [showPopup, setShowPopup] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [showAuthPopup, setShowAuthPopup] = usePersistentState("script_showAuthPopup", false);
     const [copiedScriptIndex, setCopiedScriptIndex] = usePersistentState<number | null>("script_copiedScriptIndex", null);
     const [siteInfo, setSiteInfo] = usePersistentState<{ siteId: string; siteName: string; shortName: string } | null>("siteInfo", null);
@@ -324,11 +332,18 @@ const Script: React.FC<{
     }, [fetchScripts, fetchScriptData, bannerBooleans.setFetchScripts, isWelcome]);
 
     const handleSaveAll = async () => {
+        // Reset all states before starting
         setIsSaving(true);
         setSaveStatus(null);
+        setShowPopup(false);
+        
         try {
             const tokens = JSON.parse(userinfo || "{}")?.sessionToken;
             if (!tokens) {
+                setSaveStatus({
+                    success: false,
+                    message: "No authentication token found. Please authenticate first.",
+                });
                 return;
             }
 

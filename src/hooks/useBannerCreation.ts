@@ -68,7 +68,8 @@ export const useBannerCreation = () => {
       // Set the banner boolean state
       bannerBooleans.setIsBannerAdded(true);
       
-      setShowSuccessPublish(true);
+      // Don't set showSuccessPublish here - let the App component handle the success flow
+      // setShowSuccessPublish(true);
     } catch (error) {
       handleBannerError(error);
     } finally {
@@ -88,7 +89,8 @@ export const useBannerCreation = () => {
       // Set the banner boolean state
       bannerBooleans.setIsBannerAdded(true);
       
-      setShowSuccessPublish(true);
+      // Don't set showSuccessPublish here - let the App component handle the success flow
+      // setShowSuccessPublish(true);
     } catch (error) {
       handleBannerError(error);
     } finally {
@@ -102,6 +104,39 @@ export const useBannerCreation = () => {
     setShowLoading(true);
     
     try {
+      // First, remove existing banners before creating new ones
+      const allElements = await webflow.getAllElements();
+      const idsToCheck = ["consent-banner", "main-banner", "toggle-consent-btn", "initial-consent-banner", "main-consent-banner"];
+
+      // Run domId checks in parallel
+      const domIdPromises = allElements.map(async (el) => {
+        const domId = await el.getDomId?.();
+        return { el, domId };
+      });
+
+      const elementsWithDomIds = await Promise.all(domIdPromises);
+
+      // Filter matching elements
+      const matchingElements = elementsWithDomIds
+        .filter(({ domId }) => domId && idsToCheck.includes(domId))
+        .map(({ el, domId }) => el);
+
+      // Remove matching elements and children
+      await Promise.all(matchingElements.map(async (el) => {
+        try {
+          const domId = await el.getDomId?.();
+          const children = await el.getChildren?.();
+
+          if (children?.length) {
+            await Promise.all(children.map(child => child.remove()));
+          }
+
+          await el.remove();
+        } catch (err) {
+          webflow.notify({ type: "error", message: "Failed to remove a banner." });
+        }
+      }));
+
       // Import the actual banner creation functions
       const { default: createCookiePreferences } = await import('../hooks/gdprPreference');
       const { default: createCookieccpaPreferences } = await import('../hooks/ccpaPreference');
@@ -207,14 +242,14 @@ export const useBannerCreation = () => {
         );
       }
       
-      // Set bannerAdded to true in localStorage
-      localStorage.setItem('bannerAdded', 'true');
+      // Set initialBannerAdded to true when banner is added through ConfirmPublish
+      localStorage.setItem('initialBannerAdded', 'true');
       
       // Set the banner boolean state
       bannerBooleans.setIsBannerAdded(true);
       
-      // Show success page after banners are created
-      setShowSuccessPublish(true);
+      // Don't set showSuccessPublish here - let the App component handle the success flow
+      // setShowSuccessPublish(true);
     } catch (error) {
       handleBannerError(error);
     } finally {

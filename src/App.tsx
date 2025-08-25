@@ -21,7 +21,9 @@ const App: React.FC = () => {
 
   const queryClient = useQueryClient();
   const [skipWelcomeScreen, setSkipWelcomeScreen] = usePersistentState("skipWelcomeScreen", false);
-const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [customizationInitialTab, setCustomizationInitialTab] = useState("Settings");
   
   
   const {
@@ -40,6 +42,25 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 
   const { user, sessionToken, exchangeAndVerifyIdToken, openAuthScreen, isAuthenticatedForCurrentSite } = useAuth();
+
+  // Check if banners were previously added and navigate to CustomizationTab (only on initial load)
+  useEffect(() => {
+    if (isInitialized) return; // Skip if already initialized
+    
+    const initialBannerAdded = localStorage.getItem('initialBannerAdded') === 'true';
+    const bannerAdded = localStorage.getItem('bannerAdded') === 'true';
+    
+    if (initialBannerAdded || bannerAdded) {
+      // Reset all component states
+      componentStates.resetComponentStates();
+      // Navigate to CustomizationTab
+      componentStates.setIsCustomizationTab(true);
+      // Set banner added flag
+      bannerBooleans.setIsBannerAdded(true);
+    }
+    
+    setIsInitialized(true);
+  }, [isInitialized, componentStates, bannerBooleans]);
 
  
 
@@ -87,6 +108,7 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
     componentStates.setIsSuccessPublish(true);
     // Set flag that banner was added through welcome flow
     bannerBooleans.setIsBannerAdded(true);
+    componentStates.setIsCustomizationTab(false);
   };
 
   // ConfirmPublish -> SetupStep (Go back)
@@ -109,6 +131,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
     componentStates.setIsConfirmPublish(false);
     componentStates.setIsSuccessPublish(false);
     componentStates.setIsCustomizationTab(true);
+    // Set initial tab to Customization when coming from Customize button
+    setCustomizationInitialTab("Customization");
   };
 
   // SuccessPublish -> ConfirmPublish (Go back)
@@ -141,6 +165,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
     setSkipWelcomeScreen(false);
     componentStates.resetComponentStates();
     componentStates.setIsWelcomeScreen(true);
+    // Reset initial tab to Settings
+    setCustomizationInitialTab("Settings");
   };
 
   // SetupStep -> WelcomeScript (Go back)
@@ -160,6 +186,9 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Check if banner was already added (for existing users) and set authentication state
   useEffect(() => {
+    // Don't run this effect if we're currently showing SuccessPublish
+    if (componentStates.isSuccessPublish) return;
+    
     // Add a small delay to ensure all states are properly loaded from localStorage
     const timer = setTimeout(async() => {
       // Check both the persistent state and the direct localStorage key
@@ -183,7 +212,7 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
     }, 1000); // Small delay to ensure localStorage is read
 
     return () => clearTimeout(timer);
-  }, [bannerBooleans.isBannerAdded, user?.email, sessionToken]); // Depend on isBannerAdded state and auth state
+  }, [bannerBooleans.isBannerAdded, user?.email, sessionToken, componentStates.isSuccessPublish]); // Added isSuccessPublish to dependencies
 
   // Separate useEffect to update authentication state when auth changes
   useEffect(() => {
@@ -226,7 +255,7 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
    
 
       {skipWelcomeScreen ? (
-        <CustomizationTab onAuth={handleBackToWelcome} isAuthenticated={isAuthenticated} />
+        <CustomizationTab onAuth={handleBackToWelcome} isAuthenticated={isAuthenticated} initialActiveTab={customizationInitialTab} />
       ) : componentStates.isWelcomeScreen ? (
         <WelcomeScreen 
           onAuthorize={handleWelcomeAuthorize}
@@ -257,9 +286,14 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
           handleCustomize={handleCustomize}
         />
       ) : componentStates.isCustomizationTab ? (
-        <CustomizationTab onAuth={handleBackToWelcome} isAuthenticated={isAuthenticated} />
+        <CustomizationTab onAuth={handleBackToWelcome} isAuthenticated={isAuthenticated} initialActiveTab={customizationInitialTab} />
       ) : (
-        <CustomizationTab onAuth={handleBackToWelcome} isAuthenticated={isAuthenticated} />
+        <WelcomeScreen 
+          onAuthorize={handleWelcomeAuthorize}
+          onNeedHelp={handleWelcomeNeedHelp}
+          authenticated={isAuthenticated}
+          handleWelcomeScreen={handleWelcomeScreen}
+        />
       )}
        
      

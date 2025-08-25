@@ -1,6 +1,7 @@
 .publish-container {
   display: flex;
   gap: 2rem;
+  font-family: 'DM Sans', sans-serif;
   /* padding: 0px 24px 24px 24px; */
   background: rgba(10, 8, 27, 1);
   /* dark bg */

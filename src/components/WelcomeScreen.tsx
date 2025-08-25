@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../style/styless.css";
 
 
@@ -18,6 +18,40 @@ type WelcomeScreenProps = {
 };
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,authenticated,handleWelcomeScreen}) => {
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [hasUserData, setHasUserData] = useState(false);
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
+
+  useEffect(() => {
+    // Check for user authentication data in localStorage and authenticated prop
+    const checkUserAuth = () => {
+      const userinfo = localStorage.getItem("consentbit-userinfo");
+      const hasData = userinfo && userinfo !== "null" && userinfo !== "undefined";
+      // User has data if either authenticated prop is true OR localStorage has data
+      setHasUserData(authenticated || !!hasData);
+    };
+
+    // Set a 2-second delay before showing the actual buttons
+    const timer = setTimeout(() => {
+      checkUserAuth();
+      setIsCheckingAuth(false);
+    }, 2000); // 2 second delay
+
+    return () => clearTimeout(timer);
+  }, []); // Remove authenticated from dependencies to prevent re-running
+
+  // Separate useEffect to handle authentication changes
+  useEffect(() => {
+    if (authenticated) {
+      setHasUserData(true);
+      setIsAuthorizing(false);
+    }
+  }, [authenticated]);
+
+  const handleAuthorizeClick = () => {
+    setIsAuthorizing(true);
+    onAuthorize();
+  };
 
    return (
     <div className="welcome-screen">
@@ -37,16 +71,36 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
             Welcome to{" "}
             <span className="welcome-title-highlight">Consentbit</span>
           </h1>
-          {authenticated?( <p className="welcome-instructions">
-            Scan your Webflow site, review detected scripts, add them to the
-            backend, and publish when you're ready.
-          </p>):( <p className="welcome-instructions">
-            The authorization process appears to be incomplete. To continue with the next step, please ensure that all necessary authorization steps have been successfully carried out.
-          </p>)}
+          {isCheckingAuth ? (
+            <p className="welcome-instructions">
+              Checking your authentication status...
+            </p>
+          ) : isAuthorizing ? (
+            <p className="welcome-instructions">
+              Please complete the authorization process in the popup window...
+            </p>
+          ) : hasUserData ? (
+            <p className="welcome-instructions">
+              Scan your Webflow site, review detected scripts, add them to the
+              backend, and publish when you're ready.
+            </p>
+          ) : (
+            <p className="welcome-instructions">
+              The authorization process appears to be incomplete. To continue with the next step, please ensure that all necessary authorization steps have been successfully carried out.
+            </p>
+          )}
 
         
 
-          {authenticated ? (
+          {isCheckingAuth ? (
+            <button className="welcome-authorize-btn" disabled>
+              Loading...
+            </button>
+          ) : isAuthorizing ? (
+            <button className="welcome-authorize-btn" disabled>
+              Authorizing...
+            </button>
+          ) : hasUserData ? (
             <button
               className="welcome-authorize-btn scan-project"
               onClick={handleWelcomeScreen}
@@ -54,7 +108,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
               Scan Project
             </button>
           ) : (
-            <button className="welcome-authorize-btn" onClick={onAuthorize}>
+            <button className="welcome-authorize-btn" onClick={handleAuthorizeClick}>
               Authorize
             </button>
           )}

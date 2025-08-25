@@ -85,7 +85,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [expires, setExpires] = usePersistentState("expires", "");
   const [size, setSize] = usePersistentState("size", "12");
   const [isActive, setIsActive] = usePersistentState("isActive", false);
-  const [Font, SetFont] = usePersistentState("Font", "");
+  const [Font, SetFont] = usePersistentState("Font", "Montserrat");
   const [selectedtext, settextSelected] = usePersistentState("selectedtext", "left");
   const [style, setStyle] = usePersistentState<BannerStyle>("style", "align");
   // Removed activeMode - all features are now available by default
@@ -119,6 +119,15 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
     setIsExporting(false);
     setIsCSVButtonLoading(false);
   }, []);
+
+  // Handle auth checking with 2-3 second delay
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsCheckingAuth(false);
+    }, 2500); // 2.5 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [buttonText, setButtonText] = usePersistentState("buttonText", "Scan Project");
   const [showLoadingPopup, setShowLoadingPopup] = useState(false);
@@ -134,6 +143,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [isBannerAdded, setIsBannerAdded] = usePersistentState("isBannerAdded", false);
   const [isCSVButtonLoading, setIsCSVButtonLoading] = useState(false);
   const [showCSVExportAdvanced, setShowCSVExportAdvanced] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
 
 
@@ -201,7 +211,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
       reject: "Reject",
       preferences: "Preference",
       ccpa: {
-        heading: "We value your Privacy",
+        heading: "We value your privacy",
         description: "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.",
         doNotShare: "Do Not Share My Personal Information"
       }
@@ -1803,10 +1813,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   // Welcome screen logic removed - this component is accessed via Customize link
   // No need to show welcome screen when coming from ConfirmPublish
 
-  if (showChoosePlan) {
-    return <ChoosePlan onClose={() => setShowChoosePlan(false)} />;
-  }
-
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
 
@@ -1958,13 +1964,28 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
       {/* Top Navigation */}
       <div className="navbar">
         <div>
-          {isAuthenticated && user?.firstName ? (
-            <p className="hello">Hello, {user.firstName}!</p>
-          ) : (
-            <button className="publish-buttons" onClick={openAuthScreen}>
-              Authentication
-            </button>
-          )}
+          {(() => {
+            // Show loading during auth check period
+            if (isCheckingAuth) {
+              return (
+                <button className="publish-buttons" disabled>
+                  Loading...
+                </button>
+              );
+            }
+
+            // Check if user is authenticated and has session token for current site
+            const hasValidAuth = (isAuthenticated && user?.firstName) || 
+              (sessionTokenFromLocalStorage && siteInfo && tokenss?.siteId === siteInfo.siteId);
+            
+            return hasValidAuth ? (
+              <p className="hello">Hello{user?.firstName ? `, ${user.firstName}` : ''}!</p>
+            ) : (
+              <button className="publish-buttons" onClick={openAuthScreen}>
+                Authorize
+              </button>
+            );
+          })()}
         </div>
 
         <NeedHelp />
@@ -2616,6 +2637,10 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
         }}
       />
 
+      {/* ChoosePlan Modal */}
+      {showChoosePlan && (
+        <ChoosePlan onClose={() => setShowChoosePlan(false)} />
+      )}
       
     </div>
   );

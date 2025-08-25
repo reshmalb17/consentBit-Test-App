@@ -3002,9 +3002,11 @@ text-align: center;
 .font-14.light {
   color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
+  color: #8C79FF;
+  display: flex;
+  gap: 10px;
   transition: color 0.2s ease;
 }
-
 .font-14.light:hover {
   color: #8C79FF;
 }

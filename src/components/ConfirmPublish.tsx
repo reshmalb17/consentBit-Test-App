@@ -287,7 +287,7 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
                       <div className="cookie-actions">
                         <button className="btns-preferences">Preferences</button>
                         <button className="btns-reject">Reject</button>
-                        <button className="btns-accept">Accept All</button>
+                        <button className="btns-accept">Accept</button>
                       </div>
                     </div>
                   </div>
