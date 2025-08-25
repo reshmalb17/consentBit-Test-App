@@ -467,7 +467,9 @@ export const useBannerCreation = () => {
         "right": "3%",
         "transform": "translate3d(0px, 0, 0)",
         "left": "auto",
-        
+         "bottom":"3%",
+         "width" :"438px",
+         "min-height": "220px",
       };
      
       
@@ -520,7 +522,7 @@ export const useBannerCreation = () => {
       const headingPropertyMap: Record<string, string> = {
         "color": `${bannerStyles.headColor}`,
         "font-size": "20px",
-        "font-weight": "400",
+        "font-weight": "500",
         "text-align": "left",
         "margin-top": "0",
         "margin-bottom": "10px",
@@ -570,6 +572,15 @@ export const useBannerCreation = () => {
       await secondBackgroundStyle.setProperties(secondbackgroundPropertyMap);
       await closebutton.setProperties(CloseButtonPropertyMap)
 
+       if (newDiv.setStyles) {
+        await newDiv.setStyles([divStyle]);
+      }
+
+       if (newDiv.setCustomAttribute) {
+         await newDiv.setCustomAttribute("data-animation", "fade");
+         await newDiv.setCustomAttribute("data-cookie-banner", "false");
+       }
+
       const innerdiv = await selectedElement.before(webflow.elementPresets.DivBlock);
       await innerdiv.setStyles([innerDivStyle]);
       const tempHeading = await selectedElement.before(webflow.elementPresets.Heading);
@@ -577,10 +588,27 @@ export const useBannerCreation = () => {
         throw new Error("Failed to create heading");
       }
       
+        if (tempHeading.setHeadingLevel) {
+          await tempHeading.setHeadingLevel(2);
+        }
+        if (tempHeading.setStyles) {
+          await tempHeading.setStyles([headingStyle]);
+        }
+        if (tempHeading.setTextContent) {
+           await tempHeading.setTextContent("We value your privacy");
+         }
       const tempParagraph = await selectedElement.before(webflow.elementPresets.Paragraph);
         if (!tempParagraph) {
           throw new Error("Failed to create paragraph");
         }
+         if (tempParagraph.setStyles) {
+           await tempParagraph.setStyles([paragraphStyle]);
+             }
+        
+         if (tempParagraph.setTextContent) {
+        await tempParagraph.setTextContent("We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.");
+         }
+        
         const buttonContainer = await selectedElement.before(webflow.elementPresets.DivBlock);
         if (!buttonContainer) {
           throw new Error("Failed to create button container");
@@ -593,27 +621,21 @@ export const useBannerCreation = () => {
         }
         await prefrenceButton.setStyles([Linktext])
         await prefrenceButton.setTextContent('Do Not Share My Personal Information');
-        if (tempParagraph.setStyles) {
-          await tempParagraph.setStyles([paragraphStyle]);
-        }
-      
-   
-
-    
-      
-    
-    
-
-
-      // Step   if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
+  
+     if ((prefrenceButton as any).setDomId) {
+           await (prefrenceButton as any).setDomId("do-not-share-link"); 
+         }
+      if (newDiv.append && innerdiv && tempHeading && tempParagraph && buttonContainer) {
           await newDiv.append(innerdiv);
           await innerdiv.append(tempHeading);
           await innerdiv.append(tempParagraph);
           await innerdiv.append(buttonContainer);
 
-                     if (buttonContainer.append && prefrenceButton) {
+           if (buttonContainer.append && prefrenceButton) {
+
              await buttonContainer.append(prefrenceButton)
            }
+         }
          
       
       
