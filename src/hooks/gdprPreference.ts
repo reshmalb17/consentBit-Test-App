@@ -7,7 +7,7 @@ type BreakpointAndPseudo = {
   pseudoClass: string;
 };
 
-const createCookiePreferences = async (selectedPreferences: string[], language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, customToggle: boolean, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", skipCommonDiv: boolean = false, disableScroll: boolean, closebutton: boolean = false, borderRadius: number) => {
+const createCookiePreferences = async (selectedPreferences: string[], language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, customToggle: boolean, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", skipCommonDiv: boolean = false, disableScroll: boolean, closebutton: boolean = false, borderRadius: number, font: string) => {
   
   try {
     const translation = getTranslation(language);
@@ -88,6 +88,7 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       "padding-bottom": "20px",
       "padding-left": "20px",
       "box-shadow": "2px 2px 20px rgba(0, 0, 0, 0.51)",
+      "font-family":font
     };
 
     const responsivePropertyMap: Record<string, string> = {
@@ -160,6 +161,8 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       "min-width": "80px",
       "color": primaryButtonText,
       "text-align": "center",
+      "display": "flex",
+      "justify-content": "center",
     };
 
     const declineButtonPropertyMap: Record<string, string> = {
@@ -171,6 +174,8 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       "margin-right": "5px",
       "min-width": "80px",
       "text-align": "center",
+      "display": "flex",
+      "justify-content": "center",
     };
 
 
@@ -196,6 +201,7 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       "left": "auto",
       "right": "10",
       "z-index": "99",
+      "font-family": "'Montserrat', sans-serif",
       "cursor": "pointer",
     };
 
@@ -264,6 +270,9 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       const tempHeading = await selectedElement.before(webflow.elementPresets.Heading);
       if (!tempHeading) {
         throw new Error("Failed to create heading");
+      }
+      if (tempHeading.setHeadingLevel) {
+        await tempHeading.setHeadingLevel(4);
       }
       if (tempHeading.setStyles) {
         await tempHeading.setStyles([headingStyle]);

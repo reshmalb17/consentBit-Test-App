@@ -678,6 +678,7 @@ export const useBannerCreation = () => {
        typeof config.buttonRadius === 'number' 
        ? config.buttonRadius 
        : parseInt(config.buttonRadius as string),
+       config.Font
       );
       
     } catch (error) {
