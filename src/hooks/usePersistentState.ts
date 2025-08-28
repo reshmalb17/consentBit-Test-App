@@ -181,6 +181,193 @@ export function clearAuthData(): void {
 
 }
 
+// Utility function to clear ALL localStorage data on reload
+export function clearAllDataOnReload(): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Set flag to indicate data should be cleared on next load
+    localStorage.setItem('__clear_on_reload__', 'true');
+    
+    // Clear everything immediately
+    localStorage.clear();
+    
+    // Also clear any session storage if used
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.clear();
+    }
+    
+    console.log('All localStorage and sessionStorage data cleared');
+  } catch (error) {
+    console.error('Error clearing storage data:', error);
+  }
+}
+
+// Function to check and handle clear on reload flag
+export function handleClearOnReload(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    const shouldClear = localStorage.getItem('__clear_on_reload__');
+    
+    if (shouldClear === 'true') {
+      // Clear everything
+      localStorage.clear();
+      
+      // Also clear session storage
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.clear();
+      }
+      
+      console.log('Data cleared on reload as requested');
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error handling clear on reload:', error);
+    return false;
+  }
+}
+
+// Enhanced function to clear all persistent data except authentication
+export function clearAllPersistentData(): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Authentication keys to preserve
+    const authKeysToPreserve = [
+      'consentbit-userinfo',
+      'siteInfo', 
+      'explicitly_logged_out'
+    ];
+    
+    // Save authentication data temporarily
+    const preservedData: Record<string, string | null> = {};
+    authKeysToPreserve.forEach(key => {
+      preservedData[key] = localStorage.getItem(key);
+    });
+    
+    // Get all localStorage keys first
+    const allKeys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        allKeys.push(key);
+      }
+    }
+    
+    // Clear all keys
+    allKeys.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
+    // Restore authentication data
+    authKeysToPreserve.forEach(key => {
+      if (preservedData[key] !== null) {
+        localStorage.setItem(key, preservedData[key]!);
+      }
+    });
+    
+    // Also clear sessionStorage
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.clear();
+    }
+    
+    const clearedCount = allKeys.length - authKeysToPreserve.filter(key => preservedData[key] !== null).length;
+    console.log(`Cleared ${clearedCount} localStorage keys (preserved ${authKeysToPreserve.filter(key => preservedData[key] !== null).length} auth keys) and all sessionStorage data`);
+  } catch (error) {
+    console.error('Error clearing persistent data:', error);
+  }
+}
+
+// Import the lightweight storage solution
+import { memoryStorage } from '../utils/memoryStorage';
+
+// Function to clear ALL data including authentication (complete reset)
+export function clearAllDataIncludingAuth(): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Clear memory storage (our new lightweight solution)
+    memoryStorage.clear();
+    
+    // Also clear localStorage for any remaining data
+    const allKeys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        allKeys.push(key);
+      }
+    }
+    
+    allKeys.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
+    // Clear sessionStorage
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.clear();
+    }
+    
+    console.log(`Cleared ALL data: ${allKeys.length} localStorage keys, memory storage, and sessionStorage`);
+  } catch (error) {
+    console.error('Error clearing all data:', error);
+  }
+}
+
+// Function to enable automatic clearing on every page reload
+export function enableAutoClearOnReload(): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem('__auto_clear_enabled__', 'true');
+    console.log('Auto-clear on reload enabled. Data will be cleared on every page reload.');
+  } catch (error) {
+    console.error('Error enabling auto-clear:', error);
+  }
+}
+
+// Function to disable automatic clearing on page reload
+export function disableAutoClearOnReload(): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.removeItem('__auto_clear_enabled__');
+    console.log('Auto-clear on reload disabled.');
+  } catch (error) {
+    console.error('Error disabling auto-clear:', error);
+  }
+}
+
+// Function to check if auto-clear is enabled and handle it
+export function checkAndHandleAutoClear(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    const autoClearEnabled = localStorage.getItem('__auto_clear_enabled__');
+    
+    if (autoClearEnabled === 'true') {
+      // Temporarily save the auto-clear flag
+      const tempFlag = autoClearEnabled;
+      
+      // Clear all data
+      clearAllPersistentData();
+      
+      // Restore the auto-clear flag so it persists
+      localStorage.setItem('__auto_clear_enabled__', tempFlag);
+      
+      console.log('Auto-clear executed on page load');
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking auto-clear:', error);
+    return false;
+  }
+}
+
 // Utility function to set site info after authorization
 export function setSiteInfoAfterAuth(siteInfo: { siteId: string; siteName: string; shortName: string }): void {
   if (typeof window === 'undefined') return;
@@ -337,8 +524,8 @@ export function forceMigration(): void {
 }
 
 function usePersistentState<T>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
-  // Run migration for wf_hybrid_user -> consentbit-userinfo
-  migrateOldData();
+  // Skip migration since we clear all localStorage on every reload
+  // migrateOldData();
   
   const siteSpecificKey = getSiteSpecificKey(key);
   

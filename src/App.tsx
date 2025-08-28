@@ -11,7 +11,7 @@ import { useAppState } from "./hooks/useAppState";
 import { useAuth } from "./hooks/userAuth";
 import { use } from "i18next";
 import { serialize } from "v8";
-import { getCurrentSiteId, listCurrentSiteData, clearCurrentSiteData, clearAllData, clearAuthData, clearAuthIfNotAuthorized, checkMigrationStatus, forceMigration, usePersistentState, debugAuthStatus, forceClearAuthData } from "./hooks/usePersistentState";
+import { getCurrentSiteId, listCurrentSiteData, clearCurrentSiteData, clearAllData, clearAuthData, clearAuthIfNotAuthorized, checkMigrationStatus, forceMigration, usePersistentState, debugAuthStatus, forceClearAuthData, clearAllDataIncludingAuth } from "./hooks/usePersistentState";
 import { customCodeApi } from "./services/api";
 import { CodeApplication } from "./types/types";
 import { getSessionTokenFromLocalStorage } from './util/Session';
@@ -24,6 +24,27 @@ const appVersion = pkg.version;
 
 
 const App: React.FC = () => {
+
+  // Clear ALL data including authentication on every reload - run immediately
+  React.useEffect(() => {
+    // Clear everything immediately on mount - complete fresh start
+    clearAllDataIncludingAuth();
+    console.log('All data including authentication cleared on reload');
+    
+    // Also set up a more aggressive clearing to catch any late localStorage writes
+    const clearAgain = () => {
+      const currentKeys = Object.keys(localStorage);
+      if (currentKeys.length > 0) {
+        console.log('Found additional localStorage keys, clearing again:', currentKeys);
+        clearAllDataIncludingAuth();
+      }
+    };
+    
+    // Check again after a short delay to catch any late writes
+    const timeoutId = setTimeout(clearAgain, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   const queryClient = useQueryClient();
   const [skipWelcomeScreen, setSkipWelcomeScreen] = usePersistentState("skipWelcomeScreen", false);
@@ -48,8 +69,36 @@ const App: React.FC = () => {
   } = useAppState();
 
 
-  const { user, sessionToken, exchangeAndVerifyIdToken, openAuthScreen, isAuthenticatedForCurrentSite } = useAuth();
+  const { user, sessionToken, exchangeAndVerifyIdToken, openAuthScreen, isAuthenticatedForCurrentSite, attemptAutoRefresh } = useAuth();
   
+  // App initialization with fresh background authentication
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        // Small delay to prevent flash of content
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Try fresh background authentication (silent)
+        console.log('Attempting fresh background authentication...');
+        const refreshSuccess = await attemptAutoRefresh();
+        if (refreshSuccess) {
+          console.log('Background authentication successful');
+          setIsAuthenticated(true);
+        } else {
+          console.log('Background authentication failed - user needs to authenticate manually');
+        }
+      } catch (error) {
+        console.error('App initialization error:', error);
+      } finally {
+        // Additional small delay for smoother UX
+        await new Promise(resolve => setTimeout(resolve, 300));
+        setIsAppInitializing(false);
+      }
+    };
+
+    initializeApp();
+  }, []);
+
   // Debug authentication state changes
   useEffect(() => {
     // Auth state monitoring
@@ -301,16 +350,7 @@ const App: React.FC = () => {
     };
   }, [isAuthenticated, sessionToken, user?.email]); // Trigger when auth state changes
 
-  // App initialization delay to prevent welcome screen flash
-  useEffect(() => {
-    const initializeApp = async () => {
-      // Give time for authentication, localStorage reads, and state to settle
-      await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5 second delay
-      setIsAppInitializing(false);
-    };
-
-    initializeApp();
-  }, []); // Run only once on app mount
+  // App initialization delay removed - now handled in automatic token refresh useEffect
 
 
 
@@ -333,6 +373,8 @@ const App: React.FC = () => {
   const handleDebugAuth = () => {
     debugAuthStatus();
   };
+
+  // Data is automatically cleared on every reload (see useEffect above)
 
 
 

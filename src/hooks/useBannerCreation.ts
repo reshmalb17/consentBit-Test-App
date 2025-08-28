@@ -712,23 +712,8 @@ export const useBannerCreation = () => {
       throw error;
     }
   };
-   const openAuthScreen = () => {
-    const authWindow = window.open(
-      `${base_url}/api/auth/authorize?state=webflow_designer`,
-      "_blank",
-      "width=600,height=600"
-    );
-
-    const onAuth = async () => {
-      await exchangeAndVerifyIdToken();
-    };
-    const checkWindow = setInterval(() => {
-      if (authWindow?.closed) {
-        clearInterval(checkWindow);
-        onAuth();
-      }
-    }, 1000);
-  };
+   // Import and use the openAuthScreen from useAuth hook that includes automatic silent auth
+   const { openAuthScreen } = useAuth();
     
   const  fetchAnalyticsBlockingsScriptsV2 = async () => {
     try {

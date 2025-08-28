@@ -512,29 +512,13 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   }
 
   // const { user } = useAuth();
-  const { user, exchangeAndVerifyIdToken, isAuthenticatedForCurrentSite } = useAuth();
+  const { user, exchangeAndVerifyIdToken, isAuthenticatedForCurrentSite, openAuthScreen: openAuthScreenHook } = useAuth();
 
 
 
 
-  // Function to open the authorization popup authorization window
-  const openAuthScreen = () => {
-    const authWindow = window.open(
-      `${base_url}/api/auth/authorize?state=webflow_designer`,
-      "_blank",
-      "width=600,height=600"
-    );
-
-    const onAuth = async () => {
-      await exchangeAndVerifyIdToken();
-    };
-    const checkWindow = setInterval(() => {
-      if (authWindow?.closed) {
-        clearInterval(checkWindow);
-        onAuth();
-      }
-    }, 1000);
-  };
+  // Use the authorization function from useAuth hook (includes automatic silent auth)
+  const openAuthScreen = openAuthScreenHook;
 
   const queryClient = useQueryClient();
 
@@ -2132,7 +2116,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                 <>
                   <span className="spanbox">Before proceeding, make sure you're not selecting the Consentbit element in the Webflow Designer.</span>
                   <span className="spanbox">Hang tight! We're updating your banner with the latest changes.</span>
-                  <span className="spanbox">Applying your updates to the project now!.</span>
+                  <span className="spanbox">Applying your updates to the project now!</span>
                 </>
               ) : (
                 <>

@@ -38,6 +38,39 @@ interface AuthState {
 export function useAuth() {
   const queryClient = useQueryClient();
   const isExchangingToken = { current: false };
+  
+  // Function to attempt automatic token refresh on app load
+  const attemptAutoRefresh = async (): Promise<boolean> => {
+    try {
+      // Check if user was explicitly logged out
+      const wasExplicitlyLoggedOut = localStorage.getItem("explicitly_logged_out");
+      if (wasExplicitlyLoggedOut) {
+        return false;
+      }
+
+      // Check if there's existing auth data that might be expired or invalid
+      const storedUser = localStorage.getItem("consentbit-userinfo");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          if (userData.sessionToken) {
+            const decodedToken = jwtDecode(userData.sessionToken) as DecodedToken;
+            // If token is not expired, don't need to refresh
+            if (decodedToken.exp * 1000 > Date.now()) {
+              return true; // Already have valid token
+            }
+          }
+        } catch (error) {
+          // Invalid token data, continue with refresh attempt
+        }
+      }
+
+      // Attempt silent auth to refresh token
+      return await attemptSilentAuth();
+    } catch (error) {
+      return false;
+    }
+  };
 
   // Query for managing auth state and token validation
   const { data: authState, isLoading: isAuthLoading } = useQuery<AuthState>({
@@ -155,6 +188,73 @@ export function useAuth() {
     },
   });
 
+  // Function to attempt silent authorization without user interaction
+  const attemptSilentAuth = async (): Promise<boolean> => {
+    try {
+      // Attempt to get ID token silently (works if user is already authenticated with Webflow)
+      const idToken = await webflow.getIdToken();
+      if (!idToken) {
+        return false;
+      }
+
+      // Get site info from Webflow
+      const siteInfo = await webflow.getSiteInfo();
+      if (!siteInfo || !siteInfo.siteId) {
+        return false;
+      }
+      
+      const response = await fetch(`${base_url}/api/auth/token`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ 
+          idToken, 
+          siteId: siteInfo.siteId 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.sessionToken) {
+        return false;
+      }
+
+      // Store in localStorage
+      const userData = {
+        sessionToken: data.sessionToken,
+        firstName: data.firstName,
+        email: data.email,
+        siteId: siteInfo.siteId,
+        exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
+      };
+
+      localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
+      localStorage.removeItem("explicitly_logged_out");
+
+      // Store site information after authentication
+      if (siteInfo) {
+        localStorage.setItem('siteInfo', JSON.stringify(siteInfo));
+      }
+
+      // Update React Query cache
+      queryClient.setQueryData<AuthState>(["auth"], {
+        user: {
+          firstName: data.firstName,
+          email: data.email,
+          siteId: siteInfo.siteId
+        },
+        sessionToken: data.sessionToken
+      });
+
+      return true;
+
+    } catch (error) {
+      // Silent auth failed, return false to indicate need for interactive auth
+      return false;
+    }
+  };
+
   // Function to initiate token exchange process
   const exchangeAndVerifyIdToken = async () => {
     try {
@@ -238,7 +338,16 @@ export function useAuth() {
     queryClient.clear();
   };
 
-  const openAuthScreen = () => {
+  const openAuthScreen = async () => {
+    // First, try silent authentication
+    const silentAuthSuccess = await attemptSilentAuth();
+    
+    if (silentAuthSuccess) {
+      // Silent auth succeeded, no need to show auth window
+      return;
+    }
+
+    // Silent auth failed, show the interactive auth window
     const authWindow = window.open(
       `${base_url}/api/auth/authorize?state=webflow_designer`,
       "_blank",
@@ -248,7 +357,6 @@ export function useAuth() {
     if (!authWindow) {
       return;
     }
-
 
     const onAuth = async () => {
       try {
@@ -305,5 +413,7 @@ export function useAuth() {
     logout,
     openAuthScreen,
     isAuthenticatedForCurrentSite,
+    attemptSilentAuth,
+    attemptAutoRefresh,
   };
 }
