@@ -10,6 +10,7 @@ import PulseAnimation from "../components/PulseAnimation";
 import SuccessPublish from "../components/SuccessPublish";
 import CustomizationTab from "./CustomizationTab";
 import ChoosePlan from "./ChoosePlan";
+import { customCodeApi } from "../services/api";
 
 
 
@@ -47,6 +48,7 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
   const [showCustomize, setShowCustomize] = useState(false);
   const [iconSrc, setIconSrc] = useState(CopyContent);
   const [showChoosePlan, setShowChoosePlan] = useState(false);
+  const { sessionToken } = useAuth();
 
   
   const {
@@ -106,14 +108,42 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
           // Create complete banner structure (both GDPR and CCPA banners)
           await createCompleteBannerStructureWithExistingFunctions(config);
           
-        } catch (bannerCreationError) {
+            } catch (bannerCreationError) {
           throw bannerCreationError;
-        }
+         }
 
-        popups.setShowPopup(true);
-        // After successful banner creation, call handleConfirmPublish to show SuccessPublish component
-         
-        handleConfirmPublish();
+        
+                 const bannerData = {
+           cookieExpiration: "30",
+           bgColor: bannerStyles.color,
+           activeTab: "Customization",
+           activeMode: "Advanced",
+           selectedtext: "We use cookies",
+           fetchScripts: true,
+           btnColor: bannerStyles.btnColor,
+           paraColor: bannerStyles.paraColor,
+           secondcolor: bannerStyles.secondcolor,
+           bgColors: bannerStyles.color,
+           headColor: bannerStyles.headColor,
+           secondbuttontext: bannerStyles.secondbuttontext,
+           primaryButtonText: bannerStyles.primaryButtonText,
+           Font: bannerStyles.Font,
+           style: "normal",
+           selected: "default",
+           weight: "normal",
+           borderRadius: bannerStyles.borderRadius,
+           buttonRadius: bannerStyles.buttonRadius,
+           animation: bannerAnimation.animation,
+           easing: "ease",
+           language: bannerLanguages.language,
+           buttonText: bannerStyles.primaryButtonText,
+           isBannerAdded: true,
+           color: bannerStyles.color
+         };
+         popups.setShowPopup(true);         
+         handleConfirmPublish();
+         const respons2 = await customCodeApi.saveBannerStyles(sessionToken, bannerData);
+       
       } else {
 
         

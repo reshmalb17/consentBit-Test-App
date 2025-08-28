@@ -49,6 +49,7 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isAppInitializing, setIsAppInitializing] = useState(true);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [customizationInitialTab, setCustomizationInitialTab] = useState("Settings");
   
   
@@ -69,24 +70,53 @@ const App: React.FC = () => {
 
   const { user, sessionToken, exchangeAndVerifyIdToken, openAuthScreen, isAuthenticatedForCurrentSite, attemptAutoRefresh } = useAuth();
   
-  // App initialization with fresh background authentication
+    // App initialization with clean welcome screen flow
   useEffect(() => {
     const initializeApp = async () => {
+      // Start with welcome screen and loading state
+      componentStates.resetComponentStates();
+      componentStates.setIsWelcomeScreen(true);
+      setIsAppInitializing(false);
+      setIsCheckingAuth(true);
+      
       try {
-        // Small delay to prevent flash of content
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
         // Try fresh background authentication (silent)
         const refreshSuccess = await attemptAutoRefresh();
         if (refreshSuccess) {
           setIsAuthenticated(true);
+          
+          // If authenticated, fetch app-data to check bannerAdded status
+          try {
+            const token = getSessionTokenFromLocalStorage();
+            if (token) {
+              const response = await customCodeApi.getBannerStyles(token);
+              
+              // Only proceed to CustomizationTab if response exists AND bannerAdded is explicitly true
+              if (response && response.appData && response.appData.isBannerAdded === true) {
+                // Banner was previously added - skip welcome screen
+                setSkipWelcomeScreen(true);
+                bannerBooleans.setIsBannerAdded(true);
+              } else {
+                // Response is null, empty, or bannerAdded is not true - show welcome screen
+                setSkipWelcomeScreen(false);
+                bannerBooleans.setIsBannerAdded(false);
+              }
+            } else {
+              // No token available - show welcome screen
+              setSkipWelcomeScreen(false);
+              bannerBooleans.setIsBannerAdded(false);
+            }
+          } catch (error) {
+            // API call failed - show welcome screen
+            setSkipWelcomeScreen(false);
+            bannerBooleans.setIsBannerAdded(false);
+          }
         }
       } catch (error) {
         // Silent error handling
       } finally {
-        // Additional small delay for smoother UX
-        await new Promise(resolve => setTimeout(resolve, 300));
-        setIsAppInitializing(false);
+        // Auth check complete
+        setIsCheckingAuth(false);
       }
     };
 
@@ -98,24 +128,7 @@ const App: React.FC = () => {
     // Auth state monitoring
   }, [user, sessionToken, isAuthenticated]);
 
-  // Check if banners were previously added and navigate to CustomizationTab (only on initial load)
-  useEffect(() => {
-    if (isInitialized) return; // Skip if already initialized
-    
-    const initialBannerAdded = localStorage.getItem('initialBannerAdded') === 'true';
-    const bannerAdded = localStorage.getItem('bannerAdded') === 'true';
-    
-    if (initialBannerAdded || bannerAdded) {
-      // Reset all component states
-      componentStates.resetComponentStates();
-      // Navigate to CustomizationTab
-      componentStates.setIsCustomizationTab(true);
-      // Set banner added flag
-      bannerBooleans.setIsBannerAdded(true);
-    }
-    
-    setIsInitialized(true);
-  }, [isInitialized, componentStates, bannerBooleans]);
+  // Removed - this is now handled in the main initialization useEffect
 
  
 
@@ -239,35 +252,7 @@ const App: React.FC = () => {
 
 
 
-  // Check if banner was already added (for existing users) and set authentication state
-  useEffect(() => {
-    // Don't run this effect if we're currently showing SuccessPublish
-    if (componentStates.isSuccessPublish) return;
-    
-    // Add a small delay to ensure all states are properly loaded from localStorage
-    const timer = setTimeout(async() => {
-      // Check both the persistent state and the direct localStorage key
-      const bannerAddedFromStorage = localStorage.getItem('bannerAdded') === 'true';
-
-      // Check site-specific authentication
-      const isUserAuthenticated = await isAuthenticatedForCurrentSite();
-      
-      if (bannerAddedFromStorage && isUserAuthenticated) {
-        // For existing users who already have a banner AND are authenticated for this site, show CustomizationTab directly
-        setSkipWelcomeScreen(true);
-        componentStates.resetComponentStates();
-        componentStates.setIsCustomizationTab(true);
-      } else {
-        // For new users or users without banner or not authenticated for this site, start with welcome screen
-        setSkipWelcomeScreen(false);
-        componentStates.resetComponentStates();
-        componentStates.setIsWelcomeScreen(true);
-      }
-      
-    }, 1000); // Small delay to ensure localStorage is read
-
-    return () => clearTimeout(timer);
-  }, [bannerBooleans.isBannerAdded, user?.email, sessionToken, componentStates.isSuccessPublish]); // Added isSuccessPublish to dependencies
+  // Removed - this is now handled in the main initialization useEffect
 
   // Separate useEffect to update authentication state when auth changes
   useEffect(() => {
@@ -376,10 +361,7 @@ const App: React.FC = () => {
    <div>
    
 
-      {isAppInitializing ? (
-        // Show nothing during initialization to prevent flash
-        <div></div>
-      ) : skipWelcomeScreen ? (
+      {skipWelcomeScreen ? (
         <CustomizationTab onAuth={handleBackToWelcome} isAuthenticated={isAuthenticated} initialActiveTab={customizationInitialTab} />
       ) : componentStates.isWelcomeScreen ? (
         <WelcomeScreen 
@@ -387,6 +369,7 @@ const App: React.FC = () => {
           onNeedHelp={handleWelcomeNeedHelp}
           authenticated={isAuthenticated}
           handleWelcomeScreen={handleWelcomeScreen}
+          isCheckingAuth={isCheckingAuth}
         />
       ) : componentStates.isWelcomeScipt ? (
         <WelcomeScipt
@@ -418,6 +401,7 @@ const App: React.FC = () => {
           onNeedHelp={handleWelcomeNeedHelp}
           authenticated={isAuthenticated}
           handleWelcomeScreen={handleWelcomeScreen}
+          isCheckingAuth={isCheckingAuth}
         />
       )}
        

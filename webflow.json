@@ -3,6 +3,7 @@
   "publicDir": "public",
   "size": "large",
   "apiVersion": "2",
+  "mode": "design",
   "appConnections": [
     "MyconsentImage" 
   ]
