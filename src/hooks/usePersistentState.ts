@@ -197,9 +197,8 @@ export function clearAllDataOnReload(): void {
       sessionStorage.clear();
     }
     
-    console.log('All localStorage and sessionStorage data cleared');
   } catch (error) {
-    console.error('Error clearing storage data:', error);
+    // Silent error handling
   }
 }
 
@@ -219,13 +218,11 @@ export function handleClearOnReload(): boolean {
         sessionStorage.clear();
       }
       
-      console.log('Data cleared on reload as requested');
       return true;
     }
     
     return false;
   } catch (error) {
-    console.error('Error handling clear on reload:', error);
     return false;
   }
 }
@@ -275,24 +272,17 @@ export function clearAllPersistentData(): void {
     }
     
     const clearedCount = allKeys.length - authKeysToPreserve.filter(key => preservedData[key] !== null).length;
-    console.log(`Cleared ${clearedCount} localStorage keys (preserved ${authKeysToPreserve.filter(key => preservedData[key] !== null).length} auth keys) and all sessionStorage data`);
   } catch (error) {
-    console.error('Error clearing persistent data:', error);
+    // Silent error handling
   }
 }
-
-// Import the lightweight storage solution
-import { memoryStorage } from '../utils/memoryStorage';
 
 // Function to clear ALL data including authentication (complete reset)
 export function clearAllDataIncludingAuth(): void {
   if (typeof window === 'undefined') return;
   
   try {
-    // Clear memory storage (our new lightweight solution)
-    memoryStorage.clear();
-    
-    // Also clear localStorage for any remaining data
+    // Clear all localStorage data
     const allKeys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -310,9 +300,8 @@ export function clearAllDataIncludingAuth(): void {
       sessionStorage.clear();
     }
     
-    console.log(`Cleared ALL data: ${allKeys.length} localStorage keys, memory storage, and sessionStorage`);
   } catch (error) {
-    console.error('Error clearing all data:', error);
+    // Silent error handling
   }
 }
 
@@ -322,9 +311,8 @@ export function enableAutoClearOnReload(): void {
   
   try {
     localStorage.setItem('__auto_clear_enabled__', 'true');
-    console.log('Auto-clear on reload enabled. Data will be cleared on every page reload.');
   } catch (error) {
-    console.error('Error enabling auto-clear:', error);
+    // Silent error handling
   }
 }
 
@@ -334,9 +322,8 @@ export function disableAutoClearOnReload(): void {
   
   try {
     localStorage.removeItem('__auto_clear_enabled__');
-    console.log('Auto-clear on reload disabled.');
   } catch (error) {
-    console.error('Error disabling auto-clear:', error);
+    // Silent error handling
   }
 }
 
@@ -357,13 +344,11 @@ export function checkAndHandleAutoClear(): boolean {
       // Restore the auto-clear flag so it persists
       localStorage.setItem('__auto_clear_enabled__', tempFlag);
       
-      console.log('Auto-clear executed on page load');
       return true;
     }
     
     return false;
   } catch (error) {
-    console.error('Error checking auto-clear:', error);
     return false;
   }
 }

@@ -43443,12 +43443,10 @@ const App = () => {
     react__WEBPACK_IMPORTED_MODULE_0___default().useEffect(() => {
         // Clear everything immediately on mount - complete fresh start
         (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_10__.clearAllDataIncludingAuth)();
-        console.log('All data including authentication cleared on reload');
         // Also set up a more aggressive clearing to catch any late localStorage writes
         const clearAgain = () => {
             const currentKeys = Object.keys(localStorage);
             if (currentKeys.length > 0) {
-                console.log('Found additional localStorage keys, clearing again:', currentKeys);
                 (0,_hooks_usePersistentState__WEBPACK_IMPORTED_MODULE_10__.clearAllDataIncludingAuth)();
             }
         };
@@ -43471,18 +43469,13 @@ const App = () => {
                 // Small delay to prevent flash of content
                 yield new Promise(resolve => setTimeout(resolve, 800));
                 // Try fresh background authentication (silent)
-                console.log('Attempting fresh background authentication...');
                 const refreshSuccess = yield attemptAutoRefresh();
                 if (refreshSuccess) {
-                    console.log('Background authentication successful');
                     setIsAuthenticated(true);
-                }
-                else {
-                    console.log('Background authentication failed - user needs to authenticate manually');
                 }
             }
             catch (error) {
-                console.error('App initialization error:', error);
+                // Silent error handling
             }
             finally {
                 // Additional small delay for smoother UX
@@ -50128,7 +50121,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _utils_memoryStorage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/memoryStorage */ "./src/utils/memoryStorage.ts");
 
 // Function to migrate old data to new site-specific format
 function migrateOldData() {
@@ -50304,10 +50296,9 @@ function clearAllDataOnReload() {
         if (typeof sessionStorage !== 'undefined') {
             sessionStorage.clear();
         }
-        console.log('All localStorage and sessionStorage data cleared');
     }
     catch (error) {
-        console.error('Error clearing storage data:', error);
+        // Silent error handling
     }
 }
 // Function to check and handle clear on reload flag
@@ -50323,13 +50314,11 @@ function handleClearOnReload() {
             if (typeof sessionStorage !== 'undefined') {
                 sessionStorage.clear();
             }
-            console.log('Data cleared on reload as requested');
             return true;
         }
         return false;
     }
     catch (error) {
-        console.error('Error handling clear on reload:', error);
         return false;
     }
 }
@@ -50372,22 +50361,17 @@ function clearAllPersistentData() {
             sessionStorage.clear();
         }
         const clearedCount = allKeys.length - authKeysToPreserve.filter(key => preservedData[key] !== null).length;
-        console.log(`Cleared ${clearedCount} localStorage keys (preserved ${authKeysToPreserve.filter(key => preservedData[key] !== null).length} auth keys) and all sessionStorage data`);
     }
     catch (error) {
-        console.error('Error clearing persistent data:', error);
+        // Silent error handling
     }
 }
-// Import the lightweight storage solution
-
 // Function to clear ALL data including authentication (complete reset)
 function clearAllDataIncludingAuth() {
     if (typeof window === 'undefined')
         return;
     try {
-        // Clear memory storage (our new lightweight solution)
-        _utils_memoryStorage__WEBPACK_IMPORTED_MODULE_1__.memoryStorage.clear();
-        // Also clear localStorage for any remaining data
+        // Clear all localStorage data
         const allKeys = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -50402,10 +50386,9 @@ function clearAllDataIncludingAuth() {
         if (typeof sessionStorage !== 'undefined') {
             sessionStorage.clear();
         }
-        console.log(`Cleared ALL data: ${allKeys.length} localStorage keys, memory storage, and sessionStorage`);
     }
     catch (error) {
-        console.error('Error clearing all data:', error);
+        // Silent error handling
     }
 }
 // Function to enable automatic clearing on every page reload
@@ -50414,10 +50397,9 @@ function enableAutoClearOnReload() {
         return;
     try {
         localStorage.setItem('__auto_clear_enabled__', 'true');
-        console.log('Auto-clear on reload enabled. Data will be cleared on every page reload.');
     }
     catch (error) {
-        console.error('Error enabling auto-clear:', error);
+        // Silent error handling
     }
 }
 // Function to disable automatic clearing on page reload
@@ -50426,10 +50408,9 @@ function disableAutoClearOnReload() {
         return;
     try {
         localStorage.removeItem('__auto_clear_enabled__');
-        console.log('Auto-clear on reload disabled.');
     }
     catch (error) {
-        console.error('Error disabling auto-clear:', error);
+        // Silent error handling
     }
 }
 // Function to check if auto-clear is enabled and handle it
@@ -50445,13 +50426,11 @@ function checkAndHandleAutoClear() {
             clearAllPersistentData();
             // Restore the auto-clear flag so it persists
             localStorage.setItem('__auto_clear_enabled__', tempFlag);
-            console.log('Auto-clear executed on page load');
             return true;
         }
         return false;
     }
     catch (error) {
-        console.error('Error checking auto-clear:', error);
         return false;
     }
 }
@@ -51958,109 +51937,6 @@ function getLanguageName(langCode) {
     };
     return languageNames[langCode] || langCode;
 }
-
-
-/***/ }),
-
-/***/ "./src/utils/memoryStorage.ts":
-/*!************************************!*\
-  !*** ./src/utils/memoryStorage.ts ***!
-  \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
-/* harmony export */   memoryStorage: () => (/* binding */ memoryStorage)
-/* harmony export */ });
-// Ultra-lightweight storage - 0KB bundle impact
-// Combines in-memory storage with sessionStorage backup
-class MemoryStorage {
-    constructor() {
-        this.memoryStore = new Map();
-        this.persistentKeys = new Set(['consentbit-userinfo', 'siteInfo']);
-    }
-    // Set item in memory and optionally persist
-    setItem(key, value) {
-        // Store in memory
-        this.memoryStore.set(key, value);
-        // Persist only important keys to sessionStorage
-        if (this.persistentKeys.has(key)) {
-            try {
-                sessionStorage.setItem(key, JSON.stringify(value));
-            }
-            catch (error) {
-                console.warn('SessionStorage failed for key:', key);
-            }
-        }
-    }
-    // Get item from memory first, fallback to sessionStorage
-    getItem(key) {
-        // Try memory first
-        if (this.memoryStore.has(key)) {
-            return this.memoryStore.get(key);
-        }
-        // Fallback to sessionStorage for persistent keys
-        if (this.persistentKeys.has(key)) {
-            try {
-                const stored = sessionStorage.getItem(key);
-                if (stored) {
-                    const value = JSON.parse(stored);
-                    this.memoryStore.set(key, value); // Cache in memory
-                    return value;
-                }
-            }
-            catch (error) {
-                console.warn('SessionStorage parse failed for key:', key);
-            }
-        }
-        return null;
-    }
-    // Remove item
-    removeItem(key) {
-        this.memoryStore.delete(key);
-        sessionStorage.removeItem(key);
-    }
-    // Clear all data
-    clear() {
-        this.memoryStore.clear();
-        sessionStorage.clear();
-    }
-    // Get all keys
-    getAllKeys() {
-        const memoryKeys = Array.from(this.memoryStore.keys());
-        const sessionKeys = Array.from({ length: sessionStorage.length }, (_, i) => sessionStorage.key(i)).filter(key => key !== null);
-        return [...new Set([...memoryKeys, ...sessionKeys])];
-    }
-    // Get storage info
-    getStorageInfo() {
-        let totalSize = 0;
-        // Calculate session storage size
-        for (let i = 0; i < sessionStorage.length; i++) {
-            const key = sessionStorage.key(i);
-            if (key) {
-                const value = sessionStorage.getItem(key);
-                totalSize += key.length + ((value === null || value === void 0 ? void 0 : value.length) || 0);
-            }
-        }
-        return {
-            memoryKeys: this.memoryStore.size,
-            sessionKeys: sessionStorage.length,
-            totalSize: totalSize * 2 // UTF-16 estimate
-        };
-    }
-    // Add key to persistent list
-    addPersistentKey(key) {
-        this.persistentKeys.add(key);
-    }
-    // Remove key from persistent list
-    removePersistentKey(key) {
-        this.persistentKeys.delete(key);
-    }
-}
-// Export singleton
-const memoryStorage = new MemoryStorage();
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (memoryStorage);
 
 
 /***/ }),

@@ -29,13 +29,11 @@ const App: React.FC = () => {
   React.useEffect(() => {
     // Clear everything immediately on mount - complete fresh start
     clearAllDataIncludingAuth();
-    console.log('All data including authentication cleared on reload');
     
     // Also set up a more aggressive clearing to catch any late localStorage writes
     const clearAgain = () => {
       const currentKeys = Object.keys(localStorage);
       if (currentKeys.length > 0) {
-        console.log('Found additional localStorage keys, clearing again:', currentKeys);
         clearAllDataIncludingAuth();
       }
     };
@@ -79,16 +77,12 @@ const App: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, 800));
         
         // Try fresh background authentication (silent)
-        console.log('Attempting fresh background authentication...');
         const refreshSuccess = await attemptAutoRefresh();
         if (refreshSuccess) {
-          console.log('Background authentication successful');
           setIsAuthenticated(true);
-        } else {
-          console.log('Background authentication failed - user needs to authenticate manually');
         }
       } catch (error) {
-        console.error('App initialization error:', error);
+        // Silent error handling
       } finally {
         // Additional small delay for smoother UX
         await new Promise(resolve => setTimeout(resolve, 300));
