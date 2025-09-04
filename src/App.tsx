@@ -69,6 +69,7 @@ const App: React.FC = () => {
 
 
   const { user, sessionToken, exchangeAndVerifyIdToken, openAuthScreen, isAuthenticatedForCurrentSite, attemptAutoRefresh } = useAuth();
+  const [isFetchWelcomeScripts, setIsFetchWelcomeScripts] = useState(false);
   
     // App initialization with clean welcome screen flow
   useEffect(() => {
@@ -91,13 +92,13 @@ const App: React.FC = () => {
             if (token) {
               const response = await customCodeApi.getBannerStyles(token);
               
-              // Only proceed to CustomizationTab if response exists AND bannerAdded is explicitly true
+              // Set banner status but always show welcome screen with appropriate button
               if (response && response.appData && response.appData.isBannerAdded === true) {
-                // Banner was previously added - skip welcome screen
-                setSkipWelcomeScreen(true);
+                // Banner was previously added - show welcome screen with "Customize" button
+                setSkipWelcomeScreen(false);
                 bannerBooleans.setIsBannerAdded(true);
               } else {
-                // Response is null, empty, or bannerAdded is not true - show welcome screen
+                // Response is null, empty, or bannerAdded is not true - show welcome screen with "Scan Project" button
                 setSkipWelcomeScreen(false);
                 bannerBooleans.setIsBannerAdded(false);
               }
@@ -136,7 +137,7 @@ const App: React.FC = () => {
   // Welcome Screen -> WelcomeScript (Scan Project clicked)
   const handleWelcomeScreen = () => {
     componentStates.setIsWelcomeScreen(false);
-    bannerBooleans.setFetchScripts(true);
+     setIsFetchWelcomeScripts(true);
     componentStates.setWelcomeScipt(true);
   };
 
@@ -370,10 +371,12 @@ const App: React.FC = () => {
           authenticated={isAuthenticated}
           handleWelcomeScreen={handleWelcomeScreen}
           isCheckingAuth={isCheckingAuth}
+          isBannerAdded={bannerBooleans.isBannerAdded}
+          onCustomize={handleCustomize}
         />
       ) : componentStates.isWelcomeScipt ? (
         <WelcomeScipt
-          isFetchScripts={bannerBooleans.fetchScripts}
+          isWFetchWelcomeScripts={isFetchWelcomeScripts}
           handleWelcomeScipt={handleWelcomeScipt}
           onGoBack={handleWelcomeScriptGoBack}
         />
@@ -402,6 +405,8 @@ const App: React.FC = () => {
           authenticated={isAuthenticated}
           handleWelcomeScreen={handleWelcomeScreen}
           isCheckingAuth={isCheckingAuth}
+          isBannerAdded={bannerBooleans.isBannerAdded}
+          onCustomize={handleCustomize}
         />
       )}
        

@@ -19,9 +19,11 @@ type WelcomeScreenProps = {
   authenticated?:boolean;
   handleWelcomeScreen: () => void;
   isCheckingAuth?: boolean;
+  isBannerAdded?: boolean;
+  onCustomize?: () => void;
 };
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,authenticated,handleWelcomeScreen, isCheckingAuth: externalIsCheckingAuth}) => {
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,authenticated,handleWelcomeScreen, isCheckingAuth: externalIsCheckingAuth, isBannerAdded, onCustomize}) => {
   const [hasUserData, setHasUserData] = useState(false);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
@@ -89,8 +91,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
             </p>
           ) : hasUserData ? (
             <p className="welcome-instructions">
-              Scan your Webflow site, review detected scripts, add them to the
-              backend, and publish when you're ready.
+              {isBannerAdded 
+                ? "Your banner has been successfully added! Customize your consent banner appearance and settings."
+                : "Scan your Webflow site, review detected scripts, add them to the backend, and publish when you're ready."
+              }
             </p>
           ) : (
             <p className="welcome-instructions">
@@ -112,9 +116,9 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
             <>
               <button
                 className="welcome-authorize-btn scan-project"
-                onClick={handleWelcomeScreen}
+                onClick={isBannerAdded ? onCustomize : handleWelcomeScreen}
               >
-                Scan Project
+                {isBannerAdded ? "Customize" : "Scan Project"}
               </button>
           
             </>
@@ -124,7 +128,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
             </button>
           )}
         </div>
-        {hasUserData && showButtons && !externalIsCheckingAuth?(
+        {hasUserData && showButtons && !externalIsCheckingAuth && !isBannerAdded?(
         <>
         
             {/* Bottom information cards */}

@@ -120,14 +120,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
     setIsCSVButtonLoading(false);
   }, []);
 
-  // Handle auth checking with 2-3 second delay
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsCheckingAuth(false);
-    }, 2500); // 2.5 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [buttonText, setButtonText] = usePersistentState("buttonText", "Scan Project");
   const [showLoadingPopup, setShowLoadingPopup] = useState(false);
@@ -143,7 +135,6 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [isBannerAdded, setIsBannerAdded] = usePersistentState("isBannerAdded", false);
   const [isCSVButtonLoading, setIsCSVButtonLoading] = useState(false);
   const [showCSVExportAdvanced, setShowCSVExportAdvanced] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
 
 
@@ -1960,28 +1951,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
       {/* Top Navigation */}
       <div className="navbar">
         <div>
-          {(() => {
-            // Show loading during auth check period
-            if (isCheckingAuth) {
-              return (
-                <button className="publish-buttons" disabled>
-                  Loading...
-                </button>
-              );
-            }
-
-            // Check if user is authenticated and has session token for current site
-            const hasValidAuth = (isAuthenticated && user?.firstName) || 
-              (sessionTokenFromLocalStorage && siteInfo && tokenss?.siteId === siteInfo.siteId);
-            
-            return hasValidAuth ? (
-              <p className="hello">Hello{user?.firstName ? `, ${user.firstName}` : ''}!</p>
-            ) : (
-              <button className="publish-buttons" onClick={openAuthScreen}>
-                Authorize
-              </button>
-            );
-          })()}
+          <p className="hello">Hello{user?.firstName ? `, ${user.firstName}` : ''}!</p>
         </div>
 
         <NeedHelp />
@@ -2069,7 +2039,12 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                 onClick={async () => {
                   const isUserValid = await isAuthenticatedForCurrentSite();
                   if (isUserValid) {
-                    setFetchScripts(true);
+                    // Reset fetchScripts to false first, then set to true to ensure useEffect triggers
+                    setFetchScripts(false);
+                    // Use setTimeout to ensure the state change is processed
+                    setTimeout(() => {
+                      setFetchScripts(true);
+                    }, 10);
                     setButtonText("Rescan Project");
                   } else {
                     setShowAuthPopup(true);
@@ -2612,7 +2587,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
             />
           )}
 
-          {activeTab === "Script" && <Script fetchScripts={fetchScripts} isWelcome={false} />}
+          {activeTab === "Script" && <Script fetchScripts={fetchScripts} setFetchScripts={setFetchScripts} />}
         </div>
       </div>
       <DonotShare
