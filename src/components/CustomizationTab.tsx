@@ -419,7 +419,30 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
         if (token) {
           const response = await customCodeApi.getBannerStyles(token);
 
+          // Print complete banner settings API response
+          console.log('🔍 BANNER SETTINGS API RESPONSE:');
+          console.log('Full response object:', response);
+          console.log('Response type:', typeof response);
+          console.log('Response keys:', response ? Object.keys(response) : 'No response');
+          
           if (response) {
+            console.log('📊 Banner Settings Details:');
+            console.log('bgColor:', response.bgColor);
+            console.log('btnColor:', response.btnColor);
+            console.log('paraColor:', response.paraColor);
+            console.log('headColor:', response.headColor);
+            console.log('secondcolor:', response.secondcolor);
+            console.log('primaryButtonText:', response.primaryButtonText);
+            console.log('secondbuttontext:', response.secondbuttontext);
+            console.log('Font:', response.Font);
+            console.log('style:', response.style);
+            console.log('activeTab:', response.activeTab);
+            console.log('cookieExpiration:', response.cookieExpiration);
+            console.log('selectedtext:', response.selectedtext);
+            console.log('fetchScripts:', response.fetchScripts);
+            
+            // Log the complete response as JSON
+            console.log('📄 Complete JSON Response:', JSON.stringify(response, null, 2));
 
             // Set all the values with proper checks
             if (response.cookieExpiration !== undefined) setCookieExpiration(response.cookieExpiration);
@@ -461,6 +484,36 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
     fetchbannerdetails();
   }, []);
+
+  // Debug: Add function to manually fetch and print banner settings
+  (window as any).printBannerSettings = async () => {
+    console.log('🔄 Manually fetching banner settings...');
+    try {
+      const token = getSessionTokenFromLocalStorage();
+      
+      if (!token) {
+        console.error('❌ No session token found');
+        return;
+      }
+      
+      console.log('🔑 Using token:', token.substring(0, 50) + '...');
+      
+      const response = await customCodeApi.getBannerStyles(token);
+      
+      console.log('🔍 MANUAL BANNER SETTINGS RESPONSE:');
+      console.log('Full response:', JSON.stringify(response, null, 2));
+      
+      if (response) {
+        console.log('📊 Individual Settings:');
+        Object.keys(response).forEach(key => {
+          console.log(`${key}:`, response[key]);
+        });
+      }
+      
+    } catch (error) {
+      console.error('❌ Error fetching banner settings:', error);
+    }
+  };
 
   //main function for adding custom code to the head
   const fetchAnalyticsBlockingsScripts = async () => {
@@ -2510,7 +2563,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                       width: previewDimensions.width,
                       height: previewDimensions.minHeight,
                       borderRadius: `${borderRadius}px`,
-                      backgroundColor: color,
+                      backgroundColor: bgColor,
                       fontSize: `${size}px`,
                     }}
                   >

@@ -9,6 +9,7 @@ import { customCodeApi } from "../services/api";
 import { ScriptCategory } from "../types/types";
 import PulseAnimation from "./PulseAnimation";
 import {usePersistentState} from "../hooks/usePersistentState";
+import webflow from "../types/webflowtypes";
 const infologo = new URL("../assets/info-logo.svg", import.meta.url).href;
 const thumbnail = new URL("../assets/Cover.jpg", import.meta.url).href;
 const questionmark = new URL("../assets/blue question.svg", import.meta.url).href;
@@ -70,11 +71,32 @@ useEffect(() => {
         return script.src || script.fullTag?.replace(/\s*data-category\s*=\s*"[^"]*"/i, '') || null;
     }, []);
 
+    // Function to clear any stale script data from localStorage
+    const clearStaleScriptData = useCallback(() => {
+        // Clear script data from localStorage to prevent showing old data
+        localStorage.removeItem('scriptContext_scripts');
+        // Also clear any other script-related localStorage keys
+        const keysToRemove = [
+            'scriptContext_scripts',
+            'script_isSaving',
+            'script_saveStatus', 
+            'script_showPopup',
+            'script_isLoading',
+            'script_showAuthPopup',
+            'script_copiedScriptIndex'
+        ];
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+    }, []);
+
 
 
     const fetchScriptData = useCallback(async () => {
-
         setIsLoading(true);
+        // Clear existing scripts before fetching new ones to prevent cross-site contamination
+        setScripts([]);
+        // Also clear any stale data from localStorage
+        clearStaleScriptData();
+        
         try {
             const userInfo = JSON.parse(userinfo || "{}");
             const tokens = userInfo?.sessionToken;
@@ -84,10 +106,29 @@ useEffect(() => {
                 return;
             }
 
-            // Log token for debugging (remove in production)
+            // Get current site info to verify we're getting scripts for the right site
+            const currentSiteInfo = await webflow.getSiteInfo();
+            const currentSiteId = currentSiteInfo?.siteId;
+            
+            if (!currentSiteId) {
+                setIsLoading(false);
+                return;
+            }
 
-            const result = await customCodeApi.analyticsScript(tokens);
+            // Update stored authentication data with current site ID to ensure backend uses correct site
+            const userData = JSON.parse(userinfo || "{}");
+            if (userData.siteId !== currentSiteId) {
+                const oldSiteId = userData.siteId;
+                userData.siteId = currentSiteId;
+                localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
+                console.log('🔄 Updated stored site ID from', oldSiteId, 'to', currentSiteId);
+                console.log('🎯 This should fix the backend authentication issue');
+            } else {
+                console.log('✅ Stored site ID matches current site ID:', currentSiteId);
+            }
 
+            // Get the backend data
+            const result = await customCodeApi.analyticsScript(tokens, currentSiteId);
 
             if (!result) {
                 throw new Error('No response from API');
@@ -102,9 +143,31 @@ useEffect(() => {
             }
 
             const scriptsResponse = result.data.analyticsScripts ?? [];
-
-
-            const validScripts = scriptsResponse.filter(script => script.fullTag?.trim() !== "");
+            
+            // Debug: Log the current site ID and any scripts with site IDs
+            console.log('Current Site ID:', currentSiteId);
+            console.log('Scripts from API:', scriptsResponse.map(s => ({ 
+                identifier: s.identifier, 
+                siteId: s.siteId,
+                hasSiteId: !!s.siteId 
+            })));
+            
+            // Filter scripts to only include those for the current site
+            const validScripts = scriptsResponse.filter(script => {
+                if (!script.fullTag?.trim()) return false;
+                
+                // Check if script has siteId and matches current site
+                if (script.siteId && script.siteId !== currentSiteId) {
+                    console.log('Filtering out script from different site:', script.siteId, 'vs current:', currentSiteId);
+                    return false;
+                }
+                
+                // If no siteId in script, we need to be more careful
+                // For now, we'll show them but this indicates a backend issue
+                return true;
+            });
+            
+            console.log('Valid scripts after filtering:', validScripts.length);
 
             const formattedScripts = validScripts.map(script => {
                 // Add or update type attribute in the script tag

@@ -15,6 +15,7 @@ import { getCurrentSiteId, listCurrentSiteData, clearCurrentSiteData, clearAllDa
 import { customCodeApi } from "./services/api";
 import { CodeApplication } from "./types/types";
 import { getSessionTokenFromLocalStorage } from './util/Session';
+import webflow from './types/webflowtypes';
 import pkg from '../package.json';
 
 const appVersion = pkg.version;
@@ -70,6 +71,7 @@ const App: React.FC = () => {
 
   const { user, sessionToken, exchangeAndVerifyIdToken, openAuthScreen, isAuthenticatedForCurrentSite, attemptAutoRefresh } = useAuth();
   const [isFetchWelcomeScripts, setIsFetchWelcomeScripts] = useState(false);
+  const [currentSiteId, setCurrentSiteId] = useState<string | null>(null);
   
     // App initialization with clean welcome screen flow
   useEffect(() => {
@@ -87,9 +89,9 @@ const App: React.FC = () => {
           setIsAuthenticated(true);
           
           // If authenticated, fetch app-data to check bannerAdded status
-          try {
-            const token = getSessionTokenFromLocalStorage();
-            if (token) {
+          const token = getSessionTokenFromLocalStorage();
+          if (token) {
+            try {
               const response = await customCodeApi.getBannerStyles(token);
               
               // Set banner status but always show welcome screen with appropriate button
@@ -102,19 +104,25 @@ const App: React.FC = () => {
                 setSkipWelcomeScreen(false);
                 bannerBooleans.setIsBannerAdded(false);
               }
-            } else {
-              // No token available - show welcome screen
+            } catch (error) {
+              // API call failed - show welcome screen
               setSkipWelcomeScreen(false);
               bannerBooleans.setIsBannerAdded(false);
             }
-          } catch (error) {
-            // API call failed - show welcome screen
+          } else {
+            // No token available - show welcome screen
             setSkipWelcomeScreen(false);
             bannerBooleans.setIsBannerAdded(false);
           }
+        } else {
+          // Auth failed - show welcome screen
+          setSkipWelcomeScreen(false);
+          bannerBooleans.setIsBannerAdded(false);
         }
       } catch (error) {
-        // Silent error handling
+        // Silent error handling - show welcome screen
+        setSkipWelcomeScreen(false);
+        bannerBooleans.setIsBannerAdded(false);
       } finally {
         // Auth check complete
         setIsCheckingAuth(false);
@@ -268,6 +276,60 @@ const App: React.FC = () => {
     
     checkSiteAuthentication();
   }, [user?.email, sessionToken, user?.siteId]);
+
+  // Site change detection - clear scripts when site changes
+  useEffect(() => {
+    const detectSiteChange = async () => {
+      try {
+        const siteInfo = await webflow.getSiteInfo();
+        const newSiteId = siteInfo?.siteId;
+        
+        if (newSiteId && newSiteId !== currentSiteId) {
+          // Site has changed, clear scripts to prevent cross-site contamination
+          if (currentSiteId !== null) {
+            // Only clear if we had a previous site (not initial load)
+            localStorage.removeItem('scriptContext_scripts');
+            
+            // Regenerate session token for the new site
+            try {
+              console.log('🔄 Site changed, regenerating session token for new site:', newSiteId);
+              
+              // Clear old token first to force complete regeneration
+              localStorage.removeItem("consentbit-userinfo");
+              console.log('🗑️ Cleared old session token to force regeneration');
+              
+              const newTokenData = await exchangeAndVerifyIdToken();
+              if (newTokenData) {
+                console.log('✅ Session token regenerated successfully for site:', newSiteId);
+                console.log('🔍 New token should contain siteId:', newSiteId);
+              } else {
+                console.error('❌ Failed to regenerate session token for site:', newSiteId);
+              }
+            } catch (error) {
+              console.error('❌ Error regenerating session token:', error);
+              // Fallback: just update the site ID in stored data
+              const userinfo = localStorage.getItem("consentbit-userinfo");
+              if (userinfo) {
+                try {
+                  const userData = JSON.parse(userinfo);
+                  userData.siteId = newSiteId;
+                  localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
+                  console.log('⚠️ Fallback: Updated stored site ID to:', newSiteId);
+                } catch (error) {
+                  console.error('Error updating stored site ID:', error);
+                }
+              }
+            }
+          }
+          setCurrentSiteId(newSiteId);
+        }
+      } catch (error) {
+        // Silent error handling
+      }
+    };
+    
+    detectSiteChange();
+  }, [currentSiteId, exchangeAndVerifyIdToken]);
 
   // Version-based script registration - run once when user is authenticated
   useEffect(() => {

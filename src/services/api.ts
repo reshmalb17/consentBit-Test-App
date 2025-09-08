@@ -198,12 +198,34 @@ export const customCodeApi = {
   },
 
   // src/services/api.ts
-  analyticsScript: async (token: string) => {
+  analyticsScript: async (token: string, siteId?: string) => {
     try {
       if (!token) {
         throw new Error("Token is required");
       }
-      const url = `${base_url}/api/analytics`;
+      
+      // Include siteId in the URL if provided
+      const url = siteId 
+        ? `${base_url}/api/analytics?siteId=${siteId}`
+        : `${base_url}/api/analytics`;
+
+      console.log('🔗 API Call URL:', url);
+      console.log('🎯 Site ID being sent to backend:', siteId);
+      
+      // Debug: Check what's in the session token
+      try {
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log('🔍 Session token payload:', {
+            siteId: payload.siteId,
+            exp: payload.exp,
+            email: payload.email
+          });
+        }
+      } catch (error) {
+        console.log('❌ Could not decode session token');
+      }
 
       const response = await fetch(url, {
         method: 'GET',
@@ -219,6 +241,17 @@ export const customCodeApi = {
       }
 
       const data = await response.json();
+      console.log('📊 Backend response data:', {
+        hasData: !!data.data,
+        hasAnalyticsScripts: !!data.data?.analyticsScripts,
+        scriptCount: data.data?.analyticsScripts?.length || 0,
+        firstScript: data.data?.analyticsScripts?.[0] ? {
+          identifier: data.data.analyticsScripts[0].identifier,
+          siteId: data.data.analyticsScripts[0].siteId,
+          hasFullTag: !!data.data.analyticsScripts[0].fullTag
+        } : null
+      });
+      
       return {
         success: true,
         ...data

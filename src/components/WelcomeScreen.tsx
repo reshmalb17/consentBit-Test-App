@@ -35,15 +35,11 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
     setHasUserData(authenticated || !!hasData);
   }, [authenticated]);
 
-  // Handle the 2-second delay after external auth check completes
+  // Handle auth check completion - show buttons immediately
   useEffect(() => {
     if (!externalIsCheckingAuth) {
-      // External auth check completed, wait 1 second then show buttons
-      const timer = setTimeout(() => {
-        setShowButtons(true);
-      },500);
-      
-      return () => clearTimeout(timer);
+      // External auth check completed, show buttons immediately
+      setShowButtons(true);
     } else {
       // Reset when auth check starts
       setShowButtons(false);

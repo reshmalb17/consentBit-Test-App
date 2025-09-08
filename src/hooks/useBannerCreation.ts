@@ -113,6 +113,13 @@ export const useBannerCreation = () => {
         "slide-right": "slide-right",
         "select": "select", // No attribute if "select"
       };
+      // Debug: Log banner styles before creating property map
+      console.log('🎨 BANNER CREATION DEBUG:');
+      console.log('bannerStyles object:', bannerStyles);
+      console.log('bannerStyles.bgColor:', bannerStyles.bgColor);
+      console.log('bannerStyles.bgColor type:', typeof bannerStyles.bgColor);
+      console.log('bannerStyles.bgColor value:', JSON.stringify(bannerStyles.bgColor));
+
       const divPropertyMap: Record<string, string> = {
         "background-color": `${bannerStyles.bgColor}`,
         "position": "fixed",
@@ -135,6 +142,11 @@ export const useBannerCreation = () => {
         "width": "438px",
         "min-height": "220px",
       };
+
+      // Debug: Log the final property map
+      console.log('🎨 Final divPropertyMap:');
+      console.log('background-color property:', divPropertyMap['background-color']);
+      console.log('Complete divPropertyMap:', divPropertyMap);
      
       const responsivePropertyMap: Record<string, string> = {
         "max-width": "100%",
@@ -274,6 +286,13 @@ export const useBannerCreation = () => {
       if (newDiv.setStyles) {
         await newDiv.setStyles([divStyle]);
       }
+      
+      // Debug: Log the actual DOM element after styling
+      console.log('🎨 BANNER DOM ELEMENT DEBUG:');
+      console.log('newDiv element:', newDiv);
+      console.log('divStyle object:', divStyle);
+      console.log('Applied styles to banner element');
+      
       if (newDiv.setCustomAttribute) {
         await newDiv.setCustomAttribute("data-animation", bannerAnimation.animation);
         await newDiv.setCustomAttribute("data-cookie-banner", bannerToggleStates.toggleStates.disableScroll ? "true" : "false");
@@ -830,6 +849,33 @@ export const useBannerCreation = () => {
     handleSuccessPublishProceed,
     handleSuccessPublishGoBack
   };
+};
+
+// Debug: Add function to inspect banner element in DOM
+(window as any).inspectBannerElement = () => {
+  console.log('🔍 INSPECTING BANNER ELEMENT IN DOM:');
+  
+  // Look for banner elements
+  const bannerElements = document.querySelectorAll('[id*="consent-banner"], [class*="cookie-banner"], [data-cookie-banner]');
+  console.log('Found banner elements:', bannerElements);
+  
+  bannerElements.forEach((element, index) => {
+    console.log(`Banner ${index + 1}:`, element);
+    console.log(`Computed background-color:`, window.getComputedStyle(element).backgroundColor);
+    console.log(`Inline background-color:`, (element as HTMLElement).style.backgroundColor);
+    console.log(`Element classes:`, element.className);
+    console.log(`Element ID:`, element.id);
+    console.log(`Element attributes:`, element.attributes);
+  });
+  
+  // Also check for any elements with black background
+  const allElements = document.querySelectorAll('*');
+  const blackElements = Array.from(allElements).filter(el => {
+    const bgColor = window.getComputedStyle(el).backgroundColor;
+    return bgColor === 'rgb(0, 0, 0)' || bgColor === '#000000' || bgColor === 'black';
+  });
+  
+  console.log('Elements with black background:', blackElements);
 };
 
 export default useBannerCreation;

@@ -291,12 +291,22 @@ export function useAuth() {
         throw new Error('No session token received from server');
       }
 
+      // Debug: Check what the backend returned
+      console.log('🔍 Backend token response:', {
+        hasSessionToken: !!data.sessionToken,
+        hasFirstName: !!data.firstName,
+        hasEmail: !!data.email,
+        hasSiteId: !!data.siteId,
+        requestedSiteId: siteInfo.siteId,
+        fullResponse: data
+      });
+
       // Store in localStorage
       const userData = {
         sessionToken: data.sessionToken,
         firstName: data.firstName,
         email: data.email,
-        siteId: siteInfo.siteId, // Store the siteId
+        siteId: data.siteId || siteInfo.siteId, // Use backend's siteId or fallback to requested siteId
         exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
       };
 

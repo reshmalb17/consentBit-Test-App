@@ -58,6 +58,35 @@ const Script: React.FC<{
         }
     }, [siteInfo, setSiteInfo]);
 
+    // Site change detection - clear scripts when site changes
+    useEffect(() => {
+        const detectSiteChange = async () => {
+            try {
+                const currentSiteInfo = await webflow.getSiteInfo();
+                const newSiteId = currentSiteInfo?.siteId;
+                
+                if (newSiteId && siteInfo?.siteId && newSiteId !== siteInfo.siteId) {
+                    console.log('🔄 Site changed in Script component:', siteInfo.siteId, '->', newSiteId);
+                    console.log('🧹 Clearing scripts to prevent cross-site contamination');
+                    
+                    // Clear scripts immediately
+                    setScripts([]);
+                    localStorage.removeItem('scriptContext_scripts');
+                    
+                    // Update site info
+                    setSiteInfo(currentSiteInfo);
+                }
+            } catch (error) {
+                console.error('Error detecting site change:', error);
+            }
+        };
+
+        // Check for site changes every 2 seconds
+        const interval = setInterval(detectSiteChange, 2000);
+        
+        return () => clearInterval(interval);
+    }, [siteInfo, setSiteInfo, setScripts]);
+
     // Debug logs for siteInfo
     useEffect(() => {
     }, [siteInfo]);
@@ -66,10 +95,99 @@ const Script: React.FC<{
         return script.src || script.fullTag?.replace(/\s*data-category\s*=\s*"[^"]*"/i, '') || null;
     }, []);
 
+    // Function to regenerate session token for current site
+    const regenerateSessionToken = useCallback(async () => {
+        try {
+            console.log('🔄 Regenerating session token for current site...');
+            
+            // Clear old token first to force regeneration
+            localStorage.removeItem("consentbit-userinfo");
+            console.log('🗑️ Cleared old session token');
+            
+            // Get new ID token from Webflow
+            const idToken = await webflow.getIdToken();
+            if (!idToken) {
+                throw new Error('Failed to get ID token from Webflow');
+            }
+
+            // Get current site info
+            const siteInfo = await webflow.getSiteInfo();
+            if (!siteInfo || !siteInfo.siteId) {
+                throw new Error('Failed to get site info from Webflow');
+            }
+            
+            console.log('🎯 Requesting new token for site:', siteInfo.siteId);
+            
+            // Exchange for new session token
+            const requestBody = {
+                idToken, 
+                siteId: siteInfo.siteId 
+            };
+            
+            console.log('📤 Sending token exchange request:', {
+                url: 'https://cb-server.web-8fb.workers.dev/api/auth/token',
+                siteId: siteInfo.siteId,
+                hasIdToken: !!idToken
+            });
+
+            const response = await fetch('https://cb-server.web-8fb.workers.dev/api/auth/token', {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(`Token exchange failed: ${data.error || 'Unknown error'}`);
+            }
+
+            if (!data.sessionToken) {
+                throw new Error('No session token received from server');
+            }
+
+            // Debug: Check what the backend returned
+            console.log('🔍 Backend token response (Script component):', {
+                hasSessionToken: !!data.sessionToken,
+                hasFirstName: !!data.firstName,
+                hasEmail: !!data.email,
+                hasSiteId: !!data.siteId,
+                requestedSiteId: siteInfo.siteId,
+                fullResponse: data
+            });
+
+            // Update stored authentication data
+            const userData = {
+                sessionToken: data.sessionToken,
+                firstName: data.firstName,
+                email: data.email,
+                siteId: data.siteId || siteInfo.siteId, // Use backend's siteId or fallback to requested siteId
+                exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
+            };
+
+            localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
+            console.log('✅ Session token regenerated successfully for site:', siteInfo.siteId);
+            console.log('🔍 New token payload should contain siteId:', siteInfo.siteId);
+            
+            return data.sessionToken;
+        } catch (error) {
+            console.error('❌ Error regenerating session token:', error);
+            return null;
+        }
+    }, []);
+
 
 
     const fetchScriptData = useCallback(async () => {
         setIsLoading(true);
+        // Clear existing scripts before fetching new ones to prevent cross-site contamination
+        setScripts([]);
+        
+        // Also clear from localStorage to ensure complete cleanup
+        localStorage.removeItem('scriptContext_scripts');
+        
         try {
             const userinfo = localStorage.getItem("consentbit-userinfo");
             const userInfo = JSON.parse(userinfo || "{}");
@@ -80,8 +198,84 @@ const Script: React.FC<{
                 return;
             }
 
+            // Get current site info to verify we're getting scripts for the right site
+            const currentSiteInfo = await webflow.getSiteInfo();
+            const currentSiteId = currentSiteInfo?.siteId;
+            
+            if (!currentSiteId) {
+                setIsLoading(false);
+                return;
+            }
+
+            // Check if we need to regenerate session token for the new site
+            const userData = JSON.parse(userinfo || "{}");
+            let finalTokens = tokens;
+            
+            // Check if session token has the correct siteId
+            let tokenHasCorrectSiteId = false;
+            try {
+                const tokenParts = finalTokens.split('.');
+                if (tokenParts.length === 3) {
+                    const payload = JSON.parse(atob(tokenParts[1]));
+                    tokenHasCorrectSiteId = payload.siteId === currentSiteId;
+                    console.log('🔍 Token siteId check:', payload.siteId, 'vs current:', currentSiteId, 'match:', tokenHasCorrectSiteId);
+                }
+            } catch (error) {
+                console.log('❌ Could not decode session token for siteId check');
+            }
+            
+            if (userData.siteId !== currentSiteId || !tokenHasCorrectSiteId) {
+                const oldSiteId = userData.siteId;
+                console.log('🔄 Site ID mismatch detected:', oldSiteId, 'vs', currentSiteId, 'or token siteId mismatch');
+                console.log('⚠️ Session token may be for wrong site - regenerating...');
+                
+                // Clear old token data completely
+                localStorage.removeItem("consentbit-userinfo");
+                localStorage.removeItem("scriptContext_scripts");
+                
+                // Regenerate session token for the new site
+                const newToken = await regenerateSessionToken();
+                if (newToken) {
+                    finalTokens = newToken;
+                    console.log('✅ Using regenerated session token for site:', currentSiteId);
+                } else {
+                    console.log('⚠️ Token regeneration failed, using existing token');
+                }
+            } else {
+                console.log('✅ Stored site ID matches current site ID:', currentSiteId);
+            }
+
             // Log token for debugging (remove in production)
-            const result = await customCodeApi.analyticsScript(tokens);
+            const result = await customCodeApi.analyticsScript(finalTokens, currentSiteId);
+
+            // Print complete server response
+            console.log('🔍 COMPLETE SERVER RESPONSE:');
+            console.log('Full result object:', result);
+            console.log('Result success:', result?.success);
+            console.log('Result error:', result?.error);
+            console.log('Result data:', result?.data);
+            
+            if (result?.data) {
+                console.log('Data keys:', Object.keys(result.data));
+                console.log('Analytics scripts array:', result.data.analyticsScripts);
+                console.log('Analytics scripts length:', result.data.analyticsScripts?.length);
+                
+                // Print each script individually
+                if (result.data.analyticsScripts && Array.isArray(result.data.analyticsScripts)) {
+                    result.data.analyticsScripts.forEach((script, index) => {
+                        console.log(`📜 Script ${index + 1}:`, {
+                            identifier: script.identifier,
+                            siteId: script.siteId,
+                            fullTag: script.fullTag,
+                            url: script.url,
+                            group: script.group,
+                            isActive: script.isActive,
+                            selectedCategories: script.selectedCategories,
+                            allKeys: Object.keys(script)
+                        });
+                    });
+                }
+            }
 
             if (!result) {
                 throw new Error('No response from API');
@@ -96,7 +290,152 @@ const Script: React.FC<{
             }
             
             const scriptsResponse = result.data.analyticsScripts ?? [];
-            const validScripts = scriptsResponse.filter(script => script.fullTag?.trim() !== "");
+            
+            // Debug: Log the current site ID and any scripts with site IDs
+            console.log('Current Site ID:', currentSiteId);
+            console.log('Scripts from API (first 3):', scriptsResponse.slice(0, 3).map(s => ({ 
+                identifier: s.identifier, 
+                siteId: s.siteId,
+                hasSiteId: !!s.siteId,
+                hasFullTag: !!s.fullTag,
+                hasUrl: !!s.url,
+                group: s.group
+            })));
+            
+            // Filter scripts - show all scripts that have valid content
+            const validScripts = scriptsResponse.filter(script => {
+                // Only filter out scripts that have no content at all
+                if (!script.fullTag?.trim() && !script.src?.trim() && !script.content?.trim()) {
+                    console.log('🚫 Filtering out script with no content:', script.identifier || 'unnamed');
+                    return false;
+                }
+                
+                // If script has siteId, only filter if it's explicitly from a different site
+                if (script.siteId && script.siteId !== currentSiteId) {
+                    console.log('🚫 Filtering out script from different site:', script.siteId, 'vs current:', currentSiteId);
+                    return false;
+                }
+                
+                // For scripts without siteId, trust the backend filtering
+                // Since we're passing the correct siteId to the API, the backend should return
+                // scripts for the current site only
+                console.log('✅ Accepting script:', script.identifier || 'unnamed', 'siteId:', script.siteId || 'none');
+                return true;
+            });
+            
+            console.log('Valid scripts after filtering:', validScripts.length);
+            console.log('✅ Backend should now be scanning correct site due to token regeneration');
+            
+            // If no scripts passed filtering and backend doesn't provide siteId, show a warning
+            if (validScripts.length === 0 && scriptsResponse.length > 0) {
+                console.warn('⚠️ All scripts were filtered out. This might indicate:');
+                console.warn('1. Backend is not providing siteId in script data');
+                console.warn('2. Domain filtering is too aggressive');
+                console.warn('3. Session token siteId mismatch');
+                console.warn('Consider temporarily disabling filtering for debugging');
+            }
+            
+            // Debug: Add a global function to manually regenerate token
+            (window as any).regenerateToken = regenerateSessionToken;
+            (window as any).testSiteChange = async () => {
+                console.log('🧪 Testing site change and token regeneration...');
+                const newToken = await regenerateSessionToken();
+                if (newToken) {
+                    console.log('✅ Token regenerated, now fetching scripts...');
+                    // Trigger a new script fetch
+                    fetchScriptData();
+                }
+            };
+            
+            (window as any).forceTokenRegeneration = async () => {
+                console.log('🚀 Force regenerating token...');
+                // Clear everything first
+                localStorage.removeItem("consentbit-userinfo");
+                localStorage.removeItem("scriptContext_scripts");
+                
+                // Wait a bit then regenerate
+                setTimeout(async () => {
+                    const newToken = await regenerateSessionToken();
+                    if (newToken) {
+                        console.log('✅ Force regeneration complete, fetching scripts...');
+                        fetchScriptData();
+                    }
+                }, 1000);
+            };
+            
+            // Debug: Add function to bypass filtering temporarily
+            (window as any).bypassFiltering = () => {
+                console.log('🚨 BYPASSING SCRIPT FILTERING - FOR DEBUGGING ONLY');
+                console.log('Raw scripts from API:', scriptsResponse);
+                setScripts(scriptsResponse.map(script => ({
+                    ...script,
+                    selectedCategories: script.selectedCategories || ["Essential"],
+                    isActive: script.isActive !== undefined ? script.isActive : true
+                })));
+            };
+            
+            // Debug: Add function to show filtered vs unfiltered scripts
+            (window as any).compareScripts = () => {
+                console.log('📊 SCRIPT COMPARISON:');
+                console.log('Raw scripts count:', scriptsResponse.length);
+                console.log('Filtered scripts count:', validScripts.length);
+                console.log('Raw scripts:', scriptsResponse.map(s => ({ identifier: s.identifier, siteId: s.siteId, hasFullTag: !!s.fullTag })));
+                console.log('Filtered scripts:', validScripts.map(s => ({ identifier: s.identifier, siteId: s.siteId, hasFullTag: !!s.fullTag })));
+            };
+            
+            // Debug: Add function to manually fetch and print server response
+            (window as any).printServerResponse = async () => {
+                console.log('🔄 Manually fetching server response...');
+                try {
+                    const userinfo = localStorage.getItem("consentbit-userinfo");
+                    const userInfo = JSON.parse(userinfo || "{}");
+                    const tokens = userInfo?.sessionToken;
+                    
+                    if (!tokens) {
+                        console.error('❌ No session token found');
+                        return;
+                    }
+                    
+                    const currentSiteInfo = await webflow.getSiteInfo();
+                    const currentSiteId = currentSiteInfo?.siteId;
+                    
+                    console.log('🎯 Fetching for site ID:', currentSiteId);
+                    console.log('🔑 Using token:', tokens.substring(0, 50) + '...');
+                    
+                    const result = await customCodeApi.analyticsScript(tokens, currentSiteId);
+                    
+                    console.log('🔍 MANUAL SERVER RESPONSE:');
+                    console.log('Full result:', JSON.stringify(result, null, 2));
+                    
+                    if (result?.data?.analyticsScripts) {
+                        console.log('📜 All scripts from server:');
+                        result.data.analyticsScripts.forEach((script, index) => {
+                            console.log(`Script ${index + 1}:`, JSON.stringify(script, null, 2));
+                        });
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error fetching server response:', error);
+                }
+            };
+            
+            // Debug: Add function to show all scripts without any filtering
+            (window as any).showAllScripts = () => {
+                console.log('🚨 SHOWING ALL SCRIPTS WITHOUT FILTERING');
+                console.log('Raw scripts from API:', scriptsResponse);
+                console.log('Scripts count:', scriptsResponse.length);
+                
+                // Set all scripts directly without filtering
+                const allScripts = scriptsResponse.map(script => ({
+                    ...script,
+                    selectedCategories: script.selectedCategories || 
+                                     (script.category ? (Array.isArray(script.category) ? script.category : script.category.split(',').map(c => c.trim())) : ["Essential"]),
+                    isActive: script.isActive !== undefined ? script.isActive : true
+                }));
+                
+                console.log('Setting all scripts:', allScripts);
+                setScripts(allScripts);
+            };
 
             const formattedScripts = validScripts.map(script => {
                 // Add or update type attribute in the script tag
@@ -117,6 +456,15 @@ const Script: React.FC<{
                             .split(',')
                             .map(cat => cat.trim())
                             .filter(cat => cat.length > 0); // Don't exclude Essential anymore
+                    }
+                }
+                
+                // If no categories found in fullTag, check if script has category property
+                if (existingCategories.length === 0 && script.category) {
+                    if (Array.isArray(script.category)) {
+                        existingCategories = script.category;
+                    } else if (typeof script.category === 'string') {
+                        existingCategories = script.category.split(',').map(cat => cat.trim());
                     }
                 }
                 
