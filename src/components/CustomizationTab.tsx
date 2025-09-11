@@ -18,12 +18,13 @@ const copyScript = new URL("../assets/copy script.svg", import.meta.url).href;
 
 import { customCodeApi } from "../services/api";
 import { useAuth } from "../hooks/userAuth";
-import { getAuthStorageItem, setAuthStorageItem, removeAuthStorageItem } from "../util/authStorage";
+import { getTranslation } from "../util/translation-utils";
+import { getAuthStorageItem, setAuthStorageItem, removeAuthStorageItem, setCurrentSiteId } from "../util/authStorage";
 import webflow, { WebflowAPI } from '../types/webflowtypes';
 import { CodeApplication } from "../types/types";
 import createCookiePreferences from "../hooks/gdprPreference";
 import createCookieccpaPreferences from "../hooks/ccpaPreference";
-import { usePersistentState } from "../hooks/usePersistentState";
+import { usePersistentState, getCurrentSiteId } from "../hooks/usePersistentState";
 import { Script as ScriptType } from "../types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import PulseAnimation from "./PulseAnimation";
@@ -64,6 +65,22 @@ interface CustomizationTabProps {
   initialActiveTab?: string;
   isAuthenticated?: boolean;
 }
+
+
+// Global debugging function for banner creation script registration
+(window as any).debugBannerScriptRegistration = () => {
+
+  // Log all scripts in head
+  const scripts = document.head.querySelectorAll('script');
+  scripts.forEach((script, index) => {
+  });
+  
+  // Check for consent script URLs
+  const consentScripts = document.head.querySelectorAll('script[src*="consentbit"], script[src*="cb-server"]');
+  consentScripts.forEach((script, index) => {
+  });
+};
+
 
 const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActiveTab = "Settings", isAuthenticated = false }) => {
   const [color, setColor] = usePersistentState("color", "#ffffff");
@@ -111,7 +128,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   // Removed activeMode - all features are now available by default
   const [selected, setSelected] = usePersistentState<Orientation>("selected", "right");
   const [selectedOption, setSelectedOption] = usePersistentState("selectedOption", "U.S. State Laws");
-  const [weight, setWeight] = usePersistentState("weight", "semibold");
+  const [weight, setWeight] = usePersistentState("weight", "Regular");
   const [showPopup, setShowPopup] = useState(false);
   const [selectedOptions, setSelectedOptions] = usePersistentState("selectedOptions", ["GDPR", "U.S. State Laws"]);
 
@@ -124,7 +141,8 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [siteInfo, setSiteInfo] = usePersistentState<{ siteId: string; siteName: string; shortName: string } | null>("siteInfo", null);
   const [accessToken, setAccessToken] = usePersistentState<string>("accessToken", '');
   const [pages, setPages] = usePersistentState("pages", []);
-  const [fetchScripts, setFetchScripts] = usePersistentState("fetchScripts", false);
+  const [fetchScripts, setFetchScripts] = useState(false);
+  const [triggerScan, setTriggerScan] = useState(false);
   const [borderRadius, setBorderRadius] = usePersistentState<number>("borderRadius", 4);
   const [buttonRadius, setButtonRadius] = usePersistentState<number>("buttonRadius", 3);
   const [isLoading, setIsLoading] = usePersistentState("isLoading", false);
@@ -137,8 +155,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
     setShowLoadingPopup(false);
     setIsExporting(false);
     setIsCSVButtonLoading(false);
-    // Ensure button text starts as "Scan Project" on initial load
-    setButtonText("Scan Project");
+    // Button text will be set based on banner status in fetchbannerdetails useEffect
   }, []);
 
   const [showAuthPopup, setShowAuthPopup] = useState(false);
@@ -146,7 +163,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [showLoadingPopup, setShowLoadingPopup] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [cookieExpiration, setCookieExpiration] = usePersistentState("cookieExpiration", "120");
-  const [privacyUrl, setPrivacyUrl] = usePersistentState("privacyUrl", "");
+  const [privacyUrl, setPrivacyUrl] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
   // COMMENTED OUT: const userinfo = localStorage.getItem("consentbit-userinfo");
@@ -156,6 +173,23 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [showChoosePlan, setShowChoosePlan] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isBannerAdded, setIsBannerAdded] = usePersistentState("isBannerAdded", false);
+  
+  // Update button text based on whether scripts have been fetched
+  useEffect(() => {
+    if (fetchScripts) {
+      setButtonText("Rescan Project");
+    } else {
+      setButtonText("Scan Project");
+    }
+  }, [fetchScripts]);
+
+  // Update fetchScripts when scan is triggered
+  useEffect(() => {
+    if (triggerScan) {
+      setFetchScripts(true);
+      setTriggerScan(false);
+    }
+  }, [triggerScan]);
   const [isCSVButtonLoading, setIsCSVButtonLoading] = useState(false);
   const [showCSVExportAdvanced, setShowCSVExportAdvanced] = useState(false);
 
@@ -220,98 +254,106 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const translations = {
     English: {
       heading: "Cookie Settings",
-      description: "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.",
+      description: "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you. ",
       accept: "Accept",
       reject: "Reject",
       preferences: "Preference",
+      moreInfo: "More Info",
       ccpa: {
         heading: "We value your privacy",
-        description: "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.",
+        description: "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you. ",
         doNotShare: "Do Not Share My Personal Information"
       }
     },
     Spanish: {
       heading: "Configuración de Cookies",
-      description: "Utilizamos cookies para brindarle la mejor experiencia posible. También nos permiten analizar el comportamiento del usuario para mejorar constantemente el sitio web para usted.",
+      description: "Utilizamos cookies para brindarle la mejor experiencia posible. También nos permiten analizar el comportamiento del usuario para mejorar constantemente el sitio web para usted. ",
       accept: "Aceptar",
       reject: "Rechazar",
       preferences: "Preferencias",
+      moreInfo: "Más Información",
       ccpa: {
         heading: "Valoramos tu Privacidad",
-        description: "Utilizamos cookies para brindarle la mejor experiencia posible. También nos permiten analizar el comportamiento del usuario para mejorar constantemente el sitio web para usted.",
+        description: "Utilizamos cookies para brindarle la mejor experiencia posible. También nos permiten analizar el comportamiento del usuario para mejorar constantemente el sitio web para usted. ",
         doNotShare: "No Compartir Mi Información Personal"
       }
     },
     French: {
       heading: "Paramètres des Cookies",
-      description: "Nous utilisons des cookies pour vous offrir la meilleure expérience possible. Ils nous permettent également d'analyser le comportement des utilisateurs afin d'améliorer constamment le site Web pour vous.",
+      description: "Nous utilisons des cookies pour vous offrir la meilleure expérience possible. Ils nous permettent également d'analyser le comportement des utilisateurs afin d'améliorer constamment le site Web pour vous. ",
       accept: "Accepter",
       reject: "Refuser",
       preferences: "Préférences",
+      moreInfo: "Plus d'infos",
       ccpa: {
         heading: "Nous Respectons Votre Vie Privée",
-        description: "Nous utilisons des cookies pour vous offrir la meilleure expérience possible. Ils nous permettent également d'analyser le comportement des utilisateurs afin d'améliorer constamment le site Web pour vous.",
+        description: "Nous utilisons des cookies pour vous offrir la meilleure expérience possible. Ils nous permettent également d'analyser le comportement des utilisateurs afin d'améliorer constamment le site Web pour vous. ",
         doNotShare: "Ne Pas Partager Mes Informations Personnelles"
       }
     },
     German: {
       heading: "Cookie-Einstellungen",
-      description: "Wir verwenden Cookies, um Ihnen das bestmögliche Erlebnis zu bieten. Sie helfen uns auch, das Nutzerverhalten zu analysieren, um die Website kontinuierlich für Sie zu verbessern.",
+      description: "Wir verwenden Cookies, um Ihnen das bestmögliche Erlebnis zu bieten. Sie helfen uns auch, das Nutzerverhalten zu analysieren, um die Website kontinuierlich für Sie zu verbessern. ",
       accept: "Akzeptieren",
       reject: "Ablehnen",
       preferences: "Einstellungen",
+      moreInfo: "Mehr Info",
       ccpa: {
         heading: "Wir Respektieren Ihre Privatsphäre",
-        description: "Wir verwenden Cookies, um Ihnen das bestmögliche Erlebnis zu bieten. Sie helfen uns auch, das Nutzerverhalten zu analysieren, um die Website kontinuierlich für Sie zu verbessern.",
+        description: "Wir verwenden Cookies, um Ihnen das bestmögliche Erlebnis zu bieten. Sie helfen uns auch, das Nutzerverhalten zu analysieren, um die Website kontinuierlich für Sie zu verbessern. ",
         doNotShare: "Meine persönlichen Informationen nicht weitergeben"
       }
     },
     Swedish: {
       heading: "Cookie-inställningar",
-      description: "Vi använder cookies för att ge dig den bästa möjliga upplevelsen. De låter oss också analysera användarbeteende för att ständigt förbättra webbplatsen för dig.",
+      description: "Vi använder cookies för att ge dig den bästa möjliga upplevelsen. De låter oss också analysera användarbeteende för att ständigt förbättra webbplatsen för dig. ",
       accept: "Acceptera",
       reject: "Avvisa",
       preferences: "Inställningar",
+      moreInfo: "Mer info",
       ccpa: {
         heading: "Vi Värdesätter Din Integritet",
-        description: "Vi använder cookies för att ge dig den bästa möjliga upplevelsen. De låter oss också analysera användarbeteende för att ständigt förbättra webbplatsen för dig.",
+        description: "Vi använder cookies för att ge dig den bästa möjliga upplevelsen. De låter oss också analysera användarbeteende för att ständigt förbättra webbplatsen för dig. ",
         doNotShare: "Dela Inte Min Personliga Information"
       }
     },
     Dutch: {
       heading: "Cookie-instellingen",
-      description: "We gebruiken cookies om u de best mogelijke ervaring te bieden. Ze stellen ons ook in staat om gebruikersgedrag te analyseren om de website voortdurend voor u te verbeteren.",
+      description: "We gebruiken cookies om u de best mogelijke ervaring te bieden. Ze stellen ons ook in staat om gebruikersgedrag te analyseren om de website voortdurend voor u te verbeteren. ",
       accept: "Accepteren",
       reject: "Weigeren",
       preferences: "Voorkeuren",
+      moreInfo: "Meer info",
       ccpa: {
         heading: "We Waarderen Uw Privacy",
-        description: "We gebruiken cookies om u de best mogelijke ervaring te bieden. Ze stellen ons ook in staat om gebruikersgedrag te analyseren om de website voortdurend voor u te verbeteren.",
+        description: "We gebruiken cookies om u de best mogelijke ervaring te bieden. Ze stellen ons ook in staat om gebruikersgedrag te analyseren om de website voortdurend voor u te verbeteren. ",
         doNotShare: "Deel Mijn Persoonlijke Informatie Niet"
       }
     },
     // Add these after the Dutch translations and before the closing brace
     Italian: {
       heading: "Impostazioni Cookie",
-      description: "Utilizziamo i cookie per fornirti la migliore esperienza possibile. Ci permettono anche di analizzare il comportamento degli utenti per migliorare costantemente il sito web per te.",
+      description: "Utilizziamo i cookie per fornirti la migliore esperienza possibile. Ci permettono anche di analizzare il comportamento degli utenti per migliorare costantemente il sito web per te. ",
       accept: "Accetta",
       reject: "Rifiuta",
       preferences: "Preferenze",
+      moreInfo: "Più info",
       ccpa: {
         heading: "Rispettiamo la Tua Privacy",
-        description: "Utilizziamo i cookie per fornirti la migliore esperienza possibile. Ci permettono anche di analizzare il comportamento degli utenti per migliorare costantemente il sito web per te.",
+        description: "Utilizziamo i cookie per fornirti la migliore esperienza possibile. Ci permettono anche di analizzare il comportamento degli utenti per migliorare costantemente il sito web per te. ",
         doNotShare: "Non Condividere Le Mie Informazioni Personali"
       }
     },
     Portuguese: {
       heading: "Configurações de Cookies",
-      description: "Usamos cookies para fornecer a melhor experiência possível. Eles também nos permitem analisar o comportamento do usuário para melhorar constantemente o site para você.",
+      description: "Usamos cookies para fornecer a melhor experiência possível. Eles também nos permitem analisar o comportamento do usuário para melhorar constantemente o site para você. ",
       accept: "Aceitar",
       reject: "Rejeitar",
       preferences: "Preferências",
+      moreInfo: "Mais info",
       ccpa: {
         heading: "Valorizamos Sua Privacidade",
-        description: "Usamos cookies para fornecer a melhor experiência possível. Eles também nos permitem analisar o comportamento do usuário para melhorar constantemente o site para você.",
+        description: "Usamos cookies para fornecer a melhor experiência possível. Eles também nos permitem analisar o comportamento do usuário para melhorar constantemente o site para você. ",
         doNotShare: "Não Compartilhar Minhas Informações Pessoais"
       }
     }
@@ -452,13 +494,12 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
       const token = getSessionTokenFromLocalStorage();
       try {
         if (token) {
-          const response = await customCodeApi.getBannerStyles(token);
+          const response = await customCodeApi.getBannerStyles(token, siteInfo?.siteId);
 
           if (response) {
 
             // Set all the values with proper checks
             if (response.cookieExpiration !== undefined) setCookieExpiration(response.cookieExpiration);
-            if (response.privacyUrl !== undefined) setPrivacyUrl(response.privacyUrl);
             if (response.bgColor !== undefined) setBgColor(response.bgColor);
                 if (response.activeTab !== undefined) {
                   // Map API tab names to component tab names
@@ -477,7 +518,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                 }
                          // Removed activeMode setting - no longer needed
             if (response.selectedtext !== undefined) settextSelected(response.selectedtext);
-            if (response.fetchScripts !== undefined) setFetchScripts(response.fetchScripts);
+            // fetchScripts is now only set by user action (scan button), not from API
             if (response.btnColor !== undefined) setBtnColor(response.btnColor);
             if (response.paraColor !== undefined) setParaColor(response.paraColor);
             if (response.secondcolor !== undefined) setSecondcolor(response.secondcolor);
@@ -494,13 +535,10 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
             if (response.animation !== undefined) setAnimation(response.animation);
             if (response.easing !== undefined) setEasing(response.easing);
             if (response.language !== undefined) setLanguage(response.language);
-            if (response.buttonText !== undefined) {
-              // Only set buttonText from API if it's not empty, otherwise keep default "Scan Project"
-              if (response.buttonText && response.buttonText.trim() !== "") {
-                setButtonText(response.buttonText);
-              }
+            // buttonText is determined by fetchScripts state, not from API
+            if (response.isBannerAdded !== undefined) {
+              setIsBannerAdded(response.isBannerAdded);
             }
-            if (response.isBannerAdded !== undefined) setIsBannerAdded(response.isBannerAdded);
             if (response.color !== undefined && response.color !== "#000000") setColor(response.color);
 
           } else {
@@ -528,6 +566,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
       }
 
       const siteIdinfo = await webflow.getSiteInfo();
+      if (siteIdinfo?.siteId) {
+        setCurrentSiteId(siteIdinfo.siteId);
+      }
       setSiteInfo(siteIdinfo);
 
       const hostingScript = await customCodeApi.registerAnalyticsBlockingScript(token);
@@ -583,7 +624,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
       }
 
       await createCookiePreferences(
-        selectedPreferences, language, color, btnColor, headColor, paraColor, secondcolor, buttonRadius, animation, toggleStates.customToggle, primaryButtonText, secondbuttontext, skipCommonDiv, toggleStates.disableScroll, toggleStates.closebutton, borderRadius , Font
+        selectedPreferences, language, color, btnColor, headColor, paraColor, secondcolor, buttonRadius, animation, toggleStates.customToggle, primaryButtonText, secondbuttontext, skipCommonDiv, toggleStates.disableScroll, toggleStates.closebutton, borderRadius , Font, privacyUrl
       );
     } catch (error) {
       // Error creating cookie preferences
@@ -594,7 +635,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   //CCPA preferences banner
   const handleCreatePreferencesccpa = async () => {
     try {
-      await createCookieccpaPreferences(language, color, btnColor, headColor, paraColor, secondcolor, buttonRadius, animation, primaryButtonText, secondbuttontext, toggleStates.disableScroll, toggleStates.closebutton, false, Font, borderRadius);
+      await createCookieccpaPreferences(language, color, btnColor, headColor, paraColor, secondcolor, buttonRadius, animation, primaryButtonText, secondbuttontext, toggleStates.disableScroll, toggleStates.closebutton, false, Font, borderRadius, privacyUrl);
     } catch (error) {
       // Error creating cookie preferences
     }
@@ -963,11 +1004,37 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
                  if (tempParagraph.setTextContent) {
            const descriptionText = translations[language as keyof typeof translations].ccpa.description;
-           const textWithPrivacyLink = privacyUrl 
-             ? `${descriptionText} <a href="${privacyUrl}" target="_blank" rel="noopener noreferrer" style="color: ${paraColor}; text-decoration: underline;">More info</a>`
-             : descriptionText;
-           await tempParagraph.setTextContent(textWithPrivacyLink);
+           await tempParagraph.setTextContent(descriptionText);
          }
+
+         // Create privacy link if privacyUrl is available
+         let privacyLink = null;
+         
+         if (privacyUrl && privacyUrl.trim() !== "") {
+          privacyLink = await selectedElement.before(webflow.elementPresets.LinkBlock);
+          if (!privacyLink) throw new Error("Failed to create privacy link");
+
+          // Set URL using setSettings method
+          try {
+            await privacyLink.setSettings('url', privacyUrl, {openInNewTab: true});
+          } catch (error) {
+          }
+        
+           if (privacyLink.setTextContent) {
+             const translation = getTranslation(language);
+             await privacyLink.setTextContent(` ${translation.moreInfo}`);
+           }
+        
+          if (privacyLink.setDomId) {
+            await privacyLink.setDomId("privacy-link");
+          }
+          
+          // Add hover effect for underline
+          if (privacyLink.setCustomAttribute) {
+            await privacyLink.setCustomAttribute("data-hover-underline", "true");
+          }
+        
+        }
 
         const buttonContainer = await selectedElement.before(webflow.elementPresets.DivBlock);
         if (!buttonContainer) {
@@ -993,6 +1060,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
           if (SecondDiv) await innerdiv.append(SecondDiv);
           await innerdiv.append(tempHeading);
           await innerdiv.append(tempParagraph);
+          if (privacyLink && tempParagraph.append) {
+            await tempParagraph.append(privacyLink);
+          }
           await innerdiv.append(buttonContainer);
 
                      if (buttonContainer.append && prefrenceButton) {
@@ -1005,19 +1075,24 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
         handleCreatePreferencesccpa()
         
-        // Script registration for CCPA banners
-        if (appVersion === '1.0.0') {
-          fetchAnalyticsBlockingsScripts();
-        } else if (appVersion === '2.0.0'|| appVersion === '2.0.1') {
-          fetchAnalyticsBlockingsScriptsV2();
-        }
-        setTimeout(() => {
+        setTimeout(async () => {
           setShowPopup(false);
-          setIsBannerAdded(true);
           setShowSuccessPopup(true);
           setIsLoading(false);
+          
+          // Script registration for CCPA banners - AFTER banner is created
+          if (appVersion === '1.0.0') {
+            fetchAnalyticsBlockingsScripts();
+          } else if (appVersion === '2.0.0'|| appVersion === '2.0.1') {
+            fetchAnalyticsBlockingsScriptsV2();
+          }
+          
+          // Save banner details with isBannerAdded: true
+          const response = await saveBannerDetails(true);
+          if (response && response.ok) {
+            setIsBannerAdded(true);
+          }
         }, 40000);
-        saveBannerDetails()
 
              } catch (error) {
          webflow.notify({ type: "error", message: "An error occurred while creating the cookie banner." });
@@ -1038,12 +1113,17 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
         return;
       }
 
+      // FORCE register scripts during banner creation - no session storage checks
+
       const siteIdinfo = await webflow.getSiteInfo();
+      if (siteIdinfo?.siteId) {
+        setCurrentSiteId(siteIdinfo.siteId);
+      }
       setSiteInfo(siteIdinfo);
 
-      const hostingScript = await customCodeApi.registerV2BannerCustomCode(token);
+      const hostingScript = await customCodeApi.registerV2BannerCustomCode(token, siteIdinfo.siteId);
 
-      if (hostingScript) {
+      if (hostingScript && hostingScript.result) {
         try {
           const scriptId = hostingScript.result.id;
           const version = hostingScript.result.version;
@@ -1058,14 +1138,16 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
           
           const applyScriptResponse = await customCodeApi.applyV2Script(params, token);
 
+          // Script should be added by server via custom code block
+
         }
         catch (error) {
           throw error;
         }
+      } else {
       }
     }
     catch (error) {
-      // Component error handling
     }
   }
 
@@ -1442,11 +1524,40 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
                  if (tempParagraph.setTextContent) {
            const descriptionText = translations[language as keyof typeof translations].description;
-           const textWithPrivacyLink = privacyUrl 
-             ? `${descriptionText} <a href="${privacyUrl}" target="_blank" rel="noopener noreferrer" style="color: ${paraColor}; text-decoration: underline;">More info</a>`
-             : descriptionText;
-           await tempParagraph.setTextContent(textWithPrivacyLink);
+           await tempParagraph.setTextContent(descriptionText);
          }
+
+         // Create privacy link if privacyUrl is available
+         let privacyLink = null;
+         
+         if (privacyUrl && privacyUrl.trim() !== "") {
+          privacyLink = await selectedElement.before(webflow.elementPresets.LinkBlock);
+          if (!privacyLink) throw new Error("Failed to create privacy link");
+
+          // Set URL using setSettings method
+          try {
+            await privacyLink.setSettings('url', privacyUrl, {openInNewTab: true});
+          } catch (error) {
+          }
+        
+           if (privacyLink.setTextContent) {
+             const translation = getTranslation(language);
+             await privacyLink.setTextContent(` ${translation.moreInfo}`);
+           }
+        
+        
+        
+          if (privacyLink.setDomId) {
+            await privacyLink.setDomId("privacy-link");
+          }
+          
+          // Add hover effect for underline
+          if (privacyLink.setCustomAttribute) {
+            await privacyLink.setCustomAttribute("data-hover-underline", "true");
+          }
+        
+        }
+        
 
         const buttonContainer = await selectedElement.before(webflow.elementPresets.DivBlock);
         if (!buttonContainer) {
@@ -1499,7 +1610,11 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
           if (SecondDiv) await innerdiv.append(SecondDiv);
           await innerdiv.append(tempHeading);
           await innerdiv.append(tempParagraph);
+          if (privacyLink && tempParagraph.append) {
+            await tempParagraph.append(privacyLink);
+          }
           await innerdiv.append(buttonContainer);
+          
 
                      if (buttonContainer.append && prefrenceButton && declineButton && acceptButton) {
              await buttonContainer.append(prefrenceButton)
@@ -1511,20 +1626,24 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
         handleCreatePreferences(skipCommonDiv);
         
-        // Script registration for GDPR banners
-        if (appVersion === '1.0.0') {
-          fetchAnalyticsBlockingsScripts();
-        } else if (appVersion === '2.0.0'|| appVersion === '2.0.1') {
-          fetchAnalyticsBlockingsScriptsV2();
-        }
-        setTimeout(() => {
+        setTimeout(async () => {
           setShowPopup(false);
-          setIsBannerAdded(true);
           // setShowSuccessPopup(true);
           setIsLoading(false);
+          
+          // Script registration for GDPR banners - AFTER banner is created
+          if (appVersion === '1.0.0') {
+            fetchAnalyticsBlockingsScripts();
+          } else if (appVersion === '2.0.0'|| appVersion === '2.0.1') {
+            fetchAnalyticsBlockingsScriptsV2();
+          }
+          
+          // Save banner details with isBannerAdded: true
+          const response = await saveBannerDetails(true); // Pass true directly
+          if (response && response.ok) {
+            setIsBannerAdded(true);
+          }
         }, 45000);
-
-        saveBannerDetails()
 
              } catch (error) {
 
@@ -1556,7 +1675,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   };
 
   //banner details
-  const saveBannerDetails = async () => {
+  const saveBannerDetails = async (bannerAdded?: boolean) => {
     try {
       // COMMENTED OUT: const userinfo = localStorage.getItem("consentbit-userinfo");
       const userinfo = getAuthStorageItem("consentbit-userinfo");
@@ -1566,18 +1685,22 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
       const tokenss = JSON.parse(userinfo);
       const tokewern = tokenss.sessionToken;
       const siteIdinfo = await webflow.getSiteInfo();
+      if (siteIdinfo?.siteId) {
+        setCurrentSiteId(siteIdinfo.siteId);
+      }
       setSiteInfo(siteIdinfo);
       if (!tokewern) {
         return;
       }
              const bannerData = {
+        siteId: siteIdinfo?.siteId,
         cookieExpiration: cookieExpiration,
         privacyUrl: privacyUrl,
         bgColor: bgColor,
         activeTab: activeTab,
         activeMode: "Advanced", // Add back to satisfy type requirement
         selectedtext: selectedtext,
-        fetchScripts: fetchScripts,
+        // fetchScripts is not saved to server - it's only a local UI state
         btnColor: btnColor,
         paraColor: paraColor,
         secondcolor: secondcolor,
@@ -1594,14 +1717,15 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
         animation: animation,
         easing: easing,
         language: language,
-        buttonText: buttonText,
-        isBannerAdded: isBannerAdded,
+        isBannerAdded: bannerAdded !== undefined ? bannerAdded : isBannerAdded,
         color: color
 
       }
       const response = await customCodeApi.saveBannerStyles(tokewern, bannerData);
       if (response.ok) {
+        return response;
       }
+      return null;
     }
     catch (error) {
       throw error; // or handle it differently based on your needs
@@ -1831,16 +1955,15 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
         return;
       }
       
-      // Check if V2 consent script was already registered in this session
-      const v2ScriptRegistered = sessionStorage.getItem(`v2_consent_script_registered_${appVersion}`);
-      if (v2ScriptRegistered) {
-        return; // Script already registered, skip API call
-      }
+      // Always try to register script - removed duplicate check
 
       // Ensure siteInfo is available
       let currentSiteInfo = siteInfo;
       if (!currentSiteInfo) {
         currentSiteInfo = await webflow.getSiteInfo();
+        if (currentSiteInfo?.siteId) {
+          setCurrentSiteId(currentSiteInfo.siteId);
+        }
         setSiteInfo(currentSiteInfo);
       }
              if (!currentSiteInfo?.siteId) {
@@ -1851,13 +1974,11 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
       const v2Response = await customCodeApi.registerV2CustomCode(token);
       if (!v2Response || !v2Response.result) {
-
         return;
       }
+      
       if (v2Response) {
-
         try {
-
           const scriptId = v2Response.result.id;
           const version = v2Response.result.version;
 
@@ -1868,20 +1989,17 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
             location: 'header',
             version: version
           };
+          
           const applyScriptResponse = await customCodeApi.applyV2Script(params, token);
           
           // Mark V2 consent script as registered for this version in this session
           sessionStorage.setItem(`v2_consent_script_registered_${appVersion}`, 'true');
-
-                 }
-         catch (error) {
-           // Error handling
-         }
-       }
+        } catch (error) {
+        }
+      }
      }
 
      catch (error) {
-       // Error handling
      }
   }
 
@@ -2134,14 +2252,8 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                 onClick={async () => {
                   const isUserValid = await isAuthenticatedForCurrentSite();
                   if (isUserValid) {
-                    // Reset fetchScripts to false first, then set to true to ensure useEffect triggers
-                    setFetchScripts(false);
-                    // Use setTimeout to ensure the state change is processed
-                    setTimeout(() => {
-                      setFetchScripts(true);
-                      // Only change to "Rescan Project" after the scan is initiated
-                      setButtonText("Rescan Project");
-                    }, 10);
+                    // Trigger script scanning
+                    setTriggerScan(true);
                   } else {
                     setShowAuthPopup(true);
                   }
@@ -2185,7 +2297,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
             <div className="flex down">
               {isBannerAdded ? (
                 <>
-                  <span className="spanbox">Before proceeding, make sure you're not selecting the Consentbit element in the Webflow Designer.</span>
+                  <span className="spanbox">Before proceeding, make sure you're not selecting the ConsentBit element in the Webflow Designer.</span>
                   <span className="spanbox">Hang tight! We're updating your banner with the latest changes.</span>
                   <span className="spanbox">Applying your updates to the project now!</span>
                 </>
@@ -2651,11 +2763,13 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                             rel="noopener noreferrer"
                             style={{ 
                               color: paraColor, 
-                              textDecoration: "underline",
+                              textDecoration: "none",
                               fontSize: `${typeof size === 'number' ? size - 2 : 12}px`
                             }}
+                            onMouseEnter={(e) => (e.target as HTMLAnchorElement).style.textDecoration = "underline"}
+                            onMouseLeave={(e) => (e.target as HTMLAnchorElement).style.textDecoration = "none"}
                           >
-                            More info
+                            {translations[language as keyof typeof translations]?.moreInfo || "More Info"}
                           </a>
                         </span>
                       )}
@@ -2715,10 +2829,12 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
               primaryButtonText={primaryButtonText}
               setPrimaryButtonText={setPrimaryButtonText}
               closebutton={toggleStates.closebutton}
+              privacyUrl={privacyUrl}
+              setPrivacyUrl={setPrivacyUrl}
             />
           )}
 
-          {activeTab === "Script" && <Script fetchScripts={fetchScripts} setFetchScripts={setFetchScripts} />}
+          {activeTab === "Script" && <Script fetchScripts={triggerScan} setFetchScripts={setTriggerScan} />}
         </div>
       </div>
       <DonotShare

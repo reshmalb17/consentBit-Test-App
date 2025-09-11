@@ -60,11 +60,11 @@ export const useAppState = () => {
   const [primaryButtonText, setPrimaryButtonText] = usePersistentState("primaryButtonText", "#FFFFFF");
 
   // UI/UX states
-  const [activeTab, setActiveTab] = usePersistentState("activeTab", "General Settings");
+  const [activeTab, setActiveTab] = usePersistentState("activeTab", "Settings");
   const [activeMode, setActiveMode] = usePersistentState("activeMode", "Simple");
   const [selected, setSelected] = usePersistentState<Orientation>("selected", "right");
   const [selectedOption, setSelectedOption] = usePersistentState("selectedOption", "U.S. State Laws");
-  const [selectedOptions, setSelectedOptions] = usePersistentState("selectedOptions", ["GDPR"]);
+  const [selectedOptions, setSelectedOptions] = usePersistentState("selectedOptions", ["U.S. State Laws", "GDPR"]);
   const [selectedtext, settextSelected] = usePersistentState("selectedtext", "left");
   const [style, setStyle] = usePersistentState<BannerStyle>("style", "align");
 
@@ -72,7 +72,7 @@ export const useAppState = () => {
   const [expires, setExpires] = usePersistentState("expires", "");
   const [size, setSize] = usePersistentState("size", "12");
   const [Font, SetFont] = usePersistentState("font", "");
-  const [weight, setWeight] = usePersistentState("weight", "semibold");
+  const [weight, setWeight] = usePersistentState("weight", "Regular");
   const [borderRadius, setBorderRadius] = usePersistentState<number>("borderRadius", 4);
   const [buttonRadius, setButtonRadius] = usePersistentState<number>("buttonRadius", 3);
   const [cookieExpiration, setCookieExpiration] = usePersistentState("cookieExpiration", "120");

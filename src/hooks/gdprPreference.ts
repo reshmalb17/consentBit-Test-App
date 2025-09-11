@@ -7,7 +7,7 @@ type BreakpointAndPseudo = {
   pseudoClass: string;
 };
 
-const createCookiePreferences = async (selectedPreferences: string[], language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, customToggle: boolean, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", skipCommonDiv: boolean = false, disableScroll: boolean, closebutton: boolean = false, borderRadius: number, font: string) => {
+const createCookiePreferences = async (selectedPreferences: string[], language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, customToggle: boolean, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", skipCommonDiv: boolean = false, disableScroll: boolean, closebutton: boolean = false, borderRadius: number, font: string, privacyUrl: string = "") => {
   
   try {
     const translation = getTranslation(language);
@@ -296,6 +296,34 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       } else {
       }
 
+      // Create privacy link if privacyUrl is available
+      let privacyLink = null;
+      
+      if (privacyUrl && privacyUrl.trim() !== "") {
+        privacyLink = await selectedElement.before(webflow.elementPresets.LinkBlock);
+        if (!privacyLink) throw new Error("Failed to create privacy link");
+
+        // Set URL using setSettings method
+        try {
+          await privacyLink.setSettings('url', privacyUrl, {openInNewTab: true});
+        } catch (error) {
+        }
+      
+        if (privacyLink.setTextContent) {
+          await privacyLink.setTextContent(` ${translation.moreInfo}`);
+        }
+      
+        if (privacyLink.setDomId) {
+          await privacyLink.setDomId("privacy-link-preference");
+        }
+        
+        // Add hover effect for underline
+        if (privacyLink.setCustomAttribute) {
+          await privacyLink.setCustomAttribute("data-hover-underline", "true");
+        }
+      
+      }
+
       //divblock///////////////////////////////////////////////////////////////////
 
              // Create the main banner container with class consentbit-preference
@@ -556,6 +584,9 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
        if (newDiv.append && tempHeading && tempParagraph && buttonContainer && preferenceDiv) {
          await newDiv.append(tempHeading);
          await newDiv.append(tempParagraph);
+         if (privacyLink && tempParagraph.append) {
+           await tempParagraph.append(privacyLink);
+         }
          await newDiv.append(preferenceDiv)
          await newDiv.append(buttonContainer);
          if (Closebuttons) await newDiv.append(Closebuttons)
@@ -582,16 +613,16 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       // Set bannerAdded to true in sessionStorage
       // COMMENTED OUT: localStorage.setItem('bannerAdded', 'true');
       sessionStorage.setItem('bannerAdded', 'true');
+      
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('bannerAddedChanged'));
 
-      // webflow.notify({ type: "Success", message: "ConsentBit banner added successfully!" }
-
+      // webflow.notify({ type: "Success", message: "ConsentBit banner added successfully!" })
 
     } catch (error) {
-
       webflow.notify({ type: "error", message: `Error creating preferences: ${error.message}` });
     }
   } catch (error) {
-
     webflow.notify({ type: "error", message: `Error creating cookie preferences: ${error.message}` });
   } finally {
 

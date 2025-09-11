@@ -201,12 +201,13 @@ export type ScriptType = {
 };
 
 export type AppData = {
+  siteId?: string;
   cookieExpiration: string;
   bgColor: string;
   activeTab: string;
   activeMode: string;
   selectedtext: string;
-  fetchScripts: boolean;  
+  fetchScripts?: boolean;  
   btnColor:string,
   paraColor:string,
   secondcolor:string,
@@ -223,7 +224,7 @@ export type AppData = {
   animation:string,
   easing:string,
   language:string,
-  buttonText:string,
+  buttonText?:string,
   isBannerAdded:boolean,
   color:string,
 };

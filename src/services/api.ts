@@ -109,15 +109,19 @@ export const customCodeApi = {
   
   saveBannerStyles: async (token: string, appData: AppData) => {
     try {
-      const response = await fetch(`${base_url}/api/app-data`, {
+      
+      const url = appData.siteId 
+        ? `${base_url}/api/app-data?siteId=${appData.siteId}`
+        : `${base_url}/api/app-data`;
+      
+       
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          appData: appData,
-        })
+        body: JSON.stringify(appData)
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -130,9 +134,15 @@ export const customCodeApi = {
     }
   },
 
-  getBannerStyles: async (token: string) => {
+  getBannerStyles: async (token: string, siteId?: string) => {
     try {
-      const response = await fetch(`${base_url}/api/app-details`, {
+      
+      const url = siteId 
+        ? `${base_url}/api/app-details?siteId=${siteId}`
+        : `${base_url}/api/app-details`;
+      
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -186,14 +196,35 @@ export const customCodeApi = {
     return response.json();
   },
   applyV2Script: async (params: CodeApplication, token: string) => {
-    const response = await fetch(`${base_url}/api/v2/apply-v2-custom-code`, {
+    // Extract siteId from params and add it to URL
+    const { targetId, scriptId, location, version } = params;
+    
+    const requestBody = {
+      targetType: "site",
+      scriptId: scriptId,
+      location: location,
+      version: version
+    };
+    
+    const url = `${base_url}/api/v2/apply-v2-custom-code?siteId=${targetId}`;
+    
+
+    
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(params),
+      body: JSON.stringify(requestBody),
     });
+    
+  
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Server error: ${response.status} - ${errorText}`);
+    }
+    
     return response.json();
   },
 
@@ -215,11 +246,6 @@ export const customCodeApi = {
         const tokenParts = token.split('.');
         if (tokenParts.length === 3) {
           const payload = JSON.parse(atob(tokenParts[1]));
-          console.log('Token payload:', {
-            siteId: payload.siteId,
-            exp: payload.exp,
-            email: payload.email
-          });
         }
       } catch (error) {
         // Silent error handling
@@ -239,16 +265,6 @@ export const customCodeApi = {
       }
 
       const data = await response.json();
-      console.log('Analytics response:', {
-        hasData: !!data.data,
-        hasAnalyticsScripts: !!data.data?.analyticsScripts,
-        scriptCount: data.data?.analyticsScripts?.length || 0,
-        firstScript: data.data?.analyticsScripts?.[0] ? {
-          identifier: data.data.analyticsScripts[0].identifier,
-          siteId: data.data.analyticsScripts[0].siteId,
-          hasFullTag: !!data.data.analyticsScripts[0].fullTag
-        } : null
-      });
       
       return {
         success: true,
@@ -374,22 +390,27 @@ downloadPDFFromUrl: async (token: string, pdfUrl: string, filename: string) => {
       throw error;
     }
   },
-  registerV2BannerCustomCode: async (token) => {
+  registerV2BannerCustomCode: async (token, siteId) => {
     try {
-      const response = await fetch(`${base_url}/api/v2/register-v2-banner`, {
+    
+      
+      const response = await fetch(`${base_url}/api/v2/register-v2-banner?siteId=${siteId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-       
+        body: JSON.stringify({})
       });
       
+    
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
-      return await response.json();
+      const result = await response.json();
+      return result;
     } catch (error) {
       throw error;
     }

@@ -8,56 +8,64 @@ const ccpaTranslations = {
         description: "We use third-party cookies that help us analyze how you use this website, store your preferences, and provide the content and advertisements that are relevant to you. We do not sell your information. However, you can opt out of these cookies by checking Do Not Share My Personal Information and clicking the Save My Preferences button. Once you opt out, you can opt in again at any time by unchecking Do Not Share My Personal Information and clicking the Save My Preferences button",
         doNotShare: ".Do Not Share My Personal Information",
         savePreference: "Save My Preference",
-        cancel: "Cancel"
+        cancel: "Cancel",
+        moreInfo: "More Info"
     },
     Spanish: {
         heading: "Preferencia de Exclusión",
         description: "Utilizamos cookies de terceros que nos ayudan a analizar cómo utiliza este sitio web, almacenar sus preferencias y proporcionar contenido y anuncios relevantes para usted. No vendemos su información. Sin embargo, puede optar por no recibir estas cookies marcando No Compartir Mi Información Personal y haciendo clic en el botón Guardar Mis Preferencias. Una vez que opte por no participar, puede volver a participar en cualquier momento desmarcando No Compartir Mi Información Personal y haciendo clic en el botón Guardar Mis Preferencias",
         doNotShare: ".No Compartir Mi Información Personal.",
         savePreference: "Guardar Mi Preferencia",
-        cancel: "Cancelar"
+        cancel: "Cancelar",
+        moreInfo: "Más Información"
     },
     French: {
         heading: "Préférence de Désinscription",
         description: "Nous utilisons des cookies tiers qui nous aident à analyser votre utilisation de ce site web, à stocker vos préférences et à fournir du contenu et des publicités pertinents pour vous. Nous ne vendons pas vos informations. Cependant, vous pouvez désactiver ces cookies en cochant Ne Pas Partager Mes Informations Personnelles et en cliquant sur le bouton Enregistrer Mes Préférences. Une fois désactivé, vous pouvez réactiver à tout moment en décochant Ne Pas Partager Mes Informations Personnelles et en cliquant sur le bouton Enregistrer Mes Préférences",
         doNotShare: ".Ne Pas Partager Mes Informations Personnelles.",
         savePreference: "Enregistrer Mes Préférences",
-        cancel: "Annuler"
+        cancel: "Annuler",
+        moreInfo: "Plus d'Informations"
     },
     German: {
         heading: "Abmeldepräferenzen",
         description: "Wir verwenden Cookies von Drittanbietern, die uns helfen, Ihre Nutzung dieser Website zu analysieren, Ihre Präferenzen zu speichern und relevante Inhalte und Werbung bereitzustellen. Wir verkaufen Ihre Informationen nicht. Sie können diese Cookies jedoch deaktivieren, indem Sie 'Meine persönlichen Informationen nicht weitergeben' auswählen und auf 'Meine Präferenzen speichern' klicken. Sobald deaktiviert, können Sie dies jederzeit rückgängig machen, indem Sie die Auswahl von 'Meine persönlichen Informationen nicht weitergeben' aufheben und erneut auf 'Meine Präferenzen speichern' klicken.",
         doNotShare: "Meine persönlichen Informationen nicht weitergeben",
         savePreference: "Meine Präferenzen speichern",
-        cancel: "Abbrechen"
+        cancel: "Abbrechen",
+        moreInfo: "Weitere Informationen"
     },
     Swedish: {
         heading: "Avregistreringspreferens",
         description: "Vi använder tredjepartscookies som hjälper oss att analysera hur du använder denna webbplats, lagra dina preferenser och tillhandahålla innehåll och annonser som är relevanta för dig. Vi säljer inte din information. Du kan dock välja bort dessa cookies genom att kryssa i 'Dela Inte Min Personliga Information' och klicka på 'Spara Mina Preferenser'-knappen. När du väljer bort kan du välja tillbaka när som helst genom att avmarkera 'Dela Inte Min Personliga Information' och klicka på 'Spara Mina Preferenser'-knappen",
         doNotShare: "Dela Inte Min Personliga Information",
         savePreference: "Spara Mina Preferenser",
-        cancel: "Avbryt"
+        cancel: "Avbryt",
+        moreInfo: "Mer Information"
     },
     Dutch: {
         heading: "Afmeldingsvoorkeur",
         description: "We gebruiken cookies van derden die ons helpen bij het analyseren van hoe u deze website gebruikt, het opslaan van uw voorkeuren en het leveren van inhoud en advertenties die relevant voor u zijn. We verkopen uw informatie niet. U kunt deze cookies echter uitschakelen door 'Deel Mijn Persoonlijke Informatie Niet' aan te vinken en op de 'Sla Mijn Voorkeuren Op'-knop te klikken. Zodra u zich afmeldt, kunt u zich opnieuw aanmelden door het vinkje bij 'Deel Mijn Persoonlijke Informatie Niet' te verwijderen en op de 'Sla Mijn Voorkeuren Op'-knop te klikken",
         doNotShare: "Deel Mijn Persoonlijke Informatie Niet",
         savePreference: "Sla Mijn Voorkeuren Op",
-        cancel: "Annuleren"
+        cancel: "Annuleren",
+        moreInfo: "Meer Informatie"
     },
     Portuguese: {
         heading: "Preferência de Exclusão",
         description: "Utilizamos cookies de terceiros que nos ajudam a analisar como você utiliza este site, armazenar suas preferências e fornecer conteúdos e anúncios relevantes para você. Não vendemos suas informações. No entanto, você pode desativar esses cookies marcando a opção Não Compartilhar Minhas Informações Pessoais e clicando no botão Salvar Minhas Preferências. Após desativar, você pode ativar novamente a qualquer momento desmarcando a opção e clicando no botão Salvar Minhas Preferências.",
         doNotShare: "Não Compartilhar Minhas Informações Pessoais",
         savePreference: "Salvar Minhas Preferências",
-        cancel: "Cancelar"
+        cancel: "Cancelar",
+        moreInfo: "Mais Informações"
     },
     Italian: {
         heading: "Preferenza di Opt-out",
         description: "Utilizziamo cookie di terze parti che ci aiutano ad analizzare come utilizzi questo sito web, a memorizzare le tue preferenze e a fornire contenuti e annunci pertinenti. Non vendiamo le tue informazioni. Tuttavia, puoi disattivare questi cookie selezionando Non Condividere le Mie Informazioni Personali e facendo clic sul pulsante Salva le Mie Preferenze. Una volta disattivato, puoi riattivarlo in qualsiasi momento deselezionando l'opzione e facendo clic sul pulsante Salva le Mie Preferenze.",
         doNotShare: "Non Condividere le Mie Informazioni Personali",
         savePreference: "Salva le Mie Preferenze",
-        cancel: "Annulla"
+        cancel: "Annulla",
+        moreInfo: "Maggiori Informazioni"
     }
 };
 
@@ -66,7 +74,7 @@ type BreakpointAndPseudo = {
     pseudoClass: string;
 };
 
-const createCookieccpaPreferences = async (language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", disableScroll: boolean, _closebutton: boolean = false, skipCommonDiv: boolean = false, Font: string, borderRadius: number
+const createCookieccpaPreferences = async (language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", disableScroll: boolean, _closebutton: boolean = false, skipCommonDiv: boolean = false, Font: string, borderRadius: number, privacyUrl: string = ""
 ) => {
     
     
@@ -375,6 +383,34 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
                 await tempParagraph.setTextContent(ccpaTranslations[language as keyof typeof ccpaTranslations].description);
             }
 
+            // Create privacy link if privacyUrl is available
+            let privacyLink = null;
+            
+            if (privacyUrl && privacyUrl.trim() !== "") {
+                privacyLink = await selectedElement.before(webflow.elementPresets.LinkBlock);
+                if (!privacyLink) throw new Error("Failed to create privacy link");
+
+                // Set URL using setSettings method
+                try {
+                    await privacyLink.setSettings('url', privacyUrl, {openInNewTab: true});
+                } catch (error) {
+                }
+            
+                if (privacyLink.setTextContent) {
+                    await privacyLink.setTextContent(` ${ccpaTranslations[language as keyof typeof ccpaTranslations].moreInfo}`);
+                }
+            
+                if (privacyLink.setDomId) {
+                    await privacyLink.setDomId("privacy-link-ccpa-preference");
+                }
+                
+                // Add hover effect for underline
+                if (privacyLink.setCustomAttribute) {
+                    await privacyLink.setCustomAttribute("data-hover-underline", "true");
+                }
+            
+            }
+
             //divblock///////////////////////////////////////////////////////////////////
 
             const prefrenceContainer = await selectedElement.before(webflow.elementPresets.DivBlock);
@@ -502,6 +538,9 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
             if (newDiv.append && tempHeading && tempParagraph && buttonContainer && prefrenceContainer) {
                 await newDiv.append(tempHeading);
                 await newDiv.append(tempParagraph);
+                if (privacyLink && tempParagraph.append) {
+                    await tempParagraph.append(privacyLink);
+                }
                 await newDiv.append(prefrenceContainer)
                 await newDiv.append(buttonContainer);
                 if (Closebuttons) await newDiv.append(Closebuttons)
@@ -540,6 +579,9 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
             // Set bannerAdded to true in sessionStorage
             // COMMENTED OUT: localStorage.setItem('bannerAdded', 'true');
             sessionStorage.setItem('bannerAdded', 'true');
+            
+            // Dispatch custom event to notify other components
+            window.dispatchEvent(new CustomEvent('bannerAddedChanged'));
 
             // webflow.notify({ type: "Success", message: "ConsentBit banner added successfully!" });
 

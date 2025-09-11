@@ -5,6 +5,7 @@ export interface TranslationKeys {
   acceptAll: string;
   reject: string;
   changePreference: string;
+  moreInfo: string;
   sections: {
     essential: {
       label: string;
@@ -28,10 +29,11 @@ export interface TranslationKeys {
 export const translations: Record<string, TranslationKeys> = {
   en: {
     heading: "Cookie Preferences",
-    description: "By clicking, you agree to store cookies on your device to enhance navigation, analyze usage, and support marketing",
+    description: "By clicking, you agree to store cookies on your device to enhance navigation, analyze usage, and support marketing. ",
     acceptAll: "Save Preference",
     reject: "Reject",
     changePreference: "Change Preference",
+    moreInfo: "More Info",
     sections: {
       essential: {
         label: "Essential",
@@ -57,6 +59,7 @@ export const translations: Record<string, TranslationKeys> = {
     acceptAll: "Aceptar Todo",
     reject: "Rechazar",
     changePreference: "Cambiar Preferencias",
+    moreInfo: "Más Información",
     sections: {
       essential: {
         label: "Esenciales",
@@ -82,6 +85,7 @@ export const translations: Record<string, TranslationKeys> = {
     reject: "Refuser",
     acceptAll: "Aceptar Todo",
     changePreference: "Modifier les Préférences",
+    moreInfo: "Plus d'Informations",
     sections: {
       essential: {
         label: "Essentiels",
@@ -108,6 +112,7 @@ export const translations: Record<string, TranslationKeys> = {
     acceptAll: "Einstellungen speichern",
     reject: "Ablehnen",
     changePreference: "Einstellungen ändern",
+    moreInfo: "Weitere Informationen",
     sections: {
       essential: {
         label: "Notwendig",
@@ -133,6 +138,7 @@ export const translations: Record<string, TranslationKeys> = {
     acceptAll: "Salva Preferenze",
     reject: "Rifiuta",
     changePreference: "Cambia Preferenze",
+    moreInfo: "Maggiori Informazioni",
     sections: {
       essential: {
         label: "Essenziali",
@@ -158,6 +164,7 @@ export const translations: Record<string, TranslationKeys> = {
     acceptAll: "Salvar Preferências",
     reject: "Rejeitar",
     changePreference: "Alterar Preferências",
+    moreInfo: "Mais Informações",
     sections: {
       essential: {
         label: "Essenciais",
@@ -183,6 +190,7 @@ export const translations: Record<string, TranslationKeys> = {
     acceptAll: "Spara Inställningar",
     reject: "Avvisa",
     changePreference: "Ändra Inställningar",
+    moreInfo: "Mer Information",
     sections: {
       essential: {
         label: "Nödvändiga",
@@ -208,6 +216,7 @@ export const translations: Record<string, TranslationKeys> = {
     acceptAll: "Instellingen Opslaan",
     reject: "Weigeren",
     changePreference: "Instellingen Wijzigen",
+    moreInfo: "Meer Informatie",
     sections: {
       essential: {
         label: "Essentieel",

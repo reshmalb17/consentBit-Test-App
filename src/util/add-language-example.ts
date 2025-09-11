@@ -8,6 +8,7 @@ const japaneseTranslation: TranslationKeys = {
   acceptAll: "設定を保存",
   reject: "拒否",
   changePreference: "設定を変更",
+  moreInfo: "詳細情報",
   sections: {
     essential: {
       label: "必須",
@@ -38,6 +39,7 @@ const dutchTranslation: TranslationKeys = {
   acceptAll: "Voorkeuren Opslaan",
   reject: "Afwijzen",
   changePreference: "Voorkeuren Wijzigen",
+  moreInfo: "Meer Informatie",
   sections: {
     essential: {
       label: "Essentieel",

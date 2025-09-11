@@ -43,13 +43,11 @@ export function useAuth() {
   // Function to attempt automatic token refresh on app load
   const attemptAutoRefresh = async (): Promise<boolean> => {
     try {
-      console.log('🔐 [DEBUG] attemptAutoRefresh started');
       
       // Check if user was explicitly logged out
       // COMMENTED OUT: const wasExplicitlyLoggedOut = localStorage.getItem("explicitly_logged_out");
       const wasExplicitlyLoggedOut = getAuthStorageItem("explicitly_logged_out");
       if (wasExplicitlyLoggedOut) {
-        console.log('🔐 [DEBUG] User was explicitly logged out, skipping auth');
         return false;
       }
 
@@ -60,31 +58,24 @@ export function useAuth() {
           const decodedToken = jwtDecode(authData.sessionToken) as DecodedToken;
           // If token is not expired, don't need to refresh
           if (decodedToken.exp * 1000 > Date.now()) {
-            console.log('🔐 [DEBUG] Valid token found, no refresh needed');
             return true; // Already have valid token
           }
-          console.log('🔐 [DEBUG] Token expired, attempting refresh');
         } catch (error) {
-          console.log('🔐 [DEBUG] Invalid token data, attempting refresh');
           // Invalid token data, continue with refresh attempt
         }
       }
 
       // Attempt silent auth to refresh token with timeout
-      console.log('🔐 [DEBUG] Attempting silent auth...');
       const silentAuthPromise = attemptSilentAuth();
       const timeoutPromise = new Promise<boolean>((resolve) => {
         setTimeout(() => {
-          console.log('🔐 [DEBUG] Silent auth timeout');
           resolve(false);
         }, 3000); // 3 second timeout for silent auth
       });
       
       const result = await Promise.race([silentAuthPromise, timeoutPromise]);
-      console.log('🔐 [DEBUG] Silent auth result:', result);
       return result;
     } catch (error) {
-      console.log('🔐 [DEBUG] attemptAutoRefresh error:', error);
       return false;
     }
   };
@@ -103,8 +94,6 @@ export function useAuth() {
 
       // Return initial state if no stored user or logged out
       if (!authData || wasExplicitlyLoggedOut) {
-        console.log('🔐 [DEBUG] No auth data or explicitly logged out, returning empty state');
-        console.log('🔐 [DEBUG] useAuth queryFn completed in:', performance.now() - authStartTime, 'ms');
         return { user: { firstName: "", email: "" }, sessionToken: "" };
       }
 
@@ -314,14 +303,6 @@ export function useAuth() {
       }
 
       // Debug: Check what the backend returned
-      console.log('🔍 Backend token response:', {
-        hasSessionToken: !!data.sessionToken,
-        hasFirstName: !!data.firstName,
-        hasEmail: !!data.email,
-        hasSiteId: !!data.siteId,
-        requestedSiteId: siteInfo.siteId,
-        fullResponse: data
-      });
 
       // Store in localStorage
       const userData = {
@@ -430,14 +411,24 @@ export function useAuth() {
         return false;
       }
 
-      // Check if user is authenticated for this specific site
-      const storedSiteId = authState.user.siteId;
-      const currentSiteId = currentSiteInfo.siteId;
-      const isMatch = storedSiteId === currentSiteId;
+      // For multi-site support, we'll allow authentication if:
+      // 1. User has valid session token
+      // 2. Current site info is available
+      // 3. Session token is not expired
       
-    
+      // Check if session token is expired
+      try {
+        const decodedToken = jwtDecode(authState.sessionToken) as DecodedToken;
+        if (decodedToken.exp * 1000 <= Date.now()) {
+          return false; // Token is expired
+        }
+      } catch (error) {
+        return false; // Invalid token
+      }
       
-      return isMatch;
+      // If we have a valid session token and current site info, allow access
+      // This enables multi-site support where users can work across different sites
+      return true;
     } catch (error) {
       return false;
     }

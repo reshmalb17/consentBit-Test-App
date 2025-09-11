@@ -5,8 +5,11 @@ import "../style/styless.css";
 
 import { useAppState } from "../hooks/useAppState";
 import { getAuthStorageItem } from "../util/authStorage";
+import { customCodeApi } from "../services/api";
+import { getSessionTokenFromLocalStorage } from "../util/Session";
 import WelcomeScipt from "./WelcomeScript";
 import NeedHelp from "./NeedHelp";
+import webflow from "../types/webflowtypes";
 const logo = new URL("../assets/icon.svg", import.meta.url).href;
 const questionmark = new URL("../assets/question.svg", import.meta.url).href;
 const leftLines = new URL("../assets/leftlines.svg", import.meta.url).href;
@@ -22,11 +25,14 @@ type WelcomeScreenProps = {
   isCheckingAuth?: boolean;
   isBannerAdded?: boolean;
   onCustomize?: () => void;
+  isBannerStatusLoading?: boolean;
 };
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,authenticated,handleWelcomeScreen, isCheckingAuth: externalIsCheckingAuth, isBannerAdded, onCustomize}) => {
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,authenticated,handleWelcomeScreen, isCheckingAuth: externalIsCheckingAuth, isBannerAdded, onCustomize, isBannerStatusLoading = false}) => {
   const [hasUserData, setHasUserData] = useState(false);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
+  const [actualBannerStatus, setActualBannerStatus] = useState<boolean | null>(null);
+  const [sessionBannerAdded, setSessionBannerAdded] = useState<boolean>(false);
   
   // Timing tracking for authorization flow
   const [authStartTime, setAuthStartTime] = useState<number | null>(null);
@@ -40,6 +46,59 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
     const hasData = userinfo && userinfo !== "null" && userinfo !== "undefined";
     setHasUserData(authenticated || !!hasData);
   }, [authenticated]);
+
+  // Check session storage for bannerAdded status
+  useEffect(() => {
+    const checkSessionStorage = () => {
+      const bannerAdded = sessionStorage.getItem('bannerAdded');
+      setSessionBannerAdded(bannerAdded === 'true');
+    };
+
+    // Check immediately
+    checkSessionStorage();
+
+    // Listen for storage changes (in case banner is added in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'bannerAdded') {
+        setSessionBannerAdded(e.newValue === 'true');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events (for same-tab changes)
+    const handleCustomStorageChange = () => {
+      checkSessionStorage();
+    };
+
+    window.addEventListener('bannerAddedChanged', handleCustomStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('bannerAddedChanged', handleCustomStorageChange);
+    };
+  }, []);
+
+  // Fetch actual banner status from API - only if parent is not loading
+  useEffect(() => {
+    const fetchBannerStatus = async () => {
+      const token = getSessionTokenFromLocalStorage();
+      if (token && authenticated && !isBannerStatusLoading) {
+        try {
+          // Get site info to pass siteId to API call
+          const siteInfo = await webflow.getSiteInfo();
+          const response = await customCodeApi.getBannerStyles(token, siteInfo?.siteId);
+          if (response && response.isBannerAdded !== undefined) {
+            setActualBannerStatus(response.isBannerAdded);
+          }
+        } catch (error) {
+          // Error fetching banner status
+        }
+      }
+    };
+
+    fetchBannerStatus();
+  }, [authenticated, isBannerStatusLoading]);
 
 
   // Separate useEffect to handle authentication changes
@@ -92,7 +151,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
         <div className="welcome-content">
           <h1 className="welcome-title">
             Welcome to{" "}
-            <span className="welcome-title-highlight">Consentbit</span>
+            <span className="welcome-title-highlight">ConsentBit</span>
           </h1>
           {(() => {
             
@@ -111,7 +170,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
             } else if (hasUserData) {
               return (
                 <p className="welcome-instructions">
-                  {isBannerAdded 
+                  {isBannerAdded
                     ? "Your banner has been successfully added! Customize your consent banner appearance and settings."
                     : "Scan your Webflow site, review detected scripts, add them to the backend, and publish when you're ready."
                   }
@@ -138,13 +197,18 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
             </button>
           ) : hasUserData ? (
             <>
-              <button
-                className="welcome-authorize-btn scan-project"
-                onClick={isBannerAdded ? onCustomize : handleWelcomeScreen}
-              >
-                {isBannerAdded ? "Customize" : "Scan Project"}
-              </button>
-          
+              {isBannerStatusLoading ? (
+                <button className="welcome-authorize-btn" disabled>
+                  Loading...
+                </button>
+              ) : (
+                <button
+                  className="welcome-authorize-btn scan-project"
+                  onClick={isBannerAdded ? onCustomize : handleWelcomeScreen}
+                >
+                  {isBannerAdded ? "Customize" : "Scan Project"}
+                </button>
+              )}
             </>
           ) : (
             <button className="welcome-authorize-btn" onClick={handleAuthorizeClick}>
@@ -152,7 +216,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onAuthorize, onNeedHelp ,
             </button>
           )}
         </div>
-        {hasUserData && !externalIsCheckingAuth && !isBannerAdded?(
+        {hasUserData && !externalIsCheckingAuth && !isBannerStatusLoading && !isBannerAdded?(
         <>
         
             {/* Bottom information cards */}

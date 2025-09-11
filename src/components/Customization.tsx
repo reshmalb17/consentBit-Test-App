@@ -57,9 +57,11 @@ interface CustomizationProps {
   setBgColors: (value: string) => void;
   secondbuttontext: string;
   setsecondbuttontext: (value: string) => void;
-  primaryButtonText: string
+  primaryButtonText: string;
   setPrimaryButtonText: (value: string) => void;
   closebutton: boolean;
+  privacyUrl: string;
+  setPrivacyUrl: (value: string) => void;
 }
 
 const Customization: React.FC<CustomizationProps> = ({
@@ -104,6 +106,8 @@ const Customization: React.FC<CustomizationProps> = ({
   primaryButtonText,
   setPrimaryButtonText,
   closebutton,
+  privacyUrl,
+  setPrivacyUrl,
 }) => {
   const [isActive, setIsActive] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -776,6 +780,32 @@ const Customization: React.FC<CustomizationProps> = ({
                                   ? "Utilizziamo i cookie per offrirti la migliore esperienza possibile. Ci permettono anche di analizzare il comportamento degli utenti per migliorare costantemente il sito web per te."
                                   : "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you."}
                 </span>
+                {privacyUrl && (
+                        <span>
+                          {" "}
+                          <a 
+                            href={privacyUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ 
+                              color: paraColor, 
+                              textDecoration: "none",
+                              fontSize: `${typeof size === 'number' ? size - 2 : 12}px`
+                            }}
+                            onMouseEnter={(e) => (e.target as HTMLAnchorElement).style.textDecoration = "underline"}
+                            onMouseLeave={(e) => (e.target as HTMLAnchorElement).style.textDecoration = "none"}
+                          >
+                           {language==="English"?"More Info": 
+                           language=== "Spanish"?"Más Información": 
+                           language=== "French"?"Plus d'infos": 
+                           language=== "German"?"Mehr Info": 
+                           language=== "Swedish"?"Mer info": 
+                           language=== "Dutch"?"Meer info": 
+                           language=== "Portuguese"?"Mais info": 
+                           language=== "Italian"?"Più info": "More Info"}
+                          </a>
+                        </span>
+                      )}
 
               </div>
               <div className="button-wrapp" style={{ justifyContent: style === "centeralign" ? "center" : undefined,fontFamily: Font }}>

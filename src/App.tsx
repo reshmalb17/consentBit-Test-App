@@ -21,6 +21,133 @@ import pkg from '../package.json';
 
 const appVersion = pkg.version;
 
+// // Helper function to add script directly to document head
+// const addScriptToHead = (scriptUrl: string) => {
+//   try {
+//     // Check if script already exists
+//     const existingScript = document.querySelector(`script[src="${scriptUrl}"]`);
+//     if (existingScript) {
+//       console.log('Script already exists in head:', scriptUrl);
+//       return;
+//     }
+
+//     // Create and add script element
+//     const script = document.createElement('script');
+//     script.src = scriptUrl;
+//     script.async = true;
+//     script.defer = true;
+    
+//     // Add to head
+//     document.head.appendChild(script);
+//     console.log('Script added to document head:', scriptUrl);
+    
+//     // Log success/failure
+//     script.onload = () => {
+//       console.log('Script loaded successfully:', scriptUrl);
+//     };
+    
+//     script.onerror = () => {
+//       console.error('Failed to load script:', scriptUrl);
+//     };
+//   } catch (error) {
+//     console.error('Error adding script to head:', error);
+//   }
+// };
+
+// // Helper function to check if script exists in head
+// const checkScriptInHead = (scriptUrl: string) => {
+//   const existingScript = document.querySelector(`script[src="${scriptUrl}"]`);
+//   console.log('Script check in head:', scriptUrl, existingScript ? 'EXISTS' : 'NOT FOUND');
+//   return !!existingScript;
+// };
+
+// // Helper function to log all scripts in head for debugging
+// const logAllScriptsInHead = () => {
+//   const scripts = document.head.querySelectorAll('script');
+//   console.log('All scripts in document head:');
+//   scripts.forEach((script, index) => {
+//     console.log(`${index + 1}. ${script.src || script.textContent?.substring(0, 50) + '...'}`);
+//   });
+// };
+
+// Debug function removed - no session storage checks needed
+  
+//   // Check for common consent script URLs
+//   const commonScriptUrls = [
+//     'https://cb-server.web-8fb.workers.dev',
+//     'consentbit',
+//     'v2',
+//     'banner'
+//   ];
+  
+//   commonScriptUrls.forEach(url => {
+//     const scripts = document.head.querySelectorAll(`script[src*="${url}"]`);
+//     console.log(`Scripts containing "${url}":`, scripts.length);
+//   });
+// };
+
+// // Global function to manually trigger script registration
+// (window as any).forceScriptRegistration = async () => {
+//   console.log('=== FORCING SCRIPT REGISTRATION ===');
+  
+//   // Clear existing flags
+//   sessionStorage.removeItem(`scripts_registered_${appVersion}`);
+//   sessionStorage.removeItem(`v2_consent_script_registered_${appVersion}`);
+  
+//   // Get fresh token and site info
+//   const token = getSessionTokenFromLocalStorage();
+//   if (!token) {
+//     console.error('No session token available');
+//     return;
+//   }
+  
+//   try {
+//     const siteInfo = await webflow.getSiteInfo();
+//     console.log('Site info:', siteInfo);
+    
+//     if (appVersion === '2.0.0' || appVersion === '2.0.1') {
+//       console.log('Registering V2 Banner Custom Code...');
+//       const result = await customCodeApi.registerV2BannerCustomCode(token);
+//       console.log('Registration result:', result);
+      
+//       if (result && result.result) {
+//         const params: CodeApplication = {
+//           targetType: 'site',
+//           targetId: siteInfo.siteId,
+//           scriptId: result.result.id,
+//           location: 'header',
+//           version: result.result.version
+//         };
+        
+//         console.log('Applying V2 script...', params);
+//         const applyResult = await customCodeApi.applyV2Script(params, token);
+//         console.log('Apply result:', applyResult);
+        
+//         // Add directly to head as fallback
+//         if (result.result.hostedLocation) {
+//           addScriptToHead(result.result.hostedLocation);
+//         }
+        
+//         console.log('Script registration completed');
+//       }
+//     }
+//   } catch (error) {
+//     console.error('Error in force script registration:', error);
+//   }
+// };
+
+// Global function to test script addition to head
+// (window as any).testScriptAddition = (scriptUrl: string = 'https://cb-server.web-8fb.workers.dev/test-script.js') => {
+//   console.log('=== TESTING SCRIPT ADDITION TO HEAD ===');
+//   console.log('Adding test script:', scriptUrl);
+//   addScriptToHead(scriptUrl);
+  
+//   setTimeout(() => {
+//     checkScriptInHead(scriptUrl);
+//     logAllScriptsInHead();
+//   }, 1000);
+// };
+
 
 
 
@@ -54,6 +181,7 @@ const App: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isAppInitializing, setIsAppInitializing] = useState(true);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isBannerStatusLoading, setIsBannerStatusLoading] = useState(true);
   const [customizationInitialTab, setCustomizationInitialTab] = useState("Settings");
   
   // Global timing tracking for authorization flow
@@ -81,6 +209,11 @@ const App: React.FC = () => {
     // Check if scan button should be available (authenticated && !isCheckingAuth && !isBannerAdded)
   }, [isAuthenticated, isCheckingAuth, bannerBooleans.isBannerAdded, globalAuthStartTime]);
 
+  // // Debug component states
+  // useEffect(() => {
+
+    
+  // }, [componentStates.isWelcomeScreen, componentStates.isSetUpStep, componentStates.isWelcomeScipt, componentStates.isConfirmPublish, componentStates.isSuccessPublish, componentStates.isCustomizationTab]);
 
   const { user, sessionToken, exchangeAndVerifyIdToken, openAuthScreen, isAuthenticatedForCurrentSite, attemptAutoRefresh } = useAuth();
   const [isFetchWelcomeScripts, setIsFetchWelcomeScripts] = useState(false);
@@ -117,8 +250,11 @@ const App: React.FC = () => {
           try {
             const apiStartTime = performance.now();
             
+            // Get site info to pass siteId to API call
+            const siteInfo = await webflow.getSiteInfo();
+            
             // Add timeout to prevent hanging API calls
-            const apiPromise = customCodeApi.getBannerStyles(token);
+            const apiPromise = await customCodeApi.getBannerStyles(token, siteInfo?.siteId);
             const timeoutPromise = new Promise((_, reject) => {
               setTimeout(() => reject(new Error('API call timeout after 10 seconds')), 10000);
             });
@@ -126,7 +262,7 @@ const App: React.FC = () => {
             const response = await Promise.race([apiPromise, timeoutPromise]);
             
             // Set banner status based on API response
-            if (response && response.appData && response.appData.isBannerAdded === true) {
+            if (response && response.isBannerAdded === true) {
               // Banner was previously added - show welcome screen with "Customize" button
               setSkipWelcomeScreen(false);
               bannerBooleans.setIsBannerAdded(true);
@@ -135,16 +271,19 @@ const App: React.FC = () => {
               setSkipWelcomeScreen(false);
               bannerBooleans.setIsBannerAdded(false);
             }
+            setIsBannerStatusLoading(false);
           } catch (error) {
             // API call failed or timed out - show welcome screen with default state
            
             setSkipWelcomeScreen(false);
             bannerBooleans.setIsBannerAdded(false);
+            setIsBannerStatusLoading(false);
           }
         } else {
           // No token available - show welcome screen with default state
           setSkipWelcomeScreen(false);
           bannerBooleans.setIsBannerAdded(false);
+          setIsBannerStatusLoading(false);
         }
         
         
@@ -181,8 +320,11 @@ const App: React.FC = () => {
             try {
               const apiStartTime = performance.now();
               
+              // Get site info to pass siteId to API call
+              const siteInfo = await webflow.getSiteInfo();
+              
               // Add timeout to prevent hanging API calls
-              const apiPromise = customCodeApi.getBannerStyles(token);
+              const apiPromise = customCodeApi.getBannerStyles(token, siteInfo?.siteId);
               const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('API call timeout after 10 seconds')), 10000);
               });
@@ -190,7 +332,7 @@ const App: React.FC = () => {
             const response = await Promise.race([apiPromise, timeoutPromise]);
               
               // Set banner status based on API response (not cached data)
-              if (response && response.appData && response.appData.isBannerAdded === true) {
+              if (response && response.isBannerAdded === true) {
                 // Banner was previously added - show welcome screen with "Customize" button
                 setSkipWelcomeScreen(false);
                 bannerBooleans.setIsBannerAdded(true);
@@ -199,25 +341,30 @@ const App: React.FC = () => {
                 setSkipWelcomeScreen(false);
                 bannerBooleans.setIsBannerAdded(false);
               }
+              setIsBannerStatusLoading(false);
             } catch (error) {
               // API call failed - show welcome screen
               setSkipWelcomeScreen(false);
               bannerBooleans.setIsBannerAdded(false);
+              setIsBannerStatusLoading(false);
             }
           } else {
             // No token available - show welcome screen
             setSkipWelcomeScreen(false);
             bannerBooleans.setIsBannerAdded(false);
+            setIsBannerStatusLoading(false);
           }
         } else {
           // Auth failed - show welcome screen
           setSkipWelcomeScreen(false);
           bannerBooleans.setIsBannerAdded(false);
+          setIsBannerStatusLoading(false);
         }
       } catch (error) {
         // Silent error handling - show welcome screen
         setSkipWelcomeScreen(false);
         bannerBooleans.setIsBannerAdded(false);
+        setIsBannerStatusLoading(false);
       } finally {
         // Auth check complete
         setIsCheckingAuth(false);
@@ -227,12 +374,80 @@ const App: React.FC = () => {
     initializeApp();
   }, []);
 
-  // Debug authentication state changes
+  // Update isAuthenticated state when user authentication changes
   useEffect(() => {
-    // Auth state monitoring
-  }, [user, sessionToken, isAuthenticated]);
+    const isUserAuthenticated = !!(user?.email && sessionToken);
+    setIsAuthenticated(isUserAuthenticated);
+  }, [user, sessionToken]);
 
   // Removed - this is now handled in the main initialization useEffect
+  useEffect(() => {
+    const registerVersionBasedScripts = async () => {
+      
+      // Only register scripts if user is authenticated and has session token
+      if (!isAuthenticated || !sessionToken || !user?.email) {
+        return;
+      }
+
+      const token = getSessionTokenFromLocalStorage();
+      if (!token) {
+        return;
+      }
+      
+
+      try {
+        const siteInfo = await webflow.getSiteInfo();
+        
+        // Get the stored siteId from authentication (this is the correct siteId that matches the server)
+        const storedSiteId = getCurrentSiteId();
+
+        if (appVersion === '1.0.0') {
+          const result = await customCodeApi.registerAnalyticsBlockingScript(token);
+          
+          // Apply the registered script
+          if (result && result.result) {
+            const params: CodeApplication = {
+              targetType: 'site',
+              targetId: siteInfo.siteId, // Use siteInfo.siteId for application
+              scriptId: result.result.id,
+              location: 'header',
+              version: result.result.version
+            };
+            const applyResult = await customCodeApi.applyScript(params, token);
+          } else {
+          }
+        } else if (appVersion === '2.0.0' || appVersion === '2.0.1') {
+          const result = await customCodeApi.registerV2BannerCustomCode(token, siteInfo.siteId);
+          // Apply the registered script
+          if (result && result.result) {
+            const params: CodeApplication = {
+              targetType: 'site',
+              targetId: siteInfo.siteId, // Use URL if available, fallback to siteId
+              scriptId: result.result.id,
+              location: 'header',
+              version: result.result.version
+            };
+            const applyResult = await customCodeApi.applyV2Script(params, token);
+            
+            // Script should be added by server via custom code block
+            
+          } else {
+          }
+        }
+      } catch (error) {
+        
+      }
+    };
+
+    // Delay script registration to ensure authentication is fully settled
+    const timer = setTimeout(() => {
+      registerVersionBasedScripts();
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [isAuthenticated, sessionToken, user?.email]); // Trigger when auth state changes
 
  
 
@@ -334,8 +549,8 @@ const App: React.FC = () => {
   };
 
   const handleBackToWelcome = () => {
-    // Clear the banner added flag and show welcome screen
-    bannerBooleans.setIsBannerAdded(false);
+    // Don't clear the banner added flag - preserve the banner status
+    // bannerBooleans.setIsBannerAdded(false);
     setSkipWelcomeScreen(false);
     componentStates.resetComponentStates();
     componentStates.setIsWelcomeScreen(true);
@@ -431,76 +646,7 @@ const App: React.FC = () => {
     detectSiteChange();
   }, [currentSiteId, exchangeAndVerifyIdToken]);
 
-  // Version-based script registration - run once when user is authenticated
-  useEffect(() => {
-    const registerVersionBasedScripts = async () => {
-      // Only register scripts if user is authenticated and has session token
-      if (!isAuthenticated || !sessionToken || !user?.email) {
-        return;
-      }
-
-      const token = getSessionTokenFromLocalStorage();
-      if (!token) {
-        return;
-      }
-
-      // Check if scripts were already registered in this session to avoid unnecessary API calls
-      const scriptsRegistered = sessionStorage.getItem(`scripts_registered_${appVersion}`);
-      if (scriptsRegistered) {
-        return; // Scripts already registered for this version in this session
-      }
-
-      try {
-        // Get site info for script application
-        const siteInfo = await webflow.getSiteInfo();
-
-        if (appVersion === '1.0.0') {
-          const result = await customCodeApi.registerAnalyticsBlockingScript(token);
-          
-          // Apply the registered script
-          if (result && result.result) {
-            const params: CodeApplication = {
-              targetType: 'site',
-              targetId: siteInfo.siteId,
-              scriptId: result.result.id,
-              location: 'header',
-              version: result.result.version
-            };
-            await customCodeApi.applyScript(params, token);
-          }
-        } else if (appVersion === '2.0.0' || appVersion === '2.0.1') {
-          const result = await customCodeApi.registerV2BannerCustomCode(token);
-          
-          // Apply the registered script
-          if (result && result.result) {
-            const params: CodeApplication = {
-              targetType: 'site',
-              targetId: siteInfo.siteId,
-              scriptId: result.result.id,
-              location: 'header',
-              version: result.result.version
-            };
-            await customCodeApi.applyV2Script(params, token);
-          }
-        }
-        
-        // Mark scripts as registered for this version in this session
-        sessionStorage.setItem(`scripts_registered_${appVersion}`, 'true');
-      } catch (error) {
-        // Silent error handling - script registration will be retried on next auth
-      }
-    };
-
-    // Delay script registration to ensure authentication is fully settled
-    const timer = setTimeout(() => {
-      registerVersionBasedScripts();
-    }, 2000);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [isAuthenticated, sessionToken, user?.email]); // Trigger when auth state changes
-
+ 
   // App initialization delay removed - now handled in automatic token refresh useEffect
 
 
@@ -546,6 +692,7 @@ const App: React.FC = () => {
           isCheckingAuth={isCheckingAuth}
           isBannerAdded={bannerBooleans.isBannerAdded}
           onCustomize={handleCustomize}
+          isBannerStatusLoading={isBannerStatusLoading}
         />
           );
         })()
@@ -582,6 +729,7 @@ const App: React.FC = () => {
           isCheckingAuth={isCheckingAuth}
           isBannerAdded={bannerBooleans.isBannerAdded}
           onCustomize={handleCustomize}
+          isBannerStatusLoading={isBannerStatusLoading}
         />
       )}
        

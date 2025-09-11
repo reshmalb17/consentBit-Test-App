@@ -27,9 +27,19 @@ function migrateOldData(): void {
   setAuthStorageItem(migrationKey, 'true');
 }
 
-// Function to get key (simple approach - no site-specific storage)
+// Function to get key with site-specific storage for certain keys
 function getSiteSpecificKey(key: string): string {
-  // Simple approach - just return the key without any site-specific prefixing
+  // For siteInfo, we need site-specific storage to handle multiple sites
+  if (key === 'siteInfo') {
+    const currentSiteId = getAuthStorageItem('currentSiteId');
+    if (currentSiteId) {
+      return `siteInfo_${currentSiteId}`;
+    }
+    // Fallback to old key for backward compatibility
+    return 'siteInfo';
+  }
+  
+  // For other keys, use simple approach
   return key;
 }
 
@@ -58,7 +68,13 @@ export function getCurrentSiteId(): string {
   }
   
   // User is authorized - now get site ID
-  // COMMENTED OUT: const siteInfo = localStorage.getItem('siteInfo');
+  // First try to get current site ID from storage
+  const currentSiteId = getAuthStorageItem('currentSiteId');
+  if (currentSiteId) {
+    return currentSiteId;
+  }
+  
+  // Fallback to old siteInfo storage for backward compatibility
   const siteInfo = getAuthStorageItem('siteInfo');
   if (siteInfo) {
     try {

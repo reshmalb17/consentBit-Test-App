@@ -161,10 +161,29 @@ export function setAuthData(authData: AuthData): void {
 }
 
 /**
- * Get site info from sessionStorage
+ * Get site info from sessionStorage for a specific site
  */
-export function getSiteInfo(): SiteInfo | null {
-  const siteInfo = getAuthStorageItem('siteInfo');
+export function getSiteInfo(siteId?: string): SiteInfo | null {
+  // If no siteId provided, try to get current site ID
+  if (!siteId) {
+    siteId = getAuthStorageItem('currentSiteId');
+  }
+  
+  if (!siteId) {
+    // Fallback to old key for backward compatibility
+    const siteInfo = getAuthStorageItem('siteInfo');
+    if (siteInfo) {
+      try {
+        return JSON.parse(siteInfo);
+      } catch (error) {
+        return null;
+      }
+    }
+    return null;
+  }
+  
+  const siteSpecificKey = `siteInfo_${siteId}`;
+  const siteInfo = getAuthStorageItem(siteSpecificKey);
   if (!siteInfo) return null;
   
   try {
@@ -175,10 +194,20 @@ export function getSiteInfo(): SiteInfo | null {
 }
 
 /**
- * Set site info in sessionStorage
+ * Set site info in sessionStorage with site-specific key
  */
 export function setSiteInfo(siteInfo: SiteInfo): void {
-  setAuthStorageItem('siteInfo', JSON.stringify(siteInfo));
+  const siteSpecificKey = `siteInfo_${siteInfo.siteId}`;
+  setAuthStorageItem(siteSpecificKey, JSON.stringify(siteInfo));
+  // Also store the current site ID for reference
+  setAuthStorageItem('currentSiteId', siteInfo.siteId);
+}
+
+/**
+ * Update current site ID (useful when switching between sites)
+ */
+export function setCurrentSiteId(siteId: string): void {
+  setAuthStorageItem('currentSiteId', siteId);
 }
 
 /**

@@ -5,7 +5,7 @@ import { customCodeApi } from "../services/api";
 import { useScriptContext } from "../context/ScriptContext";
 import PulseAnimation from './PulseAnimation';
 import { usePersistentState } from '../hooks/usePersistentState';
-import { getAuthStorageItem, setAuthStorageItem, removeAuthStorageItem } from '../util/authStorage';
+import { getAuthStorageItem, setAuthStorageItem, removeAuthStorageItem, setCurrentSiteId } from '../util/authStorage';
 import webflow from '../types/webflowtypes';
 
 const questionmark = new URL("../assets/blue question.svg", import.meta.url).href;
@@ -48,6 +48,9 @@ const Script: React.FC<{
         const fetchSiteInfo = async () => {
             try {
                 const siteInfo = await webflow.getSiteInfo();
+                if (siteInfo?.siteId) {
+                    setCurrentSiteId(siteInfo.siteId);
+                }
                 setSiteInfo(siteInfo);
             } catch (error) {
             }
@@ -71,6 +74,9 @@ const Script: React.FC<{
                     setScripts([]);
                     // COMMENTED OUT: localStorage.removeItem('scriptContext_scripts');
                     removeAuthStorageItem('scriptContext_scripts');
+                    
+                    // Update current site ID for site-specific storage
+                    setCurrentSiteId(newSiteId);
                     
                     // Update site info
                     setSiteInfo(currentSiteInfo);

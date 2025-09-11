@@ -48,6 +48,7 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
   const [showCustomize, setShowCustomize] = useState(false);
   const [iconSrc, setIconSrc] = useState(CopyContent);
   const [showChoosePlan, setShowChoosePlan] = useState(false);
+  const [hideLoading, setHideLoading] = useState(false);
   const { sessionToken } = useAuth();
 
   
@@ -108,12 +109,17 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
           // Create complete banner structure (both GDPR and CCPA banners)
           await createCompleteBannerStructureWithExistingFunctions(config);
           
+          // Hide loading immediately after banner creation completes
+          setHideLoading(true);
+          
             } catch (bannerCreationError) {
+          setHideLoading(true); // Hide loading even on error
           throw bannerCreationError;
          }
 
         
                  const bannerData = {
+           siteId: siteData.siteInfo?.siteId,
            cookieExpiration: "30",
            bgColor: bannerStyles.color,
            activeTab: "Customization",
@@ -128,22 +134,47 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
            secondbuttontext: bannerStyles.secondbuttontext,
            primaryButtonText: bannerStyles.primaryButtonText,
            Font: bannerStyles.Font,
-           style: "normal",
+           style: "Regular",
            selected: "default",
-           weight: "normal",
+           weight: "Regular",
            borderRadius: bannerStyles.borderRadius,
            buttonRadius: bannerStyles.buttonRadius,
            animation: bannerAnimation.animation,
            easing: "ease",
            language: bannerLanguages.language,
-           buttonText: bannerStyles.primaryButtonText,
            isBannerAdded: true,
            color: bannerStyles.color
          };
-         popups.setShowPopup(true);         
+         // Hide popup immediately to prevent flicker
+         popups.setShowPopup(false);
          handleConfirmPublish();
-         const respons2 = await customCodeApi.saveBannerStyles(sessionToken, bannerData);
        
+         try {
+           const respons2 = await customCodeApi.saveBannerStyles(sessionToken, bannerData);
+           
+           // Check for successful response - must have success message
+           if (respons2 && respons2.message === 'Banner settings saved successfully') {
+           } else {
+             // Show warning notification to user but continue
+             if (typeof webflow !== 'undefined' && webflow.notify) {
+               webflow.notify({ 
+                 type: "info", 
+                 message: "Banner created but settings may not be saved. Please check your settings." 
+               });
+             }
+           }
+         } catch (apiError) {
+           // Show warning notification to user but continue
+           if (typeof webflow !== 'undefined' && webflow.notify) {
+             webflow.notify({ 
+               type: "info", 
+               message: "Banner created but settings may not be saved. Please check your settings." 
+             });
+           }
+         }
+         
+         // Always navigate to success page after banner creation
+      
       } else {
 
         
@@ -158,14 +189,14 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
         }
       }
     } catch (error) {
-
       tooltips.setShowTooltip(false);
+      popups.setShowPopup(false);
+      
       // Show error notification to user
       if (typeof webflow !== 'undefined' && webflow.notify) {
         webflow.notify({ type: "error", message: "Failed to publish banners. Please try again." });
       }
       // Note: isCreating state is managed by useBannerCreation hook
-
     }
   };
   const handleCustomizeClick = () => {
@@ -191,7 +222,7 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
 
       <div className="publish-c">
         {/* Loading overlay with pulse animation */}
-        {isCreating && (
+        {isCreating && !hideLoading && (
           <div className="popup">
             <div className="popup-loading-content">
               <PulseAnimation />
@@ -273,7 +304,6 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
                   className="publish-btn"
                   disabled={!isConfirmed || isCreating}
                   onClick={() => {
-
                     handlePublishClick();
                   }}
                 >

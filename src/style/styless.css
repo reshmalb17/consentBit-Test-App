@@ -558,6 +558,10 @@ input[type="text"] {
   color: white;
   outline: none;
 }
+input[type="url"] {
+  color: white;
+  outline: none;
+}
 
     .custom-select {
       position: relative;
@@ -5487,4 +5491,14 @@ Responsive Design
   .setup-card {
     padding: 20px;
   }
-} */ 
+}
+
+/* Hover effect for More Info links in banners */
+[data-hover-underline="true"] {
+  text-decoration: none !important;
+  transition: text-decoration 0.2s ease;
+}
+
+[data-hover-underline="true"]:hover {
+  text-decoration: underline !important;
+} 

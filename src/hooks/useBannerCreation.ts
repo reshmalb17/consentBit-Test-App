@@ -7,8 +7,11 @@ import { getSessionTokenFromLocalStorage } from '../util/Session';
 import { customCodeApi } from '../services/api';
 import { CodeApplication } from 'src/types/types';
 import { useAuth } from '../hooks/userAuth';
-import { usePersistentState } from './usePersistentState';
-  const base_url = "https://cb-server.web-8fb.workers.dev"
+import { usePersistentState, getCurrentSiteId } from './usePersistentState';
+import pkg from '../../package.json';
+
+const appVersion = pkg.version;
+const base_url = "https://cb-server.web-8fb.workers.dev"
 
 
 export interface BannerConfig {
@@ -731,19 +734,21 @@ export const useBannerCreation = () => {
         return;
       }
 
+      // FORCE register scripts during banner creation - no session storage checks
+
       const siteIdinfo = await webflow.getSiteInfo();
       setSiteInfo(siteIdinfo);
 
-      const hostingScript = await customCodeApi.registerV2BannerCustomCode(token);
+      const hostingScript = await customCodeApi.registerV2BannerCustomCode(token, siteIdinfo.siteId);
 
-      if (hostingScript) {
+      if (hostingScript && hostingScript.result) {
         try {
           const scriptId = hostingScript.result.id;
           const version = hostingScript.result.version;
 
           const params: CodeApplication = {
             targetType: 'site',
-            targetId: siteIdinfo.siteId,
+            targetId: siteIdinfo.siteId, // Use siteIdinfo.siteId for application
             scriptId: scriptId,
             location: 'header',
             version: version
@@ -755,10 +760,10 @@ export const useBannerCreation = () => {
         catch (error) {
           throw error;
         }
+      } else {
       }
     }
     catch (error) {
-      // Component error handling
     }
   };
 
@@ -779,26 +784,41 @@ export const useBannerCreation = () => {
       const existingBanners = await webflow.getAllElements();
       for (const element of existingBanners) {
         try {
+          // Check if element exists and is valid before accessing its methods
+          if (!element) {
+            continue;
+          }
+
           // Check for DOM ID using getDomId method
-          if (element && typeof (element as any).getDomId === 'function') {
-            const domId = await (element as any).getDomId();
-            if (domId && (domId === 'consent-banner' || domId === 'initial-consent-banner' || 
-                         domId === 'main-banner' || domId === 'main-consent-banner' || 
-                         domId === 'toggle-consent-btn')) {
-              if (typeof element.remove === 'function') {
-                await element.remove();
+          if (typeof (element as any).getDomId === 'function') {
+            try {
+              const domId = await (element as any).getDomId();
+              if (domId && (domId === 'consent-banner' || domId === 'initial-consent-banner' || 
+                           domId === 'main-banner' || domId === 'main-consent-banner' || 
+                           domId === 'toggle-consent-btn')) {
+                if (typeof element.remove === 'function') {
+                  await element.remove();
+                }
               }
+            } catch (domIdError) {
+              // Element might be missing, skip it
+              continue;
             }
           }
           // Also check for custom attributes as fallback
-          else if (element && typeof element.getCustomAttribute === 'function') {
-            const customId = element.getCustomAttribute('id');
-            if (customId && (customId === 'consent-banner' || customId === 'initial-consent-banner' || 
-                           customId === 'main-banner' || customId === 'main-consent-banner' || 
-                           customId === 'toggle-consent-btn')) {
-              if (typeof element.remove === 'function') {
-                await element.remove();
+          else if (typeof element.getCustomAttribute === 'function') {
+            try {
+              const customId = await element.getCustomAttribute('id');
+              if (customId && (customId === 'consent-banner' || customId === 'initial-consent-banner' || 
+                             customId === 'main-banner' || customId === 'main-consent-banner' || 
+                             customId === 'toggle-consent-btn')) {
+                if (typeof element.remove === 'function') {
+                  await element.remove();
+                }
               }
+            } catch (customAttrError) {
+              // Element might be missing, skip it
+              continue;
             }
           }
         } catch (cleanupError) {
@@ -807,19 +827,22 @@ export const useBannerCreation = () => {
       }
 
       // Create simple banners first
-      await createSimpleGDPRBanner(selectedElement, config, animationAttribute);
-      await createGDPRPreferencesWithExistingFunction(selectedElement, config);
-
-
-      await createSimpleCCPABanner(selectedElement, config, animationAttribute);
+      try {
+        await createSimpleGDPRBanner(selectedElement, config, animationAttribute);
+        await createGDPRPreferencesWithExistingFunction(selectedElement, config);
+        await createSimpleCCPABanner(selectedElement, config, animationAttribute);
+      } catch (bannerCreationError) {
+        // Continue with the process even if banner creation fails
+      }
 
       // Create preference modals
-    
+      try {
+        await createCCPAPreferencesWithExistingFunction(selectedElement, config);
+      } catch (ccpaError) {
+        // Continue with the process even if CCPA creation fails
+      }
       
-      await createCCPAPreferencesWithExistingFunction(selectedElement, config);
       await fetchAnalyticsBlockingsScriptsV2();
-    
-      
       setIsCreating(false);
       
     } catch (error) {

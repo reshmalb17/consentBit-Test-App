@@ -93,7 +93,6 @@ enableAutoClearOnReload();
 disableAutoClearOnReload();
 
 // Check current status
-console.log('Auto-clear enabled:', localStorage.getItem('__auto_clear_enabled__') === 'true');
 ```
 
 ## Important Notes
