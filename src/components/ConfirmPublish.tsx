@@ -118,7 +118,7 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
          }
 
         
-                 const bannerData = {
+            const bannerData = {
            siteId: siteData.siteInfo?.siteId,
            cookieExpiration: "30",
            bgColor: bannerStyles.color,
@@ -153,16 +153,7 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
            const respons2 = await customCodeApi.saveBannerStyles(sessionToken, bannerData);
            
            // Check for successful response - must have success message
-           if (respons2 && respons2.message === 'Banner settings saved successfully') {
-           } else {
-             // Show warning notification to user but continue
-             if (typeof webflow !== 'undefined' && webflow.notify) {
-               webflow.notify({ 
-                 type: "info", 
-                 message: "Banner created but settings may not be saved. Please check your settings." 
-               });
-             }
-           }
+        
          } catch (apiError) {
            // Show warning notification to user but continue
            if (typeof webflow !== 'undefined' && webflow.notify) {

@@ -113,7 +113,6 @@ export const customCodeApi = {
       const url = appData.siteId 
         ? `${base_url}/api/app-data?siteId=${appData.siteId}`
         : `${base_url}/api/app-data`;
-      
        
       const response = await fetch(url, {
         method: 'POST',

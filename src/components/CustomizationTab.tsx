@@ -15,6 +15,8 @@ const crossmark = new URL("../assets/group.svg", import.meta.url).href;
 const rightarrow = new URL("../assets/up arrow.svg", import.meta.url).href;
 const uparrow = new URL("../assets/blue up arrow.svg", import.meta.url).href;
 const copyScript = new URL("../assets/copy script.svg", import.meta.url).href;
+const warningicon = new URL("../assets/warning-2.png", import.meta.url).href;
+const messageicon = new URL("../assets/message-icon.svg", import.meta.url).href;
 
 import { customCodeApi } from "../services/api";
 import { useAuth } from "../hooks/userAuth";
@@ -2237,7 +2239,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
                      }
                   }}
                 >
-                  {isBannerAdded ? "Publish your changes" : "Create Component"}
+                  Publish your changes
                 </button>
 
               </div>
@@ -2297,9 +2299,26 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
             <div className="flex down">
               {isBannerAdded ? (
                 <>
-                  <span className="spanbox">Before proceeding, make sure you're not selecting the ConsentBit element in the Webflow Designer.</span>
-                  <span className="spanbox">Hang tight! We're updating your banner with the latest changes.</span>
-                  <span className="spanbox">Applying your updates to the project now!</span>
+                  {/* <div className="warning-container">
+                    <div className="warning-icon">
+                      <img src={warningicon} alt="warning" />
+                      </div>
+                      <div className="warning-text">
+                       Before proceeding, make sure you're not selecting the ConsentBit element in the Webflow Designer.
+                        </div></div> */}
+                  <div className="message-container">
+                    <div className="message-icon">
+                      <img src={messageicon} alt="message" />
+                       </div>
+                       <div className="message-text">
+                           <span> Hang tight! We're updating your banner with the latest changes.</span> 
+                           <span >Applying your updates to the project now!</span>
+                        </div>
+                      </div>
+                      <div className="line-separator">
+
+                      </div>
+                  
                 </>
               ) : (
                 <>

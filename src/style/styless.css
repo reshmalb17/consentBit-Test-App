@@ -1324,7 +1324,51 @@ select option:checked {
   width: 90%;
   text-align: left;
 }
+.warning-container {
+  display: flex;
+    gap: 10px;
+    border: 1px solid #F4682D40 !important;
+    background-color: rgba(244, 104, 45, 0.25) !important;
+    color: #FD6727;
+   
+    padding: 30px;
+    border-radius: 5px;
+    flex-direction: column;
 
+}
+.warning-text{
+  text-align: center;
+  align-items: center;
+  padding-left: 15%;
+  padding-right: 15%;
+
+}
+.message-container {
+  border: none;
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+  justify-content: flex-start;
+  padding: 25px;
+    gap: 25px;
+    width: 100%;
+    border: none;
+
+}
+.message-text {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  text-align: left;
+
+}
+.line-separator {
+  width: 98%;
+    height: 1px;
+    background-color: white;
+    opacity: .1;
+    margin-bottom: 20px;
+}
 .leftalign {
   text-align: left;
   font-family: 'DM Sans', sans-serif;
@@ -1353,7 +1397,7 @@ select option:checked {
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
-  width: 100%;
+  width: 25%;
   height: 30px;
   display: flex;
   align-content: flex-start;
@@ -1375,7 +1419,7 @@ select option:checked {
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
-  width: 100%;
+  width: 25%;
   height: 30px;
   display: flex;
   align-content: flex-start;
