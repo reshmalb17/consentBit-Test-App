@@ -235,7 +235,33 @@ export const translations: Record<string, TranslationKeys> = {
         description: "Deze cookies onthouden instellingen zoals taal of regio en slaan weergavevoorkeuren op om een meer gepersonaliseerde, naadloze ervaring te bieden."
       }
     }
-  }
+  },
+  pl: {
+    heading: "Ustawienia plików cookie",
+    description: "Klikając, wyrażasz zgodę na przechowywanie plików cookie na Twoim urządzeniu w celu poprawy nawigacji, analizy użytkowania i wsparcia marketingu",
+    acceptAll: "Zapisz ustawienia",
+    reject: "Odrzuć",
+    changePreference: "Zmień ustawienia",
+    moreInfo: "Więcej informacji",
+    sections: {
+      essential: {
+        label: "Niezbędne",
+        description: "Niezbędne pliki cookie umożliwiają podstawowe funkcje strony internetowej, takie jak bezpieczeństwo i dostępność. Nie przechowują danych osobowych i nie można ich wyłączyć."
+      },
+      analytics: {
+        label: "Analityczne",
+        description: "Te pliki cookie zbierają anonimowe dane, aby pomóc nam ulepszyć funkcjonalność strony internetowej i zoptymalizować doświadczenie użytkownika."
+      },
+      marketing: {
+        label: "Marketingowe",
+        description: "Te pliki cookie śledzą użytkowników na różnych stronach internetowych, aby dostarczać odpowiednie reklamy i mogą przetwarzać dane osobowe, co wymaga wyraźnej zgody."
+      },
+      preferences: {
+        label: "Preferencje",
+        description: "Te pliki cookie zapamiętują ustawienia takie jak język lub region oraz przechowują preferencje wyświetlania, aby zapewnić bardziej spersonalizowane, płynne doświadczenie."
+      }
+    }
+}
 };
 
 // Language mapping for backward compatibility
@@ -245,6 +271,7 @@ export const languageMapping: Record<string, string> = {
   "French": "fr",
   "German": "de",
   "Italian": "it",
+  "Polish": "pl",
   "Portuguese": "pt",
   "Swedish": "sv",
   "Dutch": "nl"

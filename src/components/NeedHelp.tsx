@@ -18,7 +18,7 @@ const NeedHelp: React.FC = () => {
   const buttonRef = useRef<HTMLDivElement | null>(null);
 
   const helpItems: HelpItem[] = [
-    { label: 'Watch tutorial', href: 'https://www.youtube.com/watch?v=JdUFb1R2WWY&t=9s', icon: watch },
+    { label: 'Watch tutorial', href: 'https://www.youtube.com/watch?v=bS0Xdcurdrc', icon: watch },
     { label: 'Check docs', href: 'https://www.consentbit.com/help-document', icon: book },
     { label: 'Get support', href: 'https://www.consentbit.com/contact', icon: users },
     { label: 'Send feedback', href: 'https://www.consentbit.com/contact', icon: doc },

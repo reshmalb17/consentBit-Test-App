@@ -220,6 +220,7 @@ const Script: React.FC<{
             const userData = JSON.parse(userinfo || "{}");
             let finalTokens = tokens;
             
+            
             // Check if session token has the correct siteId
             let tokenHasCorrectSiteId = false;
             try {
@@ -244,16 +245,13 @@ const Script: React.FC<{
                 const newToken = await regenerateSessionToken();
                 if (newToken) {
                     finalTokens = newToken;
-                } 
-            } else {
+                }
             }
 
             // Log token for debugging (remove in production)
+            
             const result = await customCodeApi.analyticsScript(finalTokens, currentSiteId);
 
-            // Print complete server response
-           
-           
 
             if (!result) {
                 throw new Error('No response from API');
@@ -269,8 +267,6 @@ const Script: React.FC<{
             
             const scriptsResponse = result.data.analyticsScripts ?? [];
             
-            // Debug: Log the current site ID and any scripts with site IDs
-         
             
             // Filter scripts - show all scripts that have valid content
             const validScripts = scriptsResponse.filter(script => {
@@ -289,6 +285,7 @@ const Script: React.FC<{
                 // scripts for the current site only
                 return true;
             });
+            
            
            
             // Debug: Add a global function to manually regenerate token

@@ -366,7 +366,20 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
         description: "Usamos cookies para fornecer a melhor experiência possível. Eles também nos permitem analisar o comportamento do usuário para melhorar constantemente o site para você. ",
         doNotShare: "Não Compartilhar Minhas Informações Pessoais"
       }
-    }
+    },
+    Polish: {
+  heading: "Ustawienia plików cookie",
+  description: "Używamy plików cookie, aby zapewnić najlepsze możliwe doświadczenie. Pozwalają nam również analizować zachowanie użytkowników, aby stale ulepszać stronę dla Ciebie.",
+  accept: "Akceptuj",
+  reject: "Odrzuć",
+  preferences: "Preferencje",
+  moreInfo: "Więcej informacji",
+  ccpa: {
+    heading: "Cenimy Twoją prywatność",
+    description: "Używamy plików cookie, aby zapewnić najlepsze możliwe doświadczenie. Pozwalają nam również analizować zachowanie użytkowników, aby stale ulepszać stronę dla Ciebie.",
+    doNotShare: "Nie udostępniaj moich danych osobowych"
+  }
+}
 
   };
 
@@ -2081,6 +2094,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
     "French",
     "German",
     "Italian",
+    "Polish",
     "Portuguese",
     "Spanish",
     "Swedish",

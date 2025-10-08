@@ -40,23 +40,12 @@ export function useAuth() {
   const queryClient = useQueryClient();
   const isExchangingToken = { current: false };
   
-  // 🔧 NEW: Helper function to ensure site context is available
-  const ensureSiteContext = async () => {
-    try {
-      const siteInfo = await webflow.getSiteInfo();
-      if (!siteInfo?.siteId) {
-        throw new Error('No site context available - user may not be in Webflow Designer');
-      }
-      return siteInfo;
-    } catch (error) {
-      throw error;
-    }
-  };
-    // Function to attempt automatic token refresh on app load
+  // Function to attempt automatic token refresh on app load
   const attemptAutoRefresh = async (): Promise<boolean> => {
     try {
       
       // Check if user was explicitly logged out
+      // COMMENTED OUT: const wasExplicitlyLoggedOut = localStorage.getItem("explicitly_logged_out");
       const wasExplicitlyLoggedOut = getAuthStorageItem("explicitly_logged_out");
       if (wasExplicitlyLoggedOut) {
         return false;
@@ -72,9 +61,10 @@ export function useAuth() {
             return true; // Already have valid token
           }
         } catch (error) {
+          // Invalid token data, continue with refresh attempt
         }
       }
-      
+
       // Attempt silent auth to refresh token with timeout
       const silentAuthPromise = attemptSilentAuth();
       const timeoutPromise = new Promise<boolean>((resolve) => {
@@ -89,6 +79,7 @@ export function useAuth() {
       return false;
     }
   };
+
   // Query for managing auth state and token validation
   const { data: authState, isLoading: isAuthLoading } = useQuery<AuthState>({
     queryKey: ["auth"],
@@ -98,6 +89,7 @@ export function useAuth() {
       migrateAuthDataToSessionStorage();
       
       const authData = getAuthData();
+      // COMMENTED OUT: const wasExplicitlyLoggedOut = localStorage.getItem("explicitly_logged_out");
       const wasExplicitlyLoggedOut = getAuthStorageItem("explicitly_logged_out");
 
       // Return initial state if no stored user or logged out
@@ -141,12 +133,12 @@ export function useAuth() {
     refetchOnReconnect: false,
     gcTime: 1000 * 60 * 60, // Cache for 1 hour
   });
-// Mutation for exchanging ID token for session token
+
+  // Mutation for exchanging ID token for session token
   const tokenMutation = useMutation({
     mutationFn: async (idToken: string) => {
-      // 🔧 IMPROVED: Get and validate site info
-      const siteInfo = await ensureSiteContext();
-      console.log(`[TOKEN_MUTATION] Starting exchange for site: ${siteInfo.siteId}`);
+      // Get site info from Webflow
+      const siteInfo = await webflow.getSiteInfo();
 
       // Exchange token with backend
       const response = await fetch(`${base_url}/api/auth/token`, {
@@ -167,10 +159,10 @@ export function useAuth() {
         throw new Error("No session token received");
       }
 
-
       // Return both auth data and site info
       return { ...data, siteInfo };
-    },   onSuccess: (data) => {
+    },
+    onSuccess: (data) => {
       try {
         // Decode the new token
        const decodedToken = jwtDecode(data.sessionToken) as DecodedToken;
@@ -182,8 +174,9 @@ export function useAuth() {
           exp: decodedToken.exp,
         };
 
-        // Update sessionStorage for auth data
+                 // Update sessionStorage for auth data
          setAuthData(userData);
+        // COMMENTED OUT: localStorage.removeItem("explicitly_logged_out");
         removeAuthStorageItem("explicitly_logged_out");
 
         // Store site information after authentication
@@ -200,20 +193,23 @@ export function useAuth() {
           },
           sessionToken: data.sessionToken,
         });
-
       } catch (error) {
       }
     },
   });
-// 🔧 IMPROVED: Function to attempt silent authorization without user interaction
+
+  // Function to attempt silent authorization without user interaction
   const attemptSilentAuth = async (): Promise<boolean> => {
     try {
-      // 🔧 IMPROVED: Validate site context first
-      const siteInfo = await ensureSiteContext();
-      
       // Attempt to get ID token silently (works if user is already authenticated with Webflow)
       const idToken = await webflow.getIdToken();
       if (!idToken) {
+        return false;
+      }
+
+      // Get site info from Webflow
+      const siteInfo = await webflow.getSiteInfo();
+      if (!siteInfo || !siteInfo.siteId) {
         return false;
       }
       
@@ -233,20 +229,18 @@ export function useAuth() {
       if (!response.ok || !data.sessionToken) {
         return false;
       }
-  // 🔧 IMPROVED: Validate that backend returned correct site
-      if (data.siteId && data.siteId !== siteInfo.siteId) {
-      }
 
       // Store in localStorage
       const userData = {
         sessionToken: data.sessionToken,
         firstName: data.firstName,
         email: data.email,
-        siteId: data.siteId || siteInfo.siteId,
+        siteId: siteInfo.siteId,
         exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
       };
 
       setAuthData(userData);
+      // COMMENTED OUT: localStorage.removeItem("explicitly_logged_out");
       removeAuthStorageItem("explicitly_logged_out");
 
       // Store site information after authentication
@@ -259,30 +253,33 @@ export function useAuth() {
         user: {
           firstName: data.firstName,
           email: data.email,
-          siteId: data.siteId || siteInfo.siteId
+          siteId: siteInfo.siteId
         },
         sessionToken: data.sessionToken
       });
 
       return true;
-      } catch (error) {
+
+    } catch (error) {
       // Silent auth failed, return false to indicate need for interactive auth
       return false;
     }
   };
 
-  // 🔧 IMPROVED: Function to initiate token exchange process
+  // Function to initiate token exchange process
   const exchangeAndVerifyIdToken = async () => {
     try {
-      // 🔧 IMPROVED: Get and validate site context first
-      const siteInfo = await ensureSiteContext();
-
       // Get new ID token from Webflow
       const idToken = await webflow.getIdToken();
       if (!idToken) {
         throw new Error('Failed to get ID token from Webflow');
       }
 
+      // Get site info from Webflow
+      const siteInfo = await webflow.getSiteInfo();
+      if (!siteInfo || !siteInfo.siteId) {
+        throw new Error('Failed to get site info from Webflow');
+      }
       
       const response = await fetch(`${base_url}/api/auth/token`, {
         method: "POST",
@@ -294,11 +291,10 @@ export function useAuth() {
           siteId: siteInfo.siteId 
         }),
       });
-       const data = await response.json();
 
+      const data = await response.json();
 
       if (!response.ok) {
-        console.error(`[TOKEN_EXCHANGE] Failed:`, data);
         throw new Error(`Token exchange failed: ${data.error || 'Unknown error'}`);
       }
 
@@ -306,9 +302,7 @@ export function useAuth() {
         throw new Error('No session token received from server');
       }
 
-      // 🔧 IMPROVED: Validate that backend returned correct site
-      if (data.siteId && data.siteId !== siteInfo.siteId) {
-      }
+      // Debug: Check what the backend returned
 
       // Store in localStorage
       const userData = {
@@ -319,20 +313,21 @@ export function useAuth() {
         exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
       };
 
-
-      setAuthData(userData);
+             setAuthData(userData);
+      // COMMENTED OUT: localStorage.removeItem("explicitly_logged_out");
       removeAuthStorageItem("explicitly_logged_out");
 
       // Store site information after authentication
       if (siteInfo) {
         setSiteInfo(siteInfo);
       }
- // Update React Query cache
+
+      // Update React Query cache
       queryClient.setQueryData<AuthState>(["auth"], {
         user: {
           firstName: data.firstName,
           email: data.email,
-          siteId: data.siteId || siteInfo.siteId
+          siteId: siteInfo.siteId
         },
         sessionToken: data.sessionToken
       });
@@ -340,7 +335,7 @@ export function useAuth() {
       return data;
 
     } catch (error) {
-      console.error('[TOKEN_EXCHANGE] Failed:', error);
+      // COMMENTED OUT: localStorage.removeItem("consentbit-userinfo");
       clearAuthData();
       throw error;
     }
@@ -349,6 +344,8 @@ export function useAuth() {
   // Function to handle user logout
   const logout = () => {
     // Set logout flag and clear storage
+    // COMMENTED OUT: localStorage.setItem("explicitly_logged_out", "true");
+    // COMMENTED OUT: localStorage.removeItem("consentbit-userinfo");
     setAuthStorageItem("explicitly_logged_out", "true");
     clearAuthData();
     queryClient.setQueryData(["auth"], {
@@ -357,65 +354,51 @@ export function useAuth() {
     });
     queryClient.clear();
   };
-  // 🔧 IMPROVED: OAuth screen opening with site context
+
   const openAuthScreen = async () => {
-    try {
-      // First, try silent authentication
-      const silentAuthSuccess = await attemptSilentAuth();
-      
-      if (silentAuthSuccess) {
-        return;
-      }
-
-      // 🔧 IMPROVED: Get site ID before opening auth window
-      let siteId = null;
-      let siteInfo = null;
-      
-      try {
-        siteInfo = await ensureSiteContext();
-        siteId = siteInfo.siteId;
-      } catch (error) {
-      }
-
-      // 🔧 IMPROVED: Include site ID in OAuth URL
-      const authUrl = siteId 
-        ? `${base_url}/api/auth/authorize?state=webflow_designer&site_id=${siteId}`
-        : `${base_url}/api/auth/authorize?state=webflow_designer`;
-
-      // Silent auth failed, show the interactive auth window
-      const authWindow = window.open(
-        authUrl,  // 🔧 Use dynamic URL instead of static
-        "_blank",
-        "width=600,height=600"
-      );
-
-      if (!authWindow) {
-        return;
-      }
-
-      const onAuth = async () => {
-        try {
-          await exchangeAndVerifyIdToken();
-        } catch (error) {
-          // Clear any partial auth state
-          clearAuthData();
-          setAuthStorageItem("explicitly_logged_out", "true");
-        }
-      };
-
-      const checkWindow = setInterval(() => {
-        if (authWindow?.closed) {
-          clearInterval(checkWindow);
-          onAuth();
-             }
-      }, 1000);
-    } catch (error) {
+    // First, try silent authentication
+    const silentAuthSuccess = await attemptSilentAuth();
+    
+    if (silentAuthSuccess) {
+      // Silent auth succeeded, no need to show auth window
+      return;
     }
+
+    // Silent auth failed, show the interactive auth window
+    const authWindow = window.open(
+      `${base_url}/api/auth/authorize?state=webflow_designer`,
+      "_blank",
+      "width=600,height=600"
+    );
+
+    if (!authWindow) {
+      return;
+    }
+
+    const onAuth = async () => {
+      try {
+        await exchangeAndVerifyIdToken();
+      } catch (error) {
+        // Clear any partial auth state
+        // COMMENTED OUT: localStorage.removeItem("consentbit-userinfo");
+        // COMMENTED OUT: localStorage.setItem("explicitly_logged_out", "true");
+        clearAuthData();
+        setAuthStorageItem("explicitly_logged_out", "true");
+      }
+    };
+
+    const checkWindow = setInterval(() => {
+      if (authWindow?.closed) {
+        clearInterval(checkWindow);
+        onAuth();
+      }
+    }, 1000);
   };
 
   // Function to check if user is authenticated for current site
   const isAuthenticatedForCurrentSite = async (): Promise<boolean> => {
     try {
+     
       // Check if user has basic authentication
       if (!authState?.user?.email || !authState?.sessionToken) {
         return false;
@@ -461,6 +444,5 @@ export function useAuth() {
     isAuthenticatedForCurrentSite,
     attemptSilentAuth,
     attemptAutoRefresh,
-    ensureSiteContext, // 🔧 NEW: Export helper function
   };
 }

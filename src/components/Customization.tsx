@@ -552,7 +552,24 @@ const Customization: React.FC<CustomizationProps> = ({
                     <div
                       ref={colorPickerRef}
                       className={`color-picker-container ${isOpen ? "visible" : "hidden"}`}
-                    ></div>
+                    >
+                      <input
+                        type="text"
+                        className="hex-input"
+                        value={color}
+                        onChange={(e) => {
+                          const hexValue = e.target.value;
+                          if (/^#[0-9A-Fa-f]{0,6}$/.test(hexValue)) {
+                            setColor(hexValue);
+                            if (pickerInstance.current && hexValue.length === 7) {
+                              pickerInstance.current.color.set(hexValue);
+                            }
+                          }
+                        }}
+                        placeholder="#ffffff"
+                        maxLength={7}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -564,7 +581,24 @@ const Customization: React.FC<CustomizationProps> = ({
                       <span className="color-text">{bgColors}</span>
                       <div className="color-preview" style={{ backgroundColor: bgColors }}></div>
                     </button>
-                    <div ref={secondbgPickerRef} className={`color-picker-container ${secondbgOpen ? "visible" : "hidden"}`}></div>
+                    <div ref={secondbgPickerRef} className={`color-picker-container ${secondbgOpen ? "visible" : "hidden"}`}>
+                      <input
+                        type="text"
+                        className="hex-input"
+                        value={bgColors}
+                        onChange={(e) => {
+                          const hexValue = e.target.value;
+                          if (/^#[0-9A-Fa-f]{0,6}$/.test(hexValue)) {
+                            setBgColors(hexValue);
+                            if (secondbgPickerInstance.current && hexValue.length === 7) {
+                              secondbgPickerInstance.current.color.set(hexValue);
+                            }
+                          }
+                        }}
+                        placeholder="#798EFF"
+                        maxLength={7}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -757,6 +791,8 @@ const Customization: React.FC<CustomizationProps> = ({
                                 ? "Configurações de Cookies"
                                 : language === "Italian"
                                   ? "Impostazioni dei Cookie"
+                                  : language === "Polish"
+                  ? "Ustawienia plików cookie"
                                   : "Cookie Settings"}
                 </h4>
 
@@ -781,6 +817,8 @@ const Customization: React.FC<CustomizationProps> = ({
                                 ? "Utilizamos cookies para oferecer a melhor experiência possível. Eles também nos permitem analisar o comportamento dos usuários para melhorar continuamente o site para você."
                                 : language === "Italian"
                                   ? "Utilizziamo i cookie per offrirti la migliore esperienza possibile. Ci permettono anche di analizzare il comportamento degli utenti per migliorare costantemente il sito web per te."
+                                  : language === "Polish" 
+                                  ? "Używamy plików cookie, aby zapewnić Ci najlepsze możliwe doświadczenie. Pozwalają nam również analizować zachowanie użytkowników, aby stale ulepszać stronę internetową dla Ciebie."
                                   : "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you."}
                 </span>
                 {privacyUrl && (
@@ -799,6 +837,7 @@ const Customization: React.FC<CustomizationProps> = ({
                             onMouseLeave={(e) => (e.target as HTMLAnchorElement).style.textDecoration = "none"}
                           >
                            {language==="English"?"More Info": 
+                          language === "Polish" ? "Więcej informacji" :
                            language=== "Spanish"?"Más Información": 
                            language=== "French"?"Plus d'infos": 
                            language=== "German"?"Mehr Info": 
@@ -837,7 +876,9 @@ const Customization: React.FC<CustomizationProps> = ({
                                 ? "Preferências"
                                 : language === "Italian"
                                   ? "Preferenze"
-                                  : "Preference"}
+                                  :  language === "Polish"
+                  ? "Preferencje"
+                  : "Preference"}
                 </button>
 
                 <button
@@ -864,7 +905,9 @@ const Customization: React.FC<CustomizationProps> = ({
                               : language === "Portuguese"
                                 ? "Rejeitar"
                                 : language === "Italian"
-                                  ? "Rifiuta"
+                                  ? "Rifiuta":
+                                  language === "Polish"
+                  ? "Odrzuć"
                                   : "Reject"}
                 </button>
 
@@ -892,7 +935,9 @@ const Customization: React.FC<CustomizationProps> = ({
                               : language === "Portuguese"
                                 ? "Aceitar"
                                 : language === "Italian"
-                                  ? "Accetta"
+                                  ? "Accetta":
+                                  language === "Polish"
+                  ? "Zaakceptuj"
                                   : "Accept"}
                 </button>
               </div>

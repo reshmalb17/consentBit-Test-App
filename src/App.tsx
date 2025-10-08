@@ -9,13 +9,12 @@ import SuccessPublish from "./components/SuccessPublish";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAppState } from "./hooks/useAppState";  
 import { useAuth } from "./hooks/userAuth";
-import { use } from "i18next";
 import { serialize } from "v8";
 import { getCurrentSiteId, listCurrentSiteData, clearCurrentSiteData, clearAllData, clearAuthData, clearAuthIfNotAuthorized, checkMigrationStatus, forceMigration, usePersistentState, debugAuthStatus, forceClearAuthData, clearAllDataIncludingAuth } from "./hooks/usePersistentState";
 import { customCodeApi } from "./services/api";
 import { CodeApplication } from "./types/types";
 import { getSessionTokenFromLocalStorage } from './util/Session';
-import { removeAuthStorageItem, getAuthStorageItem, setAuthStorageItem } from './util/authStorage';
+import { removeAuthStorageItem, getAuthStorageItem, setAuthStorageItem, getAuthData } from './util/authStorage';
 import webflow from './types/webflowtypes';
 import pkg from '../package.json';
 
@@ -579,79 +578,118 @@ const App: React.FC = () => {
   // The authentication state is now properly managed in the main initialization useEffect
 
   // Site change detection - clear scripts when site changes
-  useEffect(() => {
-    const detectSiteChange = async () => {
-      try {
-        // Check if we already have site info cached to avoid unnecessary API call
-        const cachedSiteInfo = getAuthStorageItem("siteInfo");
-        let siteInfo;
-        let newSiteId;
+  // useEffect(() => {
+  //   const detectSiteChange = async () => {
+  //     try {
+  //       // Check if we already have site info cached to avoid unnecessary API call
+  //       const cachedSiteInfo = getAuthStorageItem("siteInfo");
+  //       let siteInfo;
+  //       let newSiteId;
         
-        if (cachedSiteInfo) {
-          try {
-            siteInfo = JSON.parse(cachedSiteInfo);
-            newSiteId = siteInfo?.siteId;
-          } catch (error) {
-            // Fallback to API call if cached data is invalid
-            siteInfo = await webflow.getSiteInfo();
-            newSiteId = siteInfo?.siteId;
-          }
-        } else {
-          siteInfo = await webflow.getSiteInfo();
-          newSiteId = siteInfo?.siteId;
-          // Cache the site info for future use
-          if (siteInfo) {
-            setAuthStorageItem("siteInfo", JSON.stringify(siteInfo));
-          }
-        }
+  //       if (cachedSiteInfo) {
+  //         try {
+  //           siteInfo = JSON.parse(cachedSiteInfo);
+  //           newSiteId = siteInfo?.siteId;
+  //         } catch (error) {
+  //           // Fallback to API call if cached data is invalid
+  //           siteInfo = await webflow.getSiteInfo();
+  //           newSiteId = siteInfo?.siteId;
+  //         }
+  //       } else {
+  //         siteInfo = await webflow.getSiteInfo();
+  //         newSiteId = siteInfo?.siteId;
+  //         // Cache the site info for future use
+  //         if (siteInfo) {
+  //           setAuthStorageItem("siteInfo", JSON.stringify(siteInfo));
+  //         }
+  //       }
         
-        if (newSiteId && newSiteId !== currentSiteId) {
-          // Site has changed, clear scripts to prevent cross-site contamination
-          if (currentSiteId !== null) {
-            // Only clear if we had a previous site (not initial load)
-            // COMMENTED OUT: localStorage.removeItem('scriptContext_scripts');
-            removeAuthStorageItem('scriptContext_scripts');
+  //       if (newSiteId && newSiteId !== currentSiteId) {
+  //         // Site has changed, clear scripts to prevent cross-site contamination
+  //         if (currentSiteId !== null) {
+  //           // Only clear if we had a previous site (not initial load)
+  //           // COMMENTED OUT: localStorage.removeItem('scriptContext_scripts');
+  //           removeAuthStorageItem('scriptContext_scripts');
             
-            // Regenerate session token for the new site
-            try {
+  //           // Regenerate session token for the new site
+  //           try {
               
-              // Clear old token first to force complete regeneration
-              // COMMENTED OUT: localStorage.removeItem("consentbit-userinfo");
-              removeAuthStorageItem("consentbit-userinfo");
+  //             // Clear old token first to force complete regeneration
+  //             // COMMENTED OUT: localStorage.removeItem("consentbit-userinfo");
+  //             removeAuthStorageItem("consentbit-userinfo");
               
-              const newTokenData = await exchangeAndVerifyIdToken();
+  //             const newTokenData = await exchangeAndVerifyIdToken();
              
-            } catch (error) {
-              // Fallback: just update the site ID in stored data
-              // COMMENTED OUT: const userinfo = localStorage.getItem("consentbit-userinfo");
-              const userinfo = getAuthStorageItem("consentbit-userinfo");
-              if (userinfo) {
-                try {
-                  const userData = JSON.parse(userinfo);
-                  userData.siteId = newSiteId;
-                  // COMMENTED OUT: localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
-                  setAuthStorageItem("consentbit-userinfo", JSON.stringify(userData));
-                } catch (error) {
-                }
-              }
-            }
-          }
-          setCurrentSiteId(newSiteId);
-        }
-      } catch (error) {
-        // Silent error handling
-      }
-    };
+  //           } catch (error) {
+  //             // Fallback: just update the site ID in stored data
+  //             // COMMENTED OUT: const userinfo = localStorage.getItem("consentbit-userinfo");
+  //             const userinfo = getAuthStorageItem("consentbit-userinfo");
+  //             if (userinfo) {
+  //               try {
+  //                 const userData = JSON.parse(userinfo);
+  //                 userData.siteId = newSiteId;
+  //                 // COMMENTED OUT: localStorage.setItem("consentbit-userinfo", JSON.stringify(userData));
+  //                 setAuthStorageItem("consentbit-userinfo", JSON.stringify(userData));
+  //               } catch (error) {
+  //               }
+  //             }
+  //           }
+  //         }
+  //         setCurrentSiteId(newSiteId);
+  //       }
+  //     } catch (error) {
+  //       // Silent error handling
+  //     }
+  //   };
     
-    detectSiteChange();
-  }, [currentSiteId, exchangeAndVerifyIdToken]);
+  //   detectSiteChange();
+  // }, [currentSiteId, exchangeAndVerifyIdToken]);
 
  
   // App initialization delay removed - now handled in automatic token refresh useEffect
 
 
 
-
+// Site change detection - clear scripts when site changes
+useEffect(() => {
+  const detectSiteChange = async () => {
+    try {
+      // Always get fresh site info for critical operations
+      const siteInfo = await webflow.getSiteInfo();
+      const newSiteId = siteInfo?.siteId;
+      
+      if (!newSiteId) {
+        return;
+      }
+      
+      if (newSiteId !== currentSiteId) {
+        if (currentSiteId !== null) {
+          // Clear site-specific data
+          removeAuthStorageItem('scriptContext_scripts');
+          
+          // Force complete re-authentication for new site
+          try {
+            removeAuthStorageItem("consentbit-userinfo");
+            await exchangeAndVerifyIdToken();
+          } catch (error) {
+            // Handle gracefully - maybe show re-auth prompt
+            // Could set a flag to show re-auth UI
+          }
+        }
+        
+        setCurrentSiteId(newSiteId);
+        
+        // Update cached site info
+        setAuthStorageItem("siteInfo", JSON.stringify(siteInfo));
+        setAuthStorageItem("currentSiteId", newSiteId);
+      }
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+  
+  detectSiteChange();
+}, [currentSiteId, exchangeAndVerifyIdToken]);
 
 
 
@@ -665,6 +703,7 @@ const App: React.FC = () => {
     currentSiteData: listCurrentSiteData(),
     migrationStatus: checkMigrationStatus(),
   };
+
 
   // Debug function to check auth status
   const handleDebugAuth = () => {

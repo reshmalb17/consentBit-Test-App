@@ -1,15 +1,53 @@
 import exp from 'constants';
 import webflow, { WebflowAPI } from '../types/webflowtypes';
 import { getTranslation } from '../util/translation-utils';
-const logo = new URL("../assets/consent_logo.png", import.meta.url).href;
-
-
 
 type BreakpointAndPseudo = {
   breakpoint: string;
   pseudoClass: string;
 };
 
+const logo = new URL("../assets/icon.svg", import.meta.url).href;
+
+
+// Helper function to get or create an ass
+const getOrCreateAsset = async (): Promise<any> => {
+  try {
+    // First, try to get existing assets to see if we already have this image
+    const assets = await webflow.getAllAssets();
+    const existingAsset = assets.find(asset => {
+      // Add null checks for all properties
+      const hasConsentIcon = asset.name && asset.name === 'consent-icon';
+      
+      return hasConsentIcon;
+    });
+    
+    if (existingAsset) {
+      return existingAsset;
+    }
+
+    // If asset doesn't exist, create it from local file
+    
+    // Fetch the local SVG file
+    const response = await fetch(logo);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch local file: ${response.status} ${response.statusText}`);
+    }
+    
+    const blob = await response.blob();
+    
+    // Create file from blob with simple name
+    const file = new File([blob], 'consent-icon.svg', {
+      type: 'image/svg+xml',
+    });
+    
+    const newAsset = await (webflow as any).createAsset(file);
+    return newAsset;
+  } catch (error) {
+    console.error('Error getting or creating asset:', error);
+    throw error;
+  }
+};
 
 const createCookiePreferences = async (selectedPreferences: string[], language: string = "English", color: string = "#ffffff", btnColor: string = "#F1F1F1", headColor: string = "#483999", paraColor: string = "#1F1D40", secondcolor: string = "secondcolor", buttonRadius: number, animation: string, customToggle: boolean, primaryButtonText: string = "#ffffff", secondbuttontext: string = "#4C4A66", skipCommonDiv: boolean = false, disableScroll: boolean, closebutton: boolean = false, borderRadius: number, font: string, privacyUrl: string = "") => {
   
@@ -45,7 +83,7 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       DeclinebuttonStyleName: `consentbit-prefrence-decline`,
       headingStyleName: `consebit-prefrence-heading`,
       checkboxContainerStyleName: `consentbit-toggle`,
-      changepre: `consentbit-change-preference`,
+      changepreference: `consentbit-change-preference`,
       closebutton: `consentbit-close`,
       maindiv: 'consentbit-preference'
 
@@ -214,22 +252,20 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
       "font-size": "18px",
       "font-weight": "500",
     };
+
     const changepreferencePropertyMap: Record<string, string> = {
       "height": "55px",
       "width": "55px",
       "border-radius": "50%",
-      "background-image": "url('https://cdn.prod.website-files.com/63d5330e6841081487be0bd6/67ebf5ee639d12979361f2bc_consent.png')",
       "background-size": "cover",
-      // "box-shadow": "2px 2px 20px rgba(0, 0, 0, 0.51)",
-      "position": "fixed !important",
-      
+      "position": "fixed",
       "z-index": "999",
-      "bottom": "3% !important",
-      "left": "2% !important",
+      "bottom": "3%",
+      "left": "2%",
       "cursor": "pointer",
       "background-position-x": "50%",
       "background-position-y": "50%"
-  };
+    };
 
 
     const formPropertyMap: Record<string, string> = {
@@ -518,7 +554,71 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
         throw new Error("Failed to create button container");
       }
       await prefrenceContainerinner.setStyles([prefrenceDiv]);
-//////////////////////////////////////////////////////////////////////
+
+      if (!skipCommonDiv) {
+        const mainDivBlock = await selectedElement.before(webflow.elementPresets.DivBlock);
+        await mainDivBlock.setStyles([changepre]);
+
+        if (!mainDivBlock) {
+          throw new Error("Failed to create main div block");
+        }
+
+        if ((mainDivBlock as any).setDomId) {
+          await mainDivBlock.setCustomAttribute("scroll-control", "true");
+          await (mainDivBlock as any).setDomId("toggle-consent-btn");
+        } else {
+          console.error("ccpa banner id setteled");
+        }
+
+        // Add image to the skip div
+        let imageElement: any = null;
+        
+        try {
+          // Create the image element
+          await mainDivBlock.append(webflow.elementPresets.Image);
+          
+          // Get the children to find the image element we just added
+          const children = await mainDivBlock.getChildren();
+          imageElement = children.find(child => child.type === 'Image');
+          
+          if (!imageElement) {
+            throw new Error("Failed to create image elementssss");
+          }
+
+          // Create the asset in Webflow
+          const asset = await getOrCreateAsset();
+          
+          // Set the asset to the image element
+          await (imageElement as any).setAsset(asset);
+          
+        } catch (error) {
+          // Continue without asset if creation fails
+        }
+
+        // Style the image
+        if (imageElement) {
+          const imageStyle =
+            (await webflow.getStyleByName("consentToggleIcon")) ||
+            (await webflow.createStyle("consentToggleIcon"));
+          
+          await imageStyle.setProperties({
+            "width": "55px",
+            "height": "55px",
+            "border-radius": "50%",
+            "background-size": "cover",
+            "background-position": "center"
+          });
+          
+          await (imageElement as any).setStyles?.([imageStyle]);
+
+          // Set custom attributes for the image
+          if ((imageElement as any).setCustomAttribute) {
+            await (imageElement as any).setCustomAttribute("data-consent-toggle", "true");
+          }
+        }
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////
 
       // Conditionally add close button only if closebutton parameter is true
       let Closebuttons = null;
@@ -597,21 +697,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
         }
       } else {
       }
-      
-            // Only create the common div if not skipped
-            if (!skipCommonDiv) {
-              const mainDivBlock = await selectedElement.before(webflow.elementPresets.DivBlock);
-              await mainDivBlock.setStyles([changepre]);
-
-              if (!mainDivBlock) {
-                  throw new Error("Failed to create main div block");
-              }
-
-              if ((mainDivBlock as any).setDomId) {
-                  await mainDivBlock.setCustomAttribute("scroll-control", "true");
-                  await (mainDivBlock as any).setDomId("toggle-consent-btn");
-              }
-          }
 
       // Set bannerAdded to true in sessionStorage
       // COMMENTED OUT: localStorage.setItem('bannerAdded', 'true');

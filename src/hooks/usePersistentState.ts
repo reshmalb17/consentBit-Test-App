@@ -50,6 +50,7 @@ export function getCurrentSiteId(): string {
   // Check if user is authorized first
   // COMMENTED OUT: const userInfo = localStorage.getItem('consentbit-userinfo');
   const userInfo = getAuthStorageItem('consentbit-userinfo');
+  
   if (!userInfo) {
     // User not authorized - return default
     return 'default';
@@ -57,6 +58,7 @@ export function getCurrentSiteId(): string {
   
   try {
     const parsed = JSON.parse(userInfo);
+    
     // Check if user has valid session token, email, and siteId
     if (!parsed?.sessionToken || !parsed?.email || !parsed?.siteId) {
       // User not properly authorized - return default
@@ -70,12 +72,14 @@ export function getCurrentSiteId(): string {
   // User is authorized - now get site ID
   // First try to get current site ID from storage
   const currentSiteId = getAuthStorageItem('currentSiteId');
+  
   if (currentSiteId) {
     return currentSiteId;
   }
   
   // Fallback to old siteInfo storage for backward compatibility
   const siteInfo = getAuthStorageItem('siteInfo');
+  
   if (siteInfo) {
     try {
       const parsed = JSON.parse(siteInfo);
