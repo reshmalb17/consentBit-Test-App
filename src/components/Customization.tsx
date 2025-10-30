@@ -62,6 +62,8 @@ interface CustomizationProps {
   closebutton: boolean;
   privacyUrl: string;
   setPrivacyUrl: (value: string) => void;
+  selectedOption: string;
+  selectedOptions: string[];
 }
 
 const Customization: React.FC<CustomizationProps> = ({
@@ -108,6 +110,8 @@ const Customization: React.FC<CustomizationProps> = ({
   closebutton,
   privacyUrl,
   setPrivacyUrl,
+  selectedOption,
+  selectedOptions,
 }) => {
   const [isActive, setIsActive] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -343,7 +347,34 @@ const Customization: React.FC<CustomizationProps> = ({
   // Preview tabs: GDPR or US State Law
   const [previewMode, setPreviewMode] = useState<'gdpr' | 'ccpa'>("gdpr");
 
-  // Preview shows both GDPR and US State Law banners by default
+  // Sync with Settings tab selection (using props)
+  const showCCPAPreview = selectedOptions.includes("U.S. State Laws");
+
+  // Initialize preview mode based on selectedOption and keep it in sync
+  useEffect(() => {
+    const hasCCPA = selectedOptions.includes('U.S. State Laws');
+    const hasGDPR = selectedOptions.includes('GDPR');
+    
+    // If U.S. State Laws is selected in Settings AND it's checked, show CCPA
+    if (selectedOption === 'U.S. State Laws' && hasCCPA) {
+      setPreviewMode('ccpa');
+    } 
+    // If only GDPR is selected (or U.S. State Laws is unselected), show GDPR
+    else if (hasGDPR && !hasCCPA) {
+      setPreviewMode('gdpr');
+    }
+    // If both are selected, default to GDPR unless U.S. State Laws is explicitly selected
+    else if (hasGDPR && hasCCPA) {
+      setPreviewMode(selectedOption === 'U.S. State Laws' ? 'ccpa' : 'gdpr');
+    }
+  }, [selectedOption, selectedOptions]);
+
+  // Safety: fall back to GDPR if CCPA is selected but not available
+  useEffect(() => {
+    if (previewMode === 'ccpa' && !showCCPAPreview) {
+      setPreviewMode('gdpr');
+    }
+  }, [previewMode, showCCPAPreview]);
 
   useEffect(() => {
     // Initialize all color pickers
@@ -878,13 +909,15 @@ const Customization: React.FC<CustomizationProps> = ({
             >
               GDPR
             </button>
-            <button
-              type="button"
-              className={`preview-tab ${previewMode === 'ccpa' ? 'active' : ''}`}
-              onClick={() => setPreviewMode('ccpa')}
-            >
-              U.S. State Laws
-            </button>
+            {showCCPAPreview && (
+              <button
+                type="button"
+                className={`preview-tab ${previewMode === 'ccpa' ? 'active' : ''}`}
+                onClick={() => setPreviewMode('ccpa')}
+              >
+                U.S. State Laws
+              </button>
+            )}
           </div>
           <div className="preview-area">
             <div className="topbar">
@@ -1090,7 +1123,7 @@ const Customization: React.FC<CustomizationProps> = ({
             
 
             {/* CCPA / US State Preview */}
-            {previewMode === 'ccpa' && (
+            {showCCPAPreview && previewMode === 'ccpa' && (
             <div
               className={`cookie-banner ccpa-banner ${animation} ${isActive ? "active" : ""}`}
               style={{

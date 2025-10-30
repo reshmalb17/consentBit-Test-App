@@ -586,11 +586,93 @@ export function forceMigration(): void {
   migrateOldData(); // Run migration again
 }
 
+// Keys that should be stored separately (not in consolidated object)
+const SEPARATE_KEYS = ['consentbit-userinfo', 'siteInfo', 'currentSiteId', 'migration_completed', 'bannerAdded'];
+
+// Check if a key should be stored in the consolidated app data object
+function shouldUseConsolidatedStorage(key: string): boolean {
+  return !SEPARATE_KEYS.includes(key) && !key.startsWith('siteInfo_');
+}
+
+// Get the consolidated app data object from storage
+function getConsolidatedAppData(): Record<string, any> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const data = getAuthStorageItem('consentbit-app-data');
+    if (!data) return {};
+    return JSON.parse(data);
+  } catch (e) {
+    return {};
+  }
+}
+
+// Save the consolidated app data object to storage
+function saveConsolidatedAppData(data: Record<string, any>): void {
+  if (typeof window === 'undefined') return;
+  try {
+    setAuthStorageItem('consentbit-app-data', JSON.stringify(data));
+  } catch (e) {
+    // Silent error handling
+  }
+}
+
+// Migration: Move existing individual keys into consolidated object
+function migrateToConsolidatedStorage(): void {
+  if (typeof window === 'undefined') return;
+  
+  // Check if migration already done
+  const migrationKey = 'consentbit-app-data-migrated';
+  if (getAuthStorageItem(migrationKey) === 'true') {
+    return; // Already migrated
+  }
+  
+  // List of keys that should be in consolidated storage
+  const keysToMigrate = [
+    'color', 'bgColor', 'btnColor', 'paraColor', 'secondcolor', 'bgColors', 'headColor',
+    'secondbuttontext', 'primaryButtonText', 'activeTab', 'size', 'Font', 'selectedtext',
+    'style', 'selected', 'selectedOption', 'selectedOptions', 'weight', 'borderRadius',
+    'buttonRadius', 'cookieExpiration', 'toggleStates', 'animation', 'easing', 'language',
+    'accessToken', 'pages', 'expires', 'buttonText', 'privacyUrl'
+  ];
+  
+  const consolidatedData: Record<string, any> = {};
+  let migratedCount = 0;
+  
+  // Migrate each key
+  keysToMigrate.forEach(key => {
+    const value = getAuthStorageItem(key);
+    if (value) {
+      try {
+        consolidatedData[key] = JSON.parse(value);
+        removeAuthStorageItem(key); // Remove old individual key
+        migratedCount++;
+      } catch (e) {
+        // Skip invalid JSON
+      }
+    }
+  });
+  
+  // Save consolidated data if we migrated anything
+  if (migratedCount > 0) {
+    saveConsolidatedAppData(consolidatedData);
+  }
+  
+  // Mark migration as complete
+  setAuthStorageItem(migrationKey, 'true');
+}
+
+// Track if migration has run (runs once per session)
+let migrationRun = false;
+
 function usePersistentState<T>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
-  // Skip migration since we clear all localStorage on every reload
-  // migrateOldData();
+  // Run migration once on first hook usage
+  if (!migrationRun && typeof window !== 'undefined') {
+    migrateToConsolidatedStorage();
+    migrationRun = true;
+  }
   
   const siteSpecificKey = getSiteSpecificKey(key);
+  const useConsolidated = shouldUseConsolidatedStorage(key);
   
   // Check if user is authorized for siteInfo
   const isAuthorized = (() => {
@@ -621,20 +703,36 @@ function usePersistentState<T>(key: string, defaultValue: T): [T, React.Dispatch
     }
     
     try {
-      // First try to get from new site-specific key
-      // COMMENTED OUT: let savedState = localStorage.getItem(siteSpecificKey);
-      let savedState = getAuthStorageItem(siteSpecificKey);
+      let savedState: string | null = null;
       
-      // Simple approach - no migration logic
-      if (!savedState && key !== 'siteInfo') {
-        // Only handle wf_hybrid_user -> consentbit-userinfo migration
-        if (key === 'consentbit-userinfo') {
-          // COMMENTED OUT: savedState = localStorage.getItem('wf_hybrid_user');
+      if (useConsolidated) {
+        // Read from consolidated app data object
+        const appData = getConsolidatedAppData();
+        if (appData[key] !== undefined) {
+          savedState = JSON.stringify(appData[key]);
+        } else {
+          // Fallback: check individual key (for backward compatibility before migration)
+          savedState = getAuthStorageItem(key);
+          if (savedState) {
+            // Auto-migrate: move to consolidated storage
+            try {
+              appData[key] = JSON.parse(savedState);
+              saveConsolidatedAppData(appData);
+              removeAuthStorageItem(key);
+            } catch (e) {
+              // Migration failed, use individual key
+            }
+          }
+        }
+      } else {
+        // Read from separate key (for consentbit-userinfo, siteInfo, etc.)
+        savedState = getAuthStorageItem(siteSpecificKey);
+        
+        // Handle migration for wf_hybrid_user -> consentbit-userinfo
+        if (!savedState && key === 'consentbit-userinfo') {
           savedState = getAuthStorageItem('wf_hybrid_user');
           if (savedState) {
-            // COMMENTED OUT: localStorage.setItem(siteSpecificKey, savedState);
             setAuthStorageItem(siteSpecificKey, savedState);
-            // COMMENTED OUT: localStorage.removeItem('wf_hybrid_user');
             removeAuthStorageItem('wf_hybrid_user');
           }
         }
@@ -699,11 +797,18 @@ function usePersistentState<T>(key: string, defaultValue: T): [T, React.Dispatch
       // 2. Value was explicitly set (not just initialized), OR
       // 3. We're loading an existing value from sessionStorage
       if (isUserAuthenticated || wasExplicitlySet.current) {
-        // COMMENTED OUT: localStorage.setItem(siteSpecificKey, JSON.stringify(state));
-        setAuthStorageItem(siteSpecificKey, JSON.stringify(state));
+        if (useConsolidated) {
+          // Save to consolidated app data object
+          const appData = getConsolidatedAppData();
+          appData[key] = state;
+          saveConsolidatedAppData(appData);
+        } else {
+          // Save to separate key (for consentbit-userinfo, siteInfo, etc.)
+          setAuthStorageItem(siteSpecificKey, JSON.stringify(state));
+        }
       }
     }
-  }, [siteSpecificKey, state, key]);
+  }, [siteSpecificKey, state, key, useConsolidated]);
 
   return [state, authorizedSetState];
 }

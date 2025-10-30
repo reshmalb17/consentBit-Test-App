@@ -17,6 +17,7 @@ const uparrow = new URL("../assets/blue up arrow.svg", import.meta.url).href;
 const copyScript = new URL("../assets/copy script.svg", import.meta.url).href;
 const warningicon = new URL("../assets/warning-2.png", import.meta.url).href;
 const messageicon = new URL("../assets/message-icon.svg", import.meta.url).href;
+const BrandImageUrl = new URL("../assets/BrandImage.png", import.meta.url).href;
 
 import { customCodeApi } from "../services/api";
 import { useAuth } from "../hooks/userAuth";
@@ -104,7 +105,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [secondbuttontext, setsecondbuttontext] = usePersistentState("secondbuttontext", "#000000");
   const [primaryButtonText, setPrimaryButtonText] = usePersistentState("primaryButtonText", "#FFFFFF");
   const [activeTab, setActiveTab] = usePersistentState("activeTab", initialActiveTab);
-   const [previewMode, setPreviewMode] = useState<'gdpr' | 'ccpa'>('gdpr');
+  const [previewMode, setPreviewMode] = useState<'gdpr' | 'ccpa'>('gdpr');
 
 
   
@@ -133,9 +134,9 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   }, [initialActiveTab, activeTab, hasSetActiveTabFromApi]);
   
  // Only run on mount
-  const [expires, setExpires] = usePersistentState("expires", "");
+  const [expires, setExpires] = useState("");
   const [size, setSize] = usePersistentState("size", "12");
-  const [isActive, setIsActive] = usePersistentState("isActive", false);
+  const [isActive, setIsActive] = useState(false);
   const [Font, SetFont] = usePersistentState("Font", "Montserrat");
   const [selectedtext, settextSelected] = usePersistentState("selectedtext", "left");
   const [style, setStyle] = usePersistentState<BannerStyle>("style", "align");
@@ -145,6 +146,33 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [weight, setWeight] = usePersistentState("weight", "Regular");
   const [showPopup, setShowPopup] = useState(false);
   const [selectedOptions, setSelectedOptions] = usePersistentState("selectedOptions", ["GDPR"]);
+  const showCCPAPreview = selectedOptions.includes("U.S. State Laws");
+
+  // Initialize preview mode based on selectedOption on mount and keep it in sync
+  useEffect(() => {
+    const hasCCPA = selectedOptions.includes('U.S. State Laws');
+    const hasGDPR = selectedOptions.includes('GDPR');
+    
+    // If U.S. State Laws is selected in Settings AND it's checked, show CCPA
+    if (selectedOption === 'U.S. State Laws' && hasCCPA) {
+      setPreviewMode('ccpa');
+    } 
+    // If only GDPR is selected (or U.S. State Laws is unselected), show GDPR
+    else if (hasGDPR && !hasCCPA) {
+      setPreviewMode('gdpr');
+    }
+    // If both are selected, default to GDPR unless U.S. State Laws is explicitly selected
+    else if (hasGDPR && hasCCPA) {
+      setPreviewMode(selectedOption === 'U.S. State Laws' ? 'ccpa' : 'gdpr');
+    }
+  }, [selectedOption, selectedOptions]);
+
+  // Safety: fall back to GDPR if CCPA is selected but not available
+  useEffect(() => {
+    if (previewMode === 'ccpa' && !showCCPAPreview) {
+      setPreviewMode('gdpr');
+    }
+  }, [previewMode, showCCPAPreview]);
 
 
   // Ensure at least one option is always selected
@@ -156,12 +184,12 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
   const [siteInfo, setSiteInfo] = usePersistentState<{ siteId: string; siteName: string; shortName: string } | null>("siteInfo", null);
   const [accessToken, setAccessToken] = usePersistentState<string>("accessToken", '');
-  const [pages, setPages] = usePersistentState("pages", []);
+  const [pages, setPages] = useState<Array<{ id: string; name: string }>>([]);
   const [fetchScripts, setFetchScripts] = useState(false);
   const [triggerScan, setTriggerScan] = useState(false);
   const [borderRadius, setBorderRadius] = usePersistentState<number>("borderRadius", 4);
   const [buttonRadius, setButtonRadius] = usePersistentState<number>("buttonRadius", 3);
-  const [isLoading, setIsLoading] = usePersistentState("isLoading", false);
+  const [isLoading, setIsLoading] = useState(false);
   const [userlocaldata, setUserlocaldata] = useState<UserData | null>(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
@@ -175,7 +203,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   }, []);
 
   const [showAuthPopup, setShowAuthPopup] = useState(false);
-  const [buttonText, setButtonText] = usePersistentState("buttonText", "Scan Project");
+  const [buttonText, setButtonText] = useState("Scan Project");
   const [showLoadingPopup, setShowLoadingPopup] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [cookieExpiration, setCookieExpiration] = usePersistentState("cookieExpiration", "120");
@@ -189,7 +217,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [showChoosePlan, setShowChoosePlan] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
-  const [isBannerAdded, setIsBannerAdded] = usePersistentState("isBannerAdded", false);
+  const [isBannerAdded, setIsBannerAdded] = useState(false);
   
   // Update button text based on whether scripts have been fetched
   useEffect(() => {
@@ -2069,7 +2097,7 @@ const handleToggles = (option) => {
           const applyScriptResponse = await customCodeApi.applyV2Script(params, token);
           
           // Mark V2 consent script as registered for this version in this session
-          sessionStorage.setItem(`v2_consent_script_registered_${appVersion}`, 'true');
+        //  sessionStorage.setItem(`v2_consent_script_registered_${appVersion}`, 'true');
         } catch (error) {
         }
       }
@@ -2861,13 +2889,15 @@ const handleToggles = (option) => {
                   >
                     GDPR
                   </button>
-                  <button
-                    type="button"
-                    className={`preview-tab ${previewMode === 'ccpa' ? 'active' : ''}`}
-                    onClick={() => setPreviewMode('ccpa')}
-                  >
-                    U.S. State Laws
-                  </button>
+                  {showCCPAPreview && (
+                    <button
+                      type="button"
+                      className={`preview-tab ${previewMode === 'ccpa' ? 'active' : ''}`}
+                      onClick={() => setPreviewMode('ccpa')}
+                    >
+                      U.S. State Laws
+                    </button>
+                  )}
                 </div>
                 <div className="preview-area">
                   <div className="topbar">
@@ -2943,7 +2973,7 @@ const handleToggles = (option) => {
                   </div>
                   )}
                 {/* US State Law (CCPA) preview */}
-                 {previewMode === 'ccpa' && (
+                 {showCCPAPreview && previewMode === 'ccpa' && (
                 <div
                   className={`cookie-banner ccpa-banner ${animation} ${isActive ? "active" : ""}`}
                   style={{
@@ -3074,6 +3104,8 @@ const handleToggles = (option) => {
               closebutton={toggleStates.closebutton}
               privacyUrl={privacyUrl}
               setPrivacyUrl={setPrivacyUrl}
+              selectedOption={selectedOption}
+              selectedOptions={selectedOptions}
             />
           )}
 

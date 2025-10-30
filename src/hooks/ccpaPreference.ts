@@ -1,6 +1,7 @@
 // import { aw } from 'framer-motion/dist/types.d-6pKw1mTI';
 import webflow, { WebflowAPI } from '../types/webflowtypes';
 const logo = new URL("../assets/icon.svg", import.meta.url).href;
+const brandLogo = new URL("../assets/BrandImage.png", import.meta.url).href;
 
 
 // Helper function to get or create an asset from local file
@@ -33,6 +34,29 @@ const getOrCreateAsset = async (): Promise<any> => {
             type: 'image/svg+xml',
         });
 
+        const newAsset = await (webflow as any).createAsset(file);
+        return newAsset;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Helper to get or create the brand image asset (Brand.png)
+const getOrCreateBrandAsset = async (): Promise<any> => {
+    try {
+        const assets = await webflow.getAllAssets();
+        const existingAsset = assets.find(asset => asset.name && asset.name === 'consent-brand');
+        if (existingAsset) {
+            return existingAsset;
+        }
+
+        const response = await fetch(brandLogo);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch brand file: ${response.status} ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const file = new File([blob], 'consent-brand.png', { type: 'image/png' });
         const newAsset = await (webflow as any).createAsset(file);
         return newAsset;
     } catch (error) {
@@ -604,6 +628,46 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
                 if (buttonContainer.append && acceptButton && declineButtons) {
                     await buttonContainer.append(acceptButton);
                     await buttonContainer.append(declineButtons);
+                }
+                // Append brand image inside a full-width wrapper at the bottom of the banner
+                try {
+                    const brandWrapper = await newDiv.append(webflow.elementPresets.DivBlock);
+                    const brandWrapperStyle = (await webflow.getStyleByName("consentBrandWrapper")) || (await webflow.createStyle("consentBrandWrapper"));
+                    await brandWrapperStyle.setProperties({
+                        "width": "40%",
+                        "height": "auto",
+                        "margin-top": "12px",
+                        "display": "block",
+                        "align-self": "flex-end",
+                        "margin-left": "auto"
+                    });
+                    await (brandWrapper as any).setStyles([brandWrapperStyle]);
+
+                    const brandLink = await (brandWrapper as any).append(webflow.elementPresets.LinkBlock);
+                    const brandLinkStyle = (await webflow.getStyleByName("consentBrandLink")) || (await webflow.createStyle("consentBrandLink"));
+                    await brandLinkStyle.setProperties({
+                        "width": "100%",
+                        "height": "auto",
+                        "display": "block"
+                    });
+                    await (brandLink as any).setStyles([brandLinkStyle]);
+                    try {
+                        await (brandLink as any).setSettings('url', 'https://www.consentbit.com/', { openInNewTab: true });
+                    } catch (e) {}
+
+                    const brandImage = await (brandLink as any).append(webflow.elementPresets.Image);
+                    const brandAsset = await getOrCreateBrandAsset();
+                    await (brandImage as any).setAsset(brandAsset);
+
+                    const brandStyle = (await webflow.getStyleByName("consentBrandImage")) || (await webflow.createStyle("consentBrandImage"));
+                    await brandStyle.setProperties({
+                        "width": "100%",
+                        "height": "auto",
+                        "display": "block",
+                        "object-fit": "contain"
+                    });
+                    await (brandImage as any).setStyles?.([brandStyle]);
+                } catch (e) {
                 }
             }
 
