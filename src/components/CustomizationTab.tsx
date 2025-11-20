@@ -149,6 +149,8 @@ const getOrCreateCloseIconAsset = async (backgroundColor: string): Promise<any> 
 };
 
 const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActiveTab = "Settings", isAuthenticated = false }) => {
+  console.log('[CustomizationTab] Component rendered');
+  console.warn('[CustomizationTab] Component rendered - WARN LEVEL');
   const [color, setColor] = usePersistentState("color", "#ffffff");
   
   // Debug: Monitor color state changes
@@ -290,6 +292,40 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [privacyUrl, setPrivacyUrl] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+
+  // Log whenever showTooltip changes
+  useEffect(() => {
+    console.log('[CustomizationTab] showTooltip state changed to:', showTooltip);
+  }, [showTooltip]);
+
+  // Auto-dismiss tooltip after 2 seconds
+  useEffect(() => {
+    console.log('[CustomizationTab] Auto-dismiss useEffect triggered - showTooltip:', showTooltip, 'fadeOut:', fadeOut);
+    console.warn('[CustomizationTab] useEffect - showTooltip:', showTooltip);
+    if (showTooltip) {
+      console.log('[CustomizationTab] showTooltip is TRUE - Starting auto-dismiss timer (2 seconds)');
+      console.warn('[CustomizationTab] ⏰ STARTING 2 SECOND TIMER');
+      const timer = setTimeout(() => {
+        console.log('[CustomizationTab] ⏰ Timer fired after 2 seconds - starting fade out');
+        console.warn('[CustomizationTab] ⏰ TIMER FIRED - HIDING TOOLTIP');
+        setFadeOut(true);
+        setTimeout(() => {
+          console.log('[CustomizationTab] 🎬 Hiding tooltip after fade animation');
+          setShowTooltip(false);
+          setFadeOut(false);
+          console.log('[CustomizationTab] ✅ Tooltip hidden successfully');
+          console.warn('[CustomizationTab] ✅ TOOLTIP HIDDEN');
+        }, 300); // Wait for fade-out animation
+      }, 2000); // Reduced to 2 seconds
+      return () => {
+        console.log('[CustomizationTab] 🧹 Cleaning up timer');
+        clearTimeout(timer);
+      };
+    } else {
+      console.log('[CustomizationTab] showTooltip is FALSE - not starting timer');
+      console.warn('[CustomizationTab] showTooltip is FALSE - no timer');
+    }
+  }, [showTooltip]);
   // COMMENTED OUT: const userinfo = localStorage.getItem("consentbit-userinfo");
   const userinfo = getAuthStorageItem("consentbit-userinfo");
   const tokenss = userinfo ? JSON.parse(userinfo) : null;
@@ -2482,7 +2518,10 @@ const handleToggles = (option) => {
                       const isInvalidElement = !selectedElement || selectedElement.type === "Body";
 
                       if (isInvalidElement) {
+                        console.log('[CustomizationTab] Setting showTooltip to true');
+                        console.warn('[CustomizationTab] 🚨 SETTING TOOLTIP TO TRUE');
                         setShowTooltip(true);
+                        console.warn('[CustomizationTab] 🚨 TOOLTIP SET TO TRUE - should trigger useEffect');
                         setShowPopup(false);
                         return;
                       }
@@ -2581,7 +2620,7 @@ const handleToggles = (option) => {
         <div className={`global-error-banner ${fadeOut ? 'fade-out' : 'fade-in'}`}>
           <img src={errorsheild} alt="errorsheild" />
           <div className="global-error-content">
-            <text>To continue, choose an element inside the page Body.</text>
+            <span>To continue, choose an element inside the page Body.</span>
           </div>
           <img src={crossmark} onClick={() => { setShowTooltip(false); setFadeOut(false); }} alt="" />
         </div>

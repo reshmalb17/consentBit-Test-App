@@ -283,6 +283,54 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
         if (!selectedElement) {
 
             webflow.notify({ type: "error", message: "No element selected in the Designer." });
+            // Auto-dismiss notification after 5 seconds
+            setTimeout(() => {
+              // Try multiple selectors to find the notification element
+              const selectors = [
+                '[data-wf-notification]',
+                '.w-notification',
+                '[class*="notification"]',
+                '[class*="Notification"]',
+                '.notification-container',
+                '[role="alert"]'
+              ];
+              
+              let notification: Element | null = null;
+              for (const selector of selectors) {
+                notification = document.querySelector(selector);
+                if (notification) break;
+              }
+              
+              if (notification) {
+                // Try to find and click the close button
+                const closeSelectors = [
+                  'button[aria-label*="close" i]',
+                  'button[aria-label*="dismiss" i]',
+                  '[class*="close"]',
+                  '[class*="dismiss"]',
+                  '[class*="Close"]',
+                  'button:last-child',
+                  'svg[class*="close"]',
+                  'svg[class*="Close"]'
+                ];
+                
+                let closeButton: Element | null = null;
+                for (const selector of closeSelectors) {
+                  closeButton = notification.querySelector(selector);
+                  if (closeButton && closeButton instanceof HTMLElement) {
+                    closeButton.click();
+                    return;
+                  }
+                }
+                
+                // If no close button found, try to hide/remove the notification
+                if (notification instanceof HTMLElement) {
+                  notification.style.display = 'none';
+                  notification.style.opacity = '0';
+                  notification.style.visibility = 'hidden';
+                }
+              }
+            }, 5000);
 
             return;
 
