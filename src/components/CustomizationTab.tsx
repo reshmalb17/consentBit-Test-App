@@ -24,7 +24,7 @@ import { useAuth } from "../hooks/userAuth";
 import { getTranslation } from "../util/translation-utils";
 import { getAuthStorageItem, setAuthStorageItem, removeAuthStorageItem, setCurrentSiteId } from "../util/authStorage";
 import webflow, { WebflowAPI } from '../types/webflowtypes';
-import { CodeApplication } from "../types/types";
+import { CodeApplication, ScriptRegistrationRequest } from "../types/types";
 import createCookiePreferences from "../hooks/gdprPreference";
 import createCookieccpaPreferences from "../hooks/ccpaPreference";
 import { usePersistentState, getCurrentSiteId } from "../hooks/usePersistentState";
@@ -188,9 +188,44 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   // Debug: Monitor bgColor state changes
   useEffect(() => {
   }, [bgColor]);
-  const [btnColor, setBtnColor] = usePersistentState("btnColor", initialBannerStyles?.btnColor || "#000000");
+  // Ensure btnColor defaults to black (#000000) for Accept button
+  const getDefaultBtnColor = () => {
+    if (initialBannerStyles?.btnColor && initialBannerStyles.btnColor !== "#C9C9C9" && initialBannerStyles.btnColor !== "rgb(201, 201, 201)") {
+      return initialBannerStyles.btnColor;
+    }
+    return "#000000"; // Default to black for Accept button
+  };
+  
+  const [btnColor, setBtnColor] = usePersistentState("btnColor", getDefaultBtnColor());
   const [paraColor, setParaColor] = usePersistentState("paraColor", initialBannerStyles?.paraColor || "#4C4A66");
-  const [secondcolor, setSecondcolor] = usePersistentState("secondcolor", initialBannerStyles?.secondcolor || "#C9C9C9");
+  // Ensure secondcolor defaults to light gray (#C9C9C9) for secondary buttons, not black
+  // Only use API value if it's explicitly provided and not black
+  const getDefaultSecondColor = () => {
+    if (initialBannerStyles?.secondcolor && initialBannerStyles.secondcolor !== "#000000" && initialBannerStyles.secondcolor !== "rgb(0, 0, 0)") {
+      return initialBannerStyles.secondcolor;
+    }
+    return "#C9C9C9"; // Default to light gray
+  };
+  
+  const [secondcolor, setSecondcolor] = usePersistentState("secondcolor", getDefaultSecondColor());
+  
+  // Fix: Reset secondcolor if it's black and not explicitly set from API
+  useEffect(() => {
+    if ((secondcolor === "#000000" || secondcolor === "rgb(0, 0, 0)" || secondcolor === "black" || secondcolor === "rgba(0, 0, 0, 1)") && 
+        (!initialBannerStyles?.secondcolor || initialBannerStyles.secondcolor === "#000000")) {
+      setSecondcolor("#C9C9C9");
+    }
+  }, [secondcolor, initialBannerStyles]);
+  
+  // Ensure btnColor is not set to secondcolor (light gray) - it should be black
+  useEffect(() => {
+    if (btnColor === "#C9C9C9" || btnColor === "rgb(201, 201, 201)" || btnColor === secondcolor) {
+      if (!initialBannerStyles?.btnColor || initialBannerStyles.btnColor === "#C9C9C9") {
+        setBtnColor("#000000");
+      }
+    }
+  }, [btnColor, secondcolor, initialBannerStyles]);
+  
   const [bgColors, setBgColors] = usePersistentState("bgColors", initialBannerStyles?.bgColors || "#798EFF");
   const [headColor, setHeadColor] = usePersistentState("headColor", initialBannerStyles?.headColor || "#000000");
   const [secondbuttontext, setsecondbuttontext] = usePersistentState("secondbuttontext", initialBannerStyles?.secondbuttontext || "#000000");
@@ -404,6 +439,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [buttonText, setButtonText] = useState("Scan Project");
   const [showLoadingPopup, setShowLoadingPopup] = useState(false);
+  const [showChildContainerErrorPopup, setShowChildContainerErrorPopup] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [cookieExpiration, setCookieExpiration] = usePersistentState("cookieExpiration", "120");
   const [privacyUrl, setPrivacyUrl] = useState("");
@@ -456,7 +492,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
 
 
-  const base_url = "https://cb-server.web-8fb.workers.dev"
+  const base_url = "https://consentbit-test-server.web-8fb.workers.dev"
 
   // Welcome screen handlers - removed since this component is accessed via Customize link
   const handleWelcomeAuthorize = () => {
@@ -876,7 +912,7 @@ const handleToggles = (option) => {
 
 
   //ccpa banner
-  const ccpabanner = async (targetDiv?: any) => {
+  const ccpabanner = async (targetDiv?: any, bothBanners: boolean = false) => {
     setShowPopup(false); // close the first popup
     setShowLoadingPopup(true); // show loading popup
     setIsLoading(true);
@@ -884,38 +920,111 @@ const handleToggles = (option) => {
     // const isBannerAlreadyAdded = getAuthStorageItem("cookieBannerAdded") === "true";
     try {
 
+      // Comprehensive check and removal of banner-related elements before creating new ones
       const allElements = await webflow.getAllElements();
-      const idsToCheck = ["initial-consent-banner", "main-consent-banner", "toggle-consent-btn"];
+      
+      // When creating both banners, only check for CCPA-specific IDs to preserve GDPR banner
+      // When creating CCPA alone, check for all banner IDs (including GDPR duplicates)
+      const idsToCheck = bothBanners ? [
+        // Only CCPA-specific IDs when creating both banners
+        "initial-consent-banner",
+        "main-consent-banner", 
+        "toggle-consent-btn",
+        "do-not-share-link",
+        "close-consent-banner",
+        "privacy-link"
+      ] : [
+        // All banner IDs when creating CCPA alone
+        "initial-consent-banner",
+        "main-consent-banner", 
+        "toggle-consent-btn",
+        "do-not-share-link",
+        "close-consent-banner",
+        "privacy-link",
+        "consent-banner",
+        "main-banner"
+      ];
 
-      // Run domId checks in parallel
-      const domIdPromises = allElements.map(async (el) => {
-        const domId = await el.getDomId?.();
-        return { el, domId };
-      });
+      // When creating both banners, only check for CCPA-specific style names to preserve GDPR banner
+      // When creating CCPA alone, check for all banner style names
+      const styleNamesToCheck = bothBanners ? [
+        // Only CCPA-specific style names when creating both banners
+        "consentbit-ccpa-banner-div",
+        "consentbit-ccpa-banner-text",
+        "consentbit-ccpa-button-container",
+        "consentbit-ccpa-banner-heading",
+        "consentbit-ccpa-linkblock",
+        "consentbit-ccpa-privacy-link",
+        "consentbit-ccpa-innerdiv",
+        "consentbit-banner-ccpasecond-bg",
+        "close-consentbit"
+      ] : [
+        // All banner style names when creating CCPA alone
+        "consentbit-ccpa-banner-div",
+        "consentbit-ccpa-banner-text",
+        "consentbit-ccpa-button-container",
+        "consentbit-ccpa-banner-heading",
+        "consentbit-ccpa-linkblock",
+        "consentbit-ccpa-privacy-link",
+        "consentbit-ccpa-innerdiv",
+        "consentbit-banner-ccpasecond-bg",
+        "close-consentbit",
+        "consentbit-gdpr_banner_div",
+        "consentbit-gdpr_banner_text",
+        "consentbit-banner_button_container",
+        "consentbit-banner_button_preference",
+        "consentbit-banner_button_decline",
+        "consentbit-banner_accept",
+        "consentbit-banner_headings",
+        "consentbit-innerdiv",
+        "consentbit-banner_second-bg",
+        "close-consent",
+        "consentbit-preference_div"
+      ];
 
-      const elementsWithDomIds = await Promise.all(domIdPromises);
+      // Check all elements by both ID and style names
+      const elementChecks = await Promise.all(
+        allElements.map(async (el) => {
+          const isBanner = await isBannerElement(el, idsToCheck, styleNamesToCheck);
+          return { el, isBanner };
+        })
+      );
 
       // Filter matching elements
-      const matchingElements = elementsWithDomIds
-        .filter(({ domId }) => domId && idsToCheck.includes(domId))
-        .map(({ el, domId }) => el);
+      const matchingElements = elementChecks
+        .filter(({ isBanner }) => isBanner)
+        .map(({ el }) => el);
 
+      // Remove ALL matching elements to prevent duplicates - regardless of container relationship
+      if (matchingElements.length > 0) {
+        console.log(`🔍 [ccpabanner] Found ${matchingElements.length} existing banner element(s) to remove (checked by ID and class names)`);
+        await Promise.all(matchingElements.map(async (el) => {
+          try {
+            const domId = await el.getDomId?.().catch(() => null);
+            const identifier = domId || 'element-with-banner-class';
+            console.log(`✅ [ccpabanner] Deleting duplicate banner element: ${identifier}`);
+            
+            // Remove all children first
+            try {
+              const children = await el.getChildren?.();
+              if (children && children.length > 0) {
+                await Promise.all(children.map(child => child.remove()));
+              }
+            } catch (childErr) {
+              console.warn(`⚠️ [ccpabanner] Error removing children:`, childErr);
+            }
 
-      // Remove matching elements and children
-      await Promise.all(matchingElements.map(async (el) => {
-        try {
-          const domId = await el.getDomId?.();
-          const children = await el.getChildren?.();
-
-          if (children?.length) {
-            await Promise.all(children.map(child => child.remove()));
+            // Remove the element itself
+            await el.remove();
+            console.log(`✓ [ccpabanner] Successfully removed element: ${identifier}`);
+          } catch (err) {
+            console.error(`⚠️ [ccpabanner] Error removing duplicate banner:`, err);
+            // Continue even if removal fails
           }
-
-                     await el.remove();
-         } catch (err) {
-           webflow.notify({ type: "error", message: "Failed to remove a banner." });
-         }
-      }));
+        }));
+      } else {
+        console.log(`✅ [ccpabanner] No existing banner elements found - safe to create new banner`);
+      }
 
 
       // Use provided targetDiv if available, otherwise get selected element
@@ -925,6 +1034,20 @@ const handleToggles = (option) => {
         setIsLoading(false);
         return;
       }
+
+      // Check if the selected element is a child of consentbit-container
+      console.log("🔍 [ccpabanner] Checking if selectedElement is child of container:", selectedElement);
+      const isChildOfContainer = await isSelectedElementChildOfContainer(selectedElement);
+      console.log("🔍 [ccpabanner] Check result:", isChildOfContainer);
+      if (isChildOfContainer) {
+        console.log("❌ [ccpabanner] Blocking banner creation - element is child of container");
+        setShowPopup(false);
+        setShowLoadingPopup(false);
+        setIsLoading(false);
+        setShowChildContainerErrorPopup(true);
+        return;
+      }
+      console.log("✅ [ccpabanner] Allowing banner creation - element is not child of container");
 
       // Check if the selected element can have children
       if (!selectedElement?.children) {
@@ -941,6 +1064,98 @@ const handleToggles = (option) => {
         }
       } catch (error) {
         // Continue if style application fails
+      }
+
+      // Set DOM ID 'consentbit-container' on the selected element (CCPA)
+      try {
+        // Check if DOM ID is already set
+        let existingDomId: string | null = null;
+        try {
+          if ((selectedElement as any).getDomId) {
+            existingDomId = await (selectedElement as any).getDomId();
+          }
+        } catch (e) {
+          // Continue if we can't get DOM ID - element might be in transition
+        }
+
+        // Set DOM ID if not already set
+        if (existingDomId !== 'consentbit-container') {
+          try {
+            if ((selectedElement as any).setDomId) {
+              await (selectedElement as any).setDomId("consentbit-container");
+              console.log("✓ DOM ID 'consentbit-container' set successfully in CCPA banner (CustomizationTab)");
+            } else if (selectedElement.setCustomAttribute) {
+              await selectedElement.setCustomAttribute("id", "consentbit-container");
+              console.log("Used setCustomAttribute to set DOM ID (CCPA)");
+            } else if ((selectedElement as any).setAttribute) {
+              await (selectedElement as any).setAttribute("id", "consentbit-container");
+              console.log("Used setAttribute to set DOM ID (CCPA)");
+            }
+          } catch (domIdSetError: any) {
+            // Handle "Missing element" error gracefully - element reference became invalid
+            // This usually means the ID was set but element was modified by Webflow
+            if (domIdSetError?.message && domIdSetError.message.includes("Missing element")) {
+              // Silently continue - ID was likely set before element became invalid
+            } else {
+              console.error("Error setting DOM ID in CCPA banner (CustomizationTab):", domIdSetError);
+            }
+            // Continue even if DOM ID setting fails
+          }
+        } else {
+          // DOM ID already set - no need to verify or retry
+          console.log("DOM ID 'consentbit-container' already set on selected element (CCPA)");
+        }
+      } catch (domIdError: any) {
+        // Handle "Missing element" error gracefully - don't log as error
+        if (domIdError?.message && domIdError.message.includes("Missing element")) {
+          // Silently continue - element reference became invalid but ID was likely set
+        } else {
+          console.error("Error setting DOM ID in CCPA banner (CustomizationTab):", domIdError);
+        }
+        // Continue even if DOM ID setting fails
+      }
+
+      // Final double-check: Ensure no duplicate initial-consent-banner exists right before creating (check by ID and class names)
+      const allElementsFinalCheck = await webflow.getAllElements();
+      const finalCheckIds = ["initial-consent-banner"];
+      const finalCheckStyleNames = bothBanners ? [
+        // Only CCPA-specific style names when creating both banners
+        "consentbit-ccpa-banner-div"
+      ] : [
+        // All banner style names when creating CCPA alone
+        "consentbit-ccpa-banner-div",
+        "consentbit-gdpr_banner_div"
+      ];
+      
+      const finalElementChecks = await Promise.all(
+        allElementsFinalCheck.map(async (el) => {
+          const isBanner = await isBannerElement(el, finalCheckIds, finalCheckStyleNames);
+          return { el, isBanner };
+        })
+      );
+      
+      const existingInitialBanners = finalElementChecks
+        .filter(({ isBanner }) => isBanner)
+        .map(({ el }) => el);
+      
+      if (existingInitialBanners.length > 0) {
+        console.log(`⚠️ [ccpabanner] Final check: Found ${existingInitialBanners.length} existing banner element(s), removing before creating new one`);
+        await Promise.all(existingInitialBanners.map(async (el) => {
+          try {
+            const domId = await el.getDomId?.().catch(() => null);
+            const identifier = domId || 'element-with-banner-class';
+            console.log(`✅ [ccpabanner] Final check: Removing banner element: ${identifier}`);
+            
+            const children = await el.getChildren?.().catch(() => []);
+            if (children && children.length > 0) {
+              await Promise.all(children.map(child => child.remove()));
+            }
+            await el.remove();
+            console.log(`✓ [ccpabanner] Final check: Successfully removed banner element: ${identifier}`);
+          } catch (err) {
+            console.error(`⚠️ [ccpabanner] Final check: Error removing existing banner:`, err);
+          }
+        }));
       }
 
       // Create newDiv as a child of the selected element
@@ -1385,12 +1600,7 @@ const handleToggles = (option) => {
           setShowSuccessPopup(true);
           setIsLoading(false);
           
-          // Script registration for CCPA banners - AFTER banner is created
-          if (appVersion === '1.0.0') {
-            fetchAnalyticsBlockingsScripts();
-          } else if (appVersion === '2.0.0'|| appVersion === '2.0.1') {
-            fetchAnalyticsBlockingsScriptsV2();
-          }
+          // No script registration for CCPA banners - only GDPR banners register scripts
           
           // Save banner details with isBannerAdded: true
           const response = await saveBannerDetails(true);
@@ -1413,6 +1623,23 @@ const handleToggles = (option) => {
 
 
 
+
+  // Helper function to register ConsentBit script globally via injectScript API (same as useBannerCreation)
+  const addConsentBitScriptGlobally = async (siteId: string, token: string) => {
+    try {
+      const injectResponse = await customCodeApi.injectScript(token, siteId);
+      if (injectResponse && injectResponse.success) {
+        console.log(`✓ Script injected successfully for site: ${siteId}`);
+        console.log(`  Script ID: ${injectResponse.scriptId}`);
+        console.log(`  Message: ${injectResponse.message}`);
+      } else {
+        console.warn("Script injection response indicates failure:", injectResponse);
+      }
+    } catch (injectError) {
+      console.error("Error injecting script:", injectError);
+      // Continue even if script injection fails
+    }
+  };
 
   const fetchAnalyticsBlockingsScriptsV2 = async () => {
     try {
@@ -1447,19 +1674,562 @@ const handleToggles = (option) => {
           
           const applyScriptResponse = await customCodeApi.applyV2Script(params, token);
 
+          // Register ConsentBit script globally
+          if (siteIdinfo?.siteId && token) {
+            await addConsentBitScriptGlobally(siteIdinfo.siteId, token);
+          }
+
           // Script should be added by server via custom code block
 
         }
         catch (error) {
+          // Register script even if there's an error
+          if (siteIdinfo?.siteId && token) {
+            await addConsentBitScriptGlobally(siteIdinfo.siteId, token);
+          }
           throw error;
         }
       } else {
+        // Register ConsentBit script even if hosting script registration fails
+        if (siteIdinfo?.siteId && token) {
+          await addConsentBitScriptGlobally(siteIdinfo.siteId, token);
+        }
       }
     }
     catch (error) {
+      // Register ConsentBit script even if there's an error
+      try {
+        const token = getSessionTokenFromLocalStorage();
+        const siteIdinfo = await webflow.getSiteInfo();
+        if (siteIdinfo?.siteId && token) {
+          await addConsentBitScriptGlobally(siteIdinfo.siteId, token);
+        }
+      } catch (e) {
+        console.error("Error registering ConsentBit script after error:", e);
+      }
     }
   }
 
+
+  // Helper function to check if an element is a child/descendant of consentbit-container
+  const isElementChildOfContainer = async (element: any): Promise<boolean> => {
+    console.log("🔍 [isElementChildOfContainer] Checking if element is child of container:", element);
+    try {
+      if (!element) {
+        console.log("⚠️ [isElementChildOfContainer] No element provided, returning false");
+        return false;
+      }
+
+      // First, check if the element itself is the container
+      try {
+        if (typeof (element as any).getDomId === 'function') {
+          const elementId = await (element as any).getDomId();
+          if (elementId === 'consentbit-container') {
+            console.log("✅ [isElementChildOfContainer] Element IS the container - not a child");
+            return false; // Element is the container itself, not a child
+          }
+        }
+      } catch (e) {
+        console.log("⚠️ [isElementChildOfContainer] Error getting element DOM ID:", e);
+      }
+
+      // Use getAllElements to find the container and check if element is inside it
+      const allElements = await webflow.getAllElements();
+      let consentBitContainer: any = null;
+
+      // Find the consentbit-container
+      for (const el of allElements) {
+        try {
+          if (typeof (el as any).getDomId === 'function') {
+            const domId = await (el as any).getDomId();
+            if (domId === 'consentbit-container') {
+              consentBitContainer = el;
+              console.log("🔍 [isElementChildOfContainer] Found consentbit-container");
+              break;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!consentBitContainer) {
+        console.log("ℹ️ [isElementChildOfContainer] No consentbit-container found - element is not a child");
+        return false; // No container exists, so element can't be a child
+      }
+
+      // Check if element is inside the container by traversing up the parent chain
+      const checkIfElementIsChild = async (parent: any, target: any, checked: Set<any>): Promise<boolean> => {
+        if (checked.has(parent) || checked.has(target)) return false;
+        checked.add(parent);
+
+        try {
+          if (parent === target) {
+            return true;
+          }
+
+          const children = await parent.getChildren();
+          if (children && children.length > 0) {
+            for (const child of children) {
+              if (child === target) {
+                return true;
+              }
+              const isDescendant = await checkIfElementIsChild(child, target, checked);
+              if (isDescendant) {
+                return true;
+              }
+            }
+          }
+        } catch (e) {
+          // Continue
+        }
+        return false;
+      };
+
+      const isInside = await checkIfElementIsChild(consentBitContainer, element, new Set());
+      console.log(`🔍 [isElementChildOfContainer] Element is ${isInside ? 'INSIDE' : 'NOT inside'} container`);
+      return isInside;
+    } catch (error) {
+      console.error("❌ [isElementChildOfContainer] Error checking if element is child of container:", error);
+      // Return false on error to be safe (don't block deletion if check fails)
+      return false;
+    }
+  };
+
+  // Helper function to find or get the consentbit-container element
+  const findOrCreateConsentBitContainer = async (selectedElement: any): Promise<any> => {
+    try {
+      // First, check if the selected element itself is the container
+      try {
+        if (typeof (selectedElement as any).getDomId === 'function') {
+          const elementId = await (selectedElement as any).getDomId();
+          if (elementId === 'consentbit-container') {
+            console.log("✅ [findOrCreateConsentBitContainer] Selected element IS the container");
+            return selectedElement;
+          }
+        }
+      } catch (e) {
+        console.log("⚠️ [findOrCreateConsentBitContainer] Error checking selected element DOM ID:", e);
+      }
+
+      // Search for existing consentbit-container
+      const allElements = await webflow.getAllElements();
+      for (const el of allElements) {
+        try {
+          if (typeof (el as any).getDomId === 'function') {
+            const domId = await (el as any).getDomId();
+            if (domId === 'consentbit-container') {
+              console.log("✅ [findOrCreateConsentBitContainer] Found existing consentbit-container");
+              return el;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      // No container found, use selected element and set it as container
+      console.log("ℹ️ [findOrCreateConsentBitContainer] No container found, using selected element as container");
+      return selectedElement;
+    } catch (error) {
+      console.error("❌ [findOrCreateConsentBitContainer] Error finding container:", error);
+      // Fallback to selected element
+      return selectedElement;
+    }
+  };
+
+  // Helper function to check if selected element is a child of consentbit-container
+  const isSelectedElementChildOfContainer = async (selectedElement: any): Promise<boolean> => {
+    console.log("🔍 [isSelectedElementChildOfContainer] Starting check for selected element:", selectedElement);
+    try {
+      let currentElement: any = selectedElement;
+      const checkedElements = new Set();
+      let isChildOfContainer = false;
+      let depth = 0;
+      const maxDepth = 20; // Prevent infinite loops
+      
+      // List of banner element IDs that indicate the element is inside a banner structure
+      const bannerElementIds = [
+        'consent-banner',
+        'initial-consent-banner',
+        'main-banner',
+        'main-consent-banner',
+        'consentbit-preference_div',
+        'toggle-consent-btn',
+        'preferences-btn',
+        'decline-btn',
+        'accept-btn',
+        'privacy-link'
+      ];
+      
+      if (!currentElement) {
+        console.log("⚠️ [isSelectedElementChildOfContainer] No element provided, returning false");
+        return false;
+      }
+      
+      // First, check if the selected element itself has the consentbit-container ID or is a banner element
+      let selectedElementId: string | null = null;
+      try {
+        if (typeof (currentElement as any).getDomId === 'function') {
+          selectedElementId = await (currentElement as any).getDomId();
+          console.log(`🔍 [isSelectedElementChildOfContainer] Selected element DOM ID: "${selectedElementId}"`);
+          
+          // If selected element IS the container, allow it
+          if (selectedElementId === 'consentbit-container') {
+            console.log("✅ [isSelectedElementChildOfContainer] Selected element IS the container - allowing");
+            return false; // Not a child, it IS the container
+          }
+          
+          // If selected element is a banner element, it's definitely a child of the container
+          // CRITICAL: This check MUST return immediately - don't continue to parent traversal
+          if (selectedElementId && bannerElementIds.includes(selectedElementId)) {
+            console.log(`❌ [isSelectedElementChildOfContainer] Selected element is a banner element (${selectedElementId}) - IMMEDIATELY BLOCKING`);
+            console.log(`❌ [isSelectedElementChildOfContainer] Banner element IDs list:`, bannerElementIds);
+            console.log(`❌ [isSelectedElementChildOfContainer] Matched: ${bannerElementIds.includes(selectedElementId)}`);
+            return true; // It's a child of the container - RETURN IMMEDIATELY
+          }
+          
+          // Log if ID exists but wasn't in banner list
+          if (selectedElementId) {
+            console.log(`🔍 [isSelectedElementChildOfContainer] Selected element ID "${selectedElementId}" is not in banner list, continuing check...`);
+          }
+        } else {
+          console.log("⚠️ [isSelectedElementChildOfContainer] Selected element does not have getDomId function");
+        }
+      } catch (e) {
+        console.log("⚠️ [isSelectedElementChildOfContainer] Error getting selected element DOM ID:", e);
+        // Element might be invalid, try getAllElements method
+      }
+      
+      // If we couldn't get the DOM ID or element is invalid, use getAllElements to find container and check
+      // This is a fallback method that works even if element references become invalid
+      if (!selectedElementId || selectedElementId === null) {
+        console.log("🔍 [isSelectedElementChildOfContainer] Using getAllElements fallback method");
+        try {
+          const allElements = await webflow.getAllElements();
+          let consentBitContainer: any = null;
+          let selectedElementFound = false;
+          
+          // Find the consentbit-container and check if selected element is inside it
+          for (const element of allElements) {
+            try {
+              if (typeof (element as any).getDomId === 'function') {
+                const domId = await (element as any).getDomId();
+                
+                if (domId === 'consentbit-container') {
+                  consentBitContainer = element;
+                  console.log("🔍 [isSelectedElementChildOfContainer] Found consentbit-container via getAllElements");
+                }
+                
+                // Also check if this element matches our selected element by comparing IDs
+                // Note: We can't directly compare element objects, so we check by DOM ID
+                if (domId && bannerElementIds.includes(domId)) {
+                  // This is a banner element, check if it's inside the container
+                  if (consentBitContainer) {
+                    try {
+                      const containerChildren = await consentBitContainer.getChildren();
+                      if (containerChildren && containerChildren.length > 0) {
+                        // Check if this banner element is a child of the container
+                        const checkIfBannerIsChild = async (parent: any, bannerId: string, checked: Set<any>): Promise<boolean> => {
+                          if (checked.has(parent)) return false;
+                          checked.add(parent);
+                          
+                          try {
+                            const children = await parent.getChildren();
+                            if (children && children.length > 0) {
+                              for (const child of children) {
+                                try {
+                                  const childId = await (child as any).getDomId?.();
+                                  if (childId === bannerId) {
+                                    return true;
+                                  }
+                                  const isDescendant = await checkIfBannerIsChild(child, bannerId, checked);
+                                  if (isDescendant) {
+                                    return true;
+                                  }
+                                } catch (e) {
+                                  continue;
+                                }
+                              }
+                            }
+                          } catch (e) {
+                            // Continue
+                          }
+                          return false;
+                        };
+                        
+                        const isInside = await checkIfBannerIsChild(consentBitContainer, domId, new Set());
+                        if (isInside) {
+                          console.log(`❌ [isSelectedElementChildOfContainer] Banner element (${domId}) is inside container - blocking`);
+                          return true;
+                        }
+                      }
+                    } catch (e) {
+                      console.log("⚠️ [isSelectedElementChildOfContainer] Error checking container children:", e);
+                    }
+                  }
+                }
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+          
+          if (consentBitContainer && selectedElementId && bannerElementIds.includes(selectedElementId)) {
+            console.log(`❌ [isSelectedElementChildOfContainer] Selected element (${selectedElementId}) is a banner element - blocking`);
+            return true;
+          }
+        } catch (e) {
+          console.log("⚠️ [isSelectedElementChildOfContainer] Error using getAllElements fallback:", e);
+        }
+      }
+      
+      // Alternative method: Check all elements to find consentbit-container and see if selected element is inside it
+      try {
+        const allElements = await webflow.getAllElements();
+        let consentBitContainer: any = null;
+        
+        // Find the consentbit-container
+        for (const element of allElements) {
+          try {
+            if (typeof (element as any).getDomId === 'function') {
+              const domId = await (element as any).getDomId();
+              if (domId === 'consentbit-container') {
+                consentBitContainer = element;
+                console.log("🔍 [isSelectedElementChildOfContainer] Found consentbit-container via getAllElements");
+                break;
+              }
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+        
+        // If container found, check if selected element is inside it
+        if (consentBitContainer) {
+          try {
+            const containerChildren = await consentBitContainer.getChildren();
+            console.log(`🔍 [isSelectedElementChildOfContainer] Container has ${containerChildren?.length || 0} children`);
+            
+            // Check if selected element is a direct child or descendant
+            const checkIfElementIsChild = async (parent: any, target: any, checked: Set<any>): Promise<boolean> => {
+              if (checked.has(parent) || checked.has(target)) return false;
+              checked.add(parent);
+              
+              try {
+                if (parent === target) {
+                  return true;
+                }
+                
+                const children = await parent.getChildren();
+                if (children && children.length > 0) {
+                  for (const child of children) {
+                    if (child === target) {
+                      return true;
+                    }
+                    const isDescendant = await checkIfElementIsChild(child, target, checked);
+                    if (isDescendant) {
+                      return true;
+                    }
+                  }
+                }
+              } catch (e) {
+                console.log("⚠️ [isSelectedElementChildOfContainer] Error checking children:", e);
+              }
+              return false;
+            };
+            
+            const isInside = await checkIfElementIsChild(consentBitContainer, selectedElement, new Set());
+            if (isInside && consentBitContainer !== selectedElement) {
+              console.log("❌ [isSelectedElementChildOfContainer] Selected element is inside consentbit-container - blocking");
+              return true;
+            } else if (consentBitContainer === selectedElement) {
+              console.log("✅ [isSelectedElementChildOfContainer] Selected element IS the container - allowing");
+              return false;
+            }
+          } catch (e) {
+            console.log("⚠️ [isSelectedElementChildOfContainer] Error checking container children:", e);
+          }
+        }
+      } catch (e) {
+        console.log("⚠️ [isSelectedElementChildOfContainer] Error using getAllElements method:", e);
+      }
+      
+      // Traverse up the parent chain to check if any parent has consentbit-container ID
+      while (currentElement && !checkedElements.has(currentElement) && !isChildOfContainer && depth < maxDepth) {
+        checkedElements.add(currentElement);
+        depth++;
+        console.log(`🔍 [isSelectedElementChildOfContainer] Checking element at depth ${depth}`);
+        
+        try {
+          // Check if current element has consentbit-container ID
+          let currentId: string | null = null;
+          if (typeof (currentElement as any).getDomId === 'function') {
+            currentId = await (currentElement as any).getDomId();
+            console.log(`🔍 [isSelectedElementChildOfContainer] Element at depth ${depth} has DOM ID: "${currentId}"`);
+            
+            // If this is a banner element, it's definitely inside the container
+            if (currentId && bannerElementIds.includes(currentId)) {
+              console.log(`❌ [isSelectedElementChildOfContainer] Found banner element (${currentId}) - blocking`);
+              isChildOfContainer = true;
+              break;
+            }
+          } else {
+            console.log(`⚠️ [isSelectedElementChildOfContainer] Element at depth ${depth} does not have getDomId function`);
+          }
+          
+          // If this element is consentbit-container, check if it's the selected element itself
+          if (currentId === 'consentbit-container') {
+            console.log(`🔍 [isSelectedElementChildOfContainer] Found consentbit-container at depth ${depth}`);
+            // If it's the selected element itself, allow it (user selected the container)
+            if (currentElement === selectedElement) {
+              console.log("✅ [isSelectedElementChildOfContainer] Container is the selected element - allowing");
+              isChildOfContainer = false;
+              break;
+            } else {
+              // Selected element is a child of consentbit-container (not the container itself)
+              console.log("❌ [isSelectedElementChildOfContainer] Selected element is a CHILD of container - blocking");
+              isChildOfContainer = true;
+              break;
+            }
+          }
+          
+          // Try to get parent using different methods
+          let parent: any = null;
+          if (typeof currentElement.getParent === 'function') {
+            try {
+              parent = await currentElement.getParent();
+            } catch (e) {
+              console.log(`⚠️ [isSelectedElementChildOfContainer] Error calling getParent():`, e);
+            }
+          }
+          
+          // Try alternative parent access methods
+          if (!parent && (currentElement as any).parent) {
+            parent = (currentElement as any).parent;
+          }
+          if (!parent && (currentElement as any).parentElement) {
+            parent = (currentElement as any).parentElement;
+          }
+          
+          if (parent) {
+            console.log(`🔍 [isSelectedElementChildOfContainer] Moving to parent at depth ${depth + 1}`);
+            currentElement = parent;
+          } else {
+            console.log(`🔍 [isSelectedElementChildOfContainer] No parent found at depth ${depth}, stopping traversal`);
+            break;
+          }
+        } catch (e) {
+          console.error(`❌ [isSelectedElementChildOfContainer] Error at depth ${depth}:`, e);
+          break;
+        }
+      }
+      
+      if (depth >= maxDepth) {
+        console.warn("⚠️ [isSelectedElementChildOfContainer] Reached max depth, stopping traversal");
+      }
+      
+      console.log(`🔍 [isSelectedElementChildOfContainer] Final result: isChildOfContainer = ${isChildOfContainer}`);
+      return isChildOfContainer;
+    } catch (checkError) {
+      console.error("❌ [isSelectedElementChildOfContainer] Error checking if selected element is child of container:", checkError);
+      // Return false on error to allow banner creation (fail-safe)
+      return false;
+    }
+  };
+
+  // Helper function to check if element matches banner criteria (by ID, style name, or custom attributes)
+  const isBannerElement = async (el: any, idsToCheck: string[], styleNamesToCheck: string[]): Promise<boolean> => {
+    try {
+      // Check by DOM ID first
+      try {
+        const domId = await el.getDomId?.();
+        if (domId && idsToCheck.includes(domId)) {
+          return true;
+        }
+      } catch {
+        // Continue if getDomId fails
+      }
+
+      // Check by custom attributes that might indicate banner elements
+      try {
+        if (el.getCustomAttribute) {
+          const consentbitAttr = await el.getCustomAttribute('consentbit').catch(() => null);
+          if (consentbitAttr === 'close' || consentbitAttr) {
+            return true;
+          }
+        }
+      } catch {
+        // Continue if custom attribute check fails
+      }
+
+      // Check by style names - try multiple methods to get style name
+      try {
+        // Method 1: Try to access styles array directly
+        if (el.styles && Array.isArray(el.styles)) {
+          for (const style of el.styles) {
+            if (style && typeof style === 'object') {
+              const styleName = (style as any).name || (style as any).getName?.() || (style as any).styleName;
+              if (styleName && typeof styleName === 'string') {
+                const lowerStyleName = styleName.toLowerCase();
+                if (styleNamesToCheck.some(checkName => 
+                  lowerStyleName.includes(checkName.toLowerCase()) || 
+                  lowerStyleName === checkName.toLowerCase()
+                )) {
+                  return true;
+                }
+              }
+            }
+          }
+        }
+
+        // Method 2: Check if element has style property with name
+        if ((el as any).style && typeof (el as any).style === 'object') {
+          const styleName = (el as any).style.name || (el as any).style.getName?.() || (el as any).style.styleName;
+          if (styleName && typeof styleName === 'string') {
+            const lowerStyleName = styleName.toLowerCase();
+            if (styleNamesToCheck.some(checkName => 
+              lowerStyleName.includes(checkName.toLowerCase()) || 
+              lowerStyleName === checkName.toLowerCase()
+            )) {
+              return true;
+            }
+          }
+        }
+
+        // Method 3: Try getAllStyles if available
+        if (typeof (el as any).getAllStyles === 'function') {
+          try {
+            const allStyles = await (el as any).getAllStyles();
+            if (allStyles && Array.isArray(allStyles)) {
+              for (const style of allStyles) {
+                if (style && typeof style === 'object') {
+                  const styleName = style.name || style.getName?.() || style.styleName;
+                  if (styleName && typeof styleName === 'string') {
+                    const lowerStyleName = styleName.toLowerCase();
+                    if (styleNamesToCheck.some(checkName => 
+                      lowerStyleName.includes(checkName.toLowerCase()) || 
+                      lowerStyleName === checkName.toLowerCase()
+                    )) {
+                      return true;
+                    }
+                  }
+                }
+              }
+            }
+          } catch {
+            // Continue if getAllStyles fails
+          }
+        }
+      } catch {
+        // Continue if style check fails
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
+  };
 
   //gdpr banner
   const gdpr = async (skipCommonDiv: boolean = false, bothbanners:boolean=false, targetDiv?: any) => {
@@ -1470,39 +2240,90 @@ const handleToggles = (option) => {
     // const isBannerAlreadyAdded = getAuthStorageItem("cookieBannerAdded") === "true";
     try {
 
+      // Comprehensive check and removal of ALL banner-related elements before creating new ones
       const allElements = await webflow.getAllElements();
-      const idsToCheck = ["consent-banner", "main-banner", "toggle-consent-btn","initial-consent-banner","main-consent-banner"];
+      // Include all possible banner element IDs
+      const idsToCheck = [
+        "consent-banner", 
+        "main-banner", 
+        "toggle-consent-btn",
+        "initial-consent-banner",
+        "main-consent-banner",
+        "consentbit-preference_div",
+        "preferences-btn",
+        "decline-btn",
+        "accept-btn",
+        "privacy-link",
+        "close-consent-banner"
+      ];
 
+      // Include all possible banner style names (class names)
+      const styleNamesToCheck = [
+        "consentbit-gdpr_banner_div",
+        "consentbit-gdpr_banner_text",
+        "consentbit-banner_button_container",
+        "consentbit-banner_button_preference",
+        "consentbit-banner_button_decline",
+        "consentbit-banner_accept",
+        "consentbit-banner_headings",
+        "consentbit-innerdiv",
+        "consentbit-banner_second-bg",
+        "close-consent",
+        "consentbit-ccpa-banner-div",
+        "consentbit-ccpa-banner-text",
+        "consentbit-ccpa-button-container",
+        "consentbit-ccpa-banner-heading",
+        "consentbit-ccpa-linkblock",
+        "consentbit-ccpa-privacy-link",
+        "consentbit-ccpa-innerdiv",
+        "consentbit-banner-ccpasecond-bg",
+        "close-consentbit",
+        "consentbit-preference_div"
+      ];
 
-      // Run domId checks in parallel
-      const domIdPromises = allElements.map(async (el) => {
-        const domId = await el.getDomId?.();
-        return { el, domId };
-      });
-
-      const elementsWithDomIds = await Promise.all(domIdPromises);
+      // Check all elements by both ID and style names
+      const elementChecks = await Promise.all(
+        allElements.map(async (el) => {
+          const isBanner = await isBannerElement(el, idsToCheck, styleNamesToCheck);
+          return { el, isBanner };
+        })
+      );
 
       // Filter matching elements
-      const matchingElements = elementsWithDomIds
-        .filter(({ domId }) => domId && idsToCheck.includes(domId))
-        .map(({ el, domId }) => el);
+      const matchingElements = elementChecks
+        .filter(({ isBanner }) => isBanner)
+        .map(({ el }) => el);
 
+      // Remove ALL matching elements to prevent duplicates - regardless of container relationship
+      if (matchingElements.length > 0) {
+        console.log(`🔍 [gdpr] Found ${matchingElements.length} existing banner element(s) to remove (checked by ID and class names)`);
+        await Promise.all(matchingElements.map(async (el) => {
+          try {
+            const domId = await el.getDomId?.().catch(() => null);
+            const identifier = domId || 'element-with-banner-class';
+            console.log(`✅ [gdpr] Deleting duplicate banner element: ${identifier}`);
+            
+            // Remove all children first
+            try {
+              const children = await el.getChildren?.();
+              if (children && children.length > 0) {
+                await Promise.all(children.map(child => child.remove()));
+              }
+            } catch (childErr) {
+              console.warn(`⚠️ [gdpr] Error removing children:`, childErr);
+            }
 
-      // Remove matching elements and children
-      await Promise.all(matchingElements.map(async (el) => {
-        try {
-          const domId = await el.getDomId?.();
-          const children = await el.getChildren?.();
-
-          if (children?.length) {
-            await Promise.all(children.map(child => child.remove()));
+            // Remove the element itself
+            await el.remove();
+            console.log(`✓ [gdpr] Successfully removed element: ${identifier}`);
+          } catch (err) {
+            console.error(`⚠️ [gdpr] Error removing duplicate banner:`, err);
+            // Continue even if removal fails
           }
-
-          await el.remove();
-        } catch (err) {
-          webflow.notify({ type: "error", message: "Failed to remove a banner." });
-        }
-      }));
+        }));
+      } else {
+        console.log(`✅ [gdpr] No existing banner elements found - safe to create new banner`);
+      }
 
       // Use provided targetDiv if available, otherwise get selected element
       const selectedElement = targetDiv ;
@@ -1511,6 +2332,20 @@ const handleToggles = (option) => {
         setIsLoading(false); // Reset loading state
         return;
       }
+
+      // Check if the selected element is a child of consentbit-container
+      console.log("🔍 [gdpr] Checking if selectedElement is child of container:", selectedElement);
+      const isChildOfContainer = await isSelectedElementChildOfContainer(selectedElement);
+      console.log("🔍 [gdpr] Check result:", isChildOfContainer);
+      if (isChildOfContainer) {
+        console.log("❌ [gdpr] Blocking banner creation - element is child of container");
+        setShowPopup(false);
+        setShowLoadingPopup(false);
+        setIsLoading(false);
+        setShowChildContainerErrorPopup(true);
+        return;
+      }
+      console.log("✅ [gdpr] Allowing banner creation - element is not child of container");
 
       // Check if the selected element can have children
       if (!selectedElement?.children) {
@@ -1527,6 +2362,94 @@ const handleToggles = (option) => {
         }
       } catch (error) {
         // Continue if style application fails
+      }
+
+      // Set DOM ID 'consentbit-container' on the selected element
+      try {
+        // Check if DOM ID is already set
+        let existingDomId: string | null = null;
+        try {
+          if ((selectedElement as any).getDomId) {
+            existingDomId = await (selectedElement as any).getDomId();
+          }
+        } catch (e) {
+          // Continue if we can't get DOM ID - element might be in transition
+        }
+
+        // Set DOM ID if not already set
+        if (existingDomId !== 'consentbit-container') {
+          try {
+            if ((selectedElement as any).setDomId) {
+              await (selectedElement as any).setDomId("consentbit-container");
+              console.log("✓ DOM ID 'consentbit-container' set successfully in CustomizationTab");
+            } else if (selectedElement.setCustomAttribute) {
+              await selectedElement.setCustomAttribute("id", "consentbit-container");
+              console.log("Used setCustomAttribute to set DOM ID");
+            } else if ((selectedElement as any).setAttribute) {
+              await (selectedElement as any).setAttribute("id", "consentbit-container");
+              console.log("Used setAttribute to set DOM ID");
+            }
+          } catch (domIdSetError: any) {
+            // Handle "Missing element" error gracefully - element reference became invalid
+            // This usually means the ID was set but element was modified by Webflow
+            if (domIdSetError?.message && domIdSetError.message.includes("Missing element")) {
+              // Silently continue - ID was likely set before element became invalid
+            } else {
+              console.error("Error setting DOM ID in CustomizationTab:", domIdSetError);
+            }
+            // Continue even if DOM ID setting fails
+          }
+        } else {
+          // DOM ID already set - no need to verify or retry
+          console.log("DOM ID 'consentbit-container' already set on selected element");
+        }
+      } catch (domIdError: any) {
+        // Handle "Missing element" error gracefully - don't log as error
+        if (domIdError?.message && domIdError.message.includes("Missing element")) {
+          // Silently continue - element reference became invalid but ID was likely set
+        } else {
+          console.error("Error setting DOM ID in CustomizationTab:", domIdError);
+        }
+        // Continue even if DOM ID setting fails
+      }
+
+      // Final double-check: Ensure no duplicate consent-banner exists right before creating (check by ID and class names)
+      const allElementsFinalCheck = await webflow.getAllElements();
+      const finalCheckIds = ["consent-banner"];
+      const finalCheckStyleNames = [
+        "consentbit-gdpr_banner_div",
+        "consentbit-ccpa-banner-div"
+      ];
+      
+      const finalElementChecks = await Promise.all(
+        allElementsFinalCheck.map(async (el) => {
+          const isBanner = await isBannerElement(el, finalCheckIds, finalCheckStyleNames);
+          return { el, isBanner };
+        })
+      );
+      
+      const existingConsentBanners = finalElementChecks
+        .filter(({ isBanner }) => isBanner)
+        .map(({ el }) => el);
+      
+      if (existingConsentBanners.length > 0) {
+        console.log(`⚠️ [gdpr] Final check: Found ${existingConsentBanners.length} existing banner element(s), removing before creating new one`);
+        await Promise.all(existingConsentBanners.map(async (el) => {
+          try {
+            const domId = await el.getDomId?.().catch(() => null);
+            const identifier = domId || 'element-with-banner-class';
+            console.log(`✅ [gdpr] Final check: Removing banner element: ${identifier}`);
+            
+            const children = await el.getChildren?.().catch(() => []);
+            if (children && children.length > 0) {
+              await Promise.all(children.map(child => child.remove()));
+            }
+            await el.remove();
+            console.log(`✓ [gdpr] Final check: Successfully removed banner element: ${identifier}`);
+          } catch (err) {
+            console.error(`⚠️ [gdpr] Final check: Error removing existing banner:`, err);
+          }
+        }));
       }
 
       // Create newDiv as a child of the selected element
@@ -1568,6 +2491,28 @@ const handleToggles = (option) => {
       const [
         divStyle, paragraphStyle, buttonContainerStyle, prefrenceButtonStyle, declineButtonStyle, buttonStyle, headingStyle, innerDivStyle, secondBackgroundStyle, closebutton
       ] = styles;
+
+      // Apply divStyle to newDiv immediately after getting styles (before setting properties)
+      if (newDiv.setStyles && divStyle) {
+        try {
+          await newDiv.setStyles([divStyle]);
+          console.log("✓ [gdpr] Applied consentbit-gdpr_banner_div style to newDiv");
+        } catch (styleError) {
+          console.error("⚠️ [gdpr] Error applying divStyle to newDiv:", styleError);
+          // Try alternative method
+          try {
+            if ((newDiv as any).applyStyle) {
+              await (newDiv as any).applyStyle(divStyle);
+              console.log("✓ [gdpr] Applied divStyle using applyStyle method");
+            }
+          } catch (altError) {
+            console.error("⚠️ [gdpr] Alternative style application also failed:", altError);
+          }
+        }
+      } else {
+        console.error("⚠️ [gdpr] Cannot apply divStyle - newDiv.setStyles or divStyle is missing");
+        console.log("newDiv.setStyles:", !!newDiv.setStyles, "divStyle:", !!divStyle);
+      }
 
 
       const animationAttributeMap = {
@@ -1810,11 +2755,25 @@ const handleToggles = (option) => {
       await headingStyle.setProperties(headingPropertyMap);
       await secondBackgroundStyle.setProperties(secondbackgroundPropertyMap);
       await innerDivStyle.setProperties(innerdivPropertyMap);
-      await closebutton.setProperties(CloseButtonPropertyMap)
+      await closebutton.setProperties(CloseButtonPropertyMap);
 
-
-      if (newDiv.setStyles) {
-        await newDiv.setStyles([divStyle]);
+      // Re-apply divStyle to newDiv after setting properties to ensure it's applied
+      if (newDiv.setStyles && divStyle) {
+        try {
+          await newDiv.setStyles([divStyle]);
+          console.log("✓ [gdpr] Re-applied consentbit-gdpr_banner_div style to newDiv after setting properties");
+        } catch (styleError) {
+          console.error("⚠️ [gdpr] Error re-applying divStyle after setting properties:", styleError);
+          // Try alternative method
+          try {
+            if ((newDiv as any).applyStyle) {
+              await (newDiv as any).applyStyle(divStyle);
+              console.log("✓ [gdpr] Re-applied divStyle using applyStyle method");
+            }
+          } catch (altError) {
+            console.error("⚠️ [gdpr] Alternative style re-application also failed:", altError);
+          }
+        }
       }
       
       // Get siteId from Webflow API
@@ -2028,14 +2987,19 @@ const handleToggles = (option) => {
         
         setTimeout(async () => {
           setShowPopup(false);
-          // setShowSuccessPopup(true);
+          setShowSuccessPopup(true);
           setIsLoading(false);
           
-          // Script registration for GDPR banners - AFTER banner is created
-          if (appVersion === '1.0.0') {
-            fetchAnalyticsBlockingsScripts();
-          } else if (appVersion === '2.0.0'|| appVersion === '2.0.1') {
-            fetchAnalyticsBlockingsScriptsV2();
+          // Register ConsentBit script globally using inline script registration - ONLY for GDPR banners
+          try {
+            const token = getSessionTokenFromLocalStorage();
+            const siteInfo = await webflow.getSiteInfo();
+            if (token && siteInfo?.siteId) {
+              await addConsentBitScriptGlobally(siteInfo.siteId, token);
+            }
+          } catch (scriptError) {
+            console.error("Error registering ConsentBit script:", scriptError);
+            // Continue even if script registration fails
           }
           
           // Save banner details with isBannerAdded: true
@@ -2070,10 +3034,16 @@ const handleToggles = (option) => {
         setIsLoading(false); // Reset loading state
         return;
       }
-    
 
     await gdpr(true,true,targetDiv);
-    await ccpabanner(targetDiv);
+    await ccpabanner(targetDiv, true); // Pass true to indicate both banners are being created
+    
+    // Show success popup after both banners are created
+    setTimeout(() => {
+      setShowPopup(false);
+      setShowSuccessPopup(true);
+      setIsLoading(false);
+    }, 500);
   };
 
   const handleExpirationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -2648,6 +3618,42 @@ const handleToggles = (option) => {
                         return;
                       }
 
+                      // Wait a moment before checking to ensure element selection is stable
+                      console.log("🔍 [Publish Button] Waiting before check...");
+                      await new Promise(resolve => setTimeout(resolve, 300)); // 300ms delay
+                      
+                      // Re-get the selected element after delay to ensure it's still selected
+                      const currentSelectedElement = await webflow.getSelectedElement() as { type?: string };
+                      if (!currentSelectedElement) {
+                        setShowTooltip(true);
+                        setShowPopup(false);
+                        return;
+                      }
+
+                      // Check if the selected element is a child of consentbit-container BEFORE showing popup
+                      console.log("🔍 [Publish Button] Starting check BEFORE popup opens");
+                      console.log("🔍 [Publish Button] Selected element:", currentSelectedElement);
+                      
+                      try {
+                        const isChildOfContainer = await isSelectedElementChildOfContainer(currentSelectedElement);
+                        console.log("🔍 [Publish Button] Check result:", isChildOfContainer);
+                        
+                        if (isChildOfContainer) {
+                          console.log("❌ [Publish Button] BLOCKING - element is child of container, NOT opening popup");
+                          setShowTooltip(false);
+                          setShowPopup(false);
+                          setShowChildContainerErrorPopup(true);
+                          console.log("✅ [Publish Button] Showing error popup");
+                          return; // Exit early - don't proceed to authentication or popup
+                        } else {
+                          console.log("✅ [Publish Button] Element is NOT a child, proceeding to open popup");
+                        }
+                      } catch (checkError) {
+                        console.error("❌ [Publish Button] Error during child check:", checkError);
+                        // If check fails, allow to proceed (fail-safe)
+                        console.log("⚠️ [Publish Button] Check failed, allowing to proceed");
+                      }
+
                       // Try authentication check with fallback
                       let isUserValid = false;
                       try {
@@ -2804,6 +3810,7 @@ const handleToggles = (option) => {
                         setIsLoading(false);
                         return;
                       }
+                      
                       await gdpr(false, false, targetDiv);
                     }}
                   >
@@ -2822,6 +3829,7 @@ const handleToggles = (option) => {
                           setIsLoading(false);
                           return;
                         }
+                        
                         await ccpabanner(targetDiv);
                       }}
                     >
@@ -2851,6 +3859,15 @@ const handleToggles = (option) => {
           <div className="success-popup">
             <p>To make the banner live, click the 'Publish' button in the top-right corner of the Webflow interface and publish your site.</p>
             <button onClick={() => setShowSuccessPopup(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {showChildContainerErrorPopup && (
+        <div className="popup-overlay">
+          <div className="success-popup">
+            <p>Please select the ConsentBit container to update the banner.</p>
+            <button onClick={() => setShowChildContainerErrorPopup(false)}>Close</button>
           </div>
         </div>
       )}
@@ -3308,9 +4325,9 @@ const handleToggles = (option) => {
                       )}
                     </div>
                     <div className="button-wrapp" style={{ justifyContent: style === "centeralign" ? "center" : undefined, }}>
-                      <button className="btn-preferences" style={{ borderRadius: `${buttonRadius}px`, backgroundColor: secondcolor, color: secondbuttontext, fontFamily: Font }} >{translations[language as keyof typeof translations]?.preferences || "Preferences"}</button>
-                      <button className="btn-reject" style={{ borderRadius: `${buttonRadius}px`, backgroundColor: secondcolor, color: secondbuttontext, fontFamily: Font }} >{translations[language as keyof typeof translations]?.reject || "Reject"}</button>
-                      <button className="btn-accept" style={{ borderRadius: `${buttonRadius}px`, backgroundColor: btnColor, color: primaryButtonText, fontFamily: Font }} >{translations[language as keyof typeof translations]?.accept || "Accept"}</button>
+                      <button className="btn-preferences" style={{ borderRadius: `${buttonRadius}px`, backgroundColor: secondcolor, color: secondbuttontext, fontFamily: Font } as React.CSSProperties} >{translations[language as keyof typeof translations]?.preferences || "Preferences"}</button>
+                      <button className="btn-reject" style={{ borderRadius: `${buttonRadius}px`, backgroundColor: secondcolor, color: secondbuttontext, fontFamily: Font } as React.CSSProperties} >{translations[language as keyof typeof translations]?.reject || "Reject"}</button>
+                      <button className="btn-accept" style={{ borderRadius: `${buttonRadius}px`, backgroundColor: btnColor, color: primaryButtonText, fontFamily: Font } as React.CSSProperties} >{translations[language as keyof typeof translations]?.accept || "Accept"}</button>
                     </div>
                   </div>
                   )}

@@ -1,4 +1,4 @@
-const base_url = "https://cb-server.web-8fb.workers.dev";
+const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
 import { ScriptCategory, SaveCategoriesResponse, AppData } from '../types/types';
 import { scriptCategorizationService } from './script-categorization-service';
 import { ClientEncryption } from '../util/Secure-Data';
@@ -426,6 +426,27 @@ downloadPDFFromUrl: async (token: string, pdfUrl: string, filename: string) => {
      
      if (!response.ok) {
        throw new Error(`HTTP error! status: ${response.status}`);
+     }
+     
+     const data = await response.json();
+     return data;
+   } catch (error) {
+     throw error;
+   }
+ },
+ injectScript: async (token: string, siteId: string) => {
+   try {
+     const response = await fetch(`${base_url}/api/inject-script?siteId=${siteId}`, {
+       method: 'POST',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json'
+       }
+     });
+     
+     if (!response.ok) {
+       const errorText = await response.text();
+       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
      }
      
      const data = await response.json();

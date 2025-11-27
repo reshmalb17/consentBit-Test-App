@@ -266,11 +266,10 @@ const App: React.FC = () => {
     setIsAuthenticated(isUserAuthenticated);
   }, [user, sessionToken]);
 
-  // Removed - this is now handled in the main initialization useEffect
+  // Script injection using injectScript API (replaces old script registration)
   useEffect(() => {
-    const registerVersionBasedScripts = async () => {
-      
-      // Only register scripts if user is authenticated and has session token
+    const injectScriptOnAuth = async () => {
+      // Only inject script if user is authenticated and has session token
       if (!isAuthenticated || !sessionToken || !user?.email) {
         return;
       }
@@ -279,55 +278,27 @@ const App: React.FC = () => {
       if (!token) {
         return;
       }
-      
 
       try {
         const siteInfo = await webflow.getSiteInfo();
-        
-        // Get the stored siteId from authentication (this is the correct siteId that matches the server)
-        const storedSiteId = getCurrentSiteId();
-
-        if (appVersion === '1.0.0') {
-          const result = await customCodeApi.registerAnalyticsBlockingScript(token);
-          
-          // Apply the registered script
-          if (result && result.result) {
-            const params: CodeApplication = {
-              targetType: 'site',
-              targetId: siteInfo.siteId, // Use siteInfo.siteId for application
-              scriptId: result.result.id,
-              location: 'header',
-              version: result.result.version
-            };
-            const applyResult = await customCodeApi.applyScript(params, token);
+        if (siteInfo?.siteId) {
+          // Use injectScript API instead of old registration methods
+          const injectResponse = await customCodeApi.injectScript(token, siteInfo.siteId);
+          if (injectResponse && injectResponse.success) {
+            // Script injected successfully
           } else {
-          }
-        } else if (appVersion === '2.0.0' || appVersion === '2.0.1') {
-          const result = await customCodeApi.registerV2BannerCustomCode(token, siteInfo.siteId);
-          // Apply the registered script
-          if (result && result.result) {
-            const params: CodeApplication = {
-              targetType: 'site',
-              targetId: siteInfo.siteId, // Use URL if available, fallback to siteId
-              scriptId: result.result.id,
-              location: 'header',
-              version: result.result.version
-            };
-            const applyResult = await customCodeApi.applyV2Script(params, token);
-            
-            // Script should be added by server via custom code block
-            
-          } else {
+            // Script injection response indicates failure
           }
         }
       } catch (error) {
-        
+        console.error("Error injecting script:", error);
+        // Continue even if script injection fails
       }
     };
 
-    // Delay script registration to ensure authentication is fully settled
+    // Delay script injection to ensure authentication is fully settled
     const timer = setTimeout(() => {
-      registerVersionBasedScripts();
+      injectScriptOnAuth();
     }, 2000);
 
     return () => {

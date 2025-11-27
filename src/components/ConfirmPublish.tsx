@@ -53,6 +53,7 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
   const [iconSrc, setIconSrc] = useState(CopyContent);
   const [showChoosePlan, setShowChoosePlan] = useState(false);
   const [hideLoading, setHideLoading] = useState(false);
+  const [showChildContainerErrorPopup, setShowChildContainerErrorPopup] = useState(false);
   const { sessionToken } = useAuth();
 
   
@@ -71,7 +72,12 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
     localStorage: localStorageData
   } = useAppState();
   const { user, exchangeAndVerifyIdToken, isAuthenticatedForCurrentSite, openAuthScreen } = useAuth();
-  const { createCompleteBannerStructureWithExistingFunctions, isCreating } = useBannerCreation();
+  const { 
+    createCompleteBannerStructureWithExistingFunctions, 
+    isCreating, 
+    showSuccessPublish, 
+    handleSuccessPublishProceed 
+  } = useBannerCreation();
 
   // Auto-dismiss tooltip after 2 seconds
   useEffect(() => {
@@ -90,16 +96,166 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
   }, [tooltips.showTooltip]);
 
 
+  // Helper function to check if selected element is a child of consentbit-container
+  // This matches the exact implementation from CustomizationTab
+  const isSelectedElementChildOfContainer = async (selectedElement: any): Promise<boolean> => {
+    try {
+      let currentElement: any = selectedElement;
+      const checkedElements = new Set();
+      let isChildOfContainer = false;
+      let depth = 0;
+      const maxDepth = 20; // Prevent infinite loops
+      
+      // List of banner element IDs that indicate the element is inside a banner structure
+      const bannerElementIds = [
+        'consent-banner',
+        'initial-consent-banner',
+        'main-banner',
+        'main-consent-banner',
+        'consentbit-preference_div',
+        'toggle-consent-btn',
+        'preferences-btn',
+        'decline-btn',
+        'accept-btn',
+        'privacy-link'
+      ];
+      
+      if (!currentElement) {
+        return false;
+      }
+      
+      // First, check if the selected element itself has the consentbit-container ID or is a banner element
+      let selectedElementId: string | null = null;
+      try {
+        if (typeof (currentElement as any).getDomId === 'function') {
+          selectedElementId = await (currentElement as any).getDomId();
+          
+          // If selected element IS the container, allow it
+          if (selectedElementId === 'consentbit-container') {
+            return false; // Not a child, it IS the container
+          }
+          
+          // If selected element is a banner element, it's definitely a child of the container
+          // CRITICAL: This check MUST return immediately - don't continue to parent traversal
+          if (selectedElementId && bannerElementIds.includes(selectedElementId)) {
+            return true; // It's a child of the container - RETURN IMMEDIATELY
+          }
+        }
+      } catch (e) {
+        // Error getting selected element DOM ID
+      }
+      
+      // Traverse up the parent chain to check if any parent has consentbit-container ID
+      while (currentElement && !checkedElements.has(currentElement) && !isChildOfContainer && depth < maxDepth) {
+        checkedElements.add(currentElement);
+        depth++;
+        
+        try {
+          // Check if current element has consentbit-container ID
+          let currentId: string | null = null;
+          if (typeof (currentElement as any).getDomId === 'function') {
+            currentId = await (currentElement as any).getDomId();
+            
+            // If this is a banner element, it's definitely inside the container
+            if (currentId && bannerElementIds.includes(currentId)) {
+              isChildOfContainer = true;
+              break;
+            }
+          }
+          
+          // If this element is consentbit-container, check if it's the selected element itself
+          if (currentId === 'consentbit-container') {
+            // If it's the selected element itself, allow it (user selected the container)
+            if (currentElement === selectedElement) {
+              isChildOfContainer = false;
+              break;
+            } else {
+              // Selected element is a child of consentbit-container (not the container itself)
+              isChildOfContainer = true;
+              break;
+            }
+          }
+          
+          // Try to get parent
+          let parent: any = null;
+          if (typeof currentElement.getParent === 'function') {
+            try {
+              parent = await currentElement.getParent();
+            } catch (e) {
+              // Error calling getParent()
+            }
+          }
+          
+          if (parent) {
+            currentElement = parent;
+          } else {
+            break;
+          }
+        } catch (e) {
+          console.error(`❌ [ConfirmPublish.isSelectedElementChildOfContainer] Error at depth ${depth}:`, e);
+          break;
+        }
+      }
+      
+      if (depth >= maxDepth) {
+        // Reached max depth, stopping traversal
+      }
+      
+      return isChildOfContainer;
+    } catch (checkError) {
+      console.error("❌ [ConfirmPublish.isSelectedElementChildOfContainer] Error checking if selected element is child of container:", checkError);
+      // Return false on error to allow banner creation (fail-safe)
+      return false;
+    }
+  };
+
   const handlePublishClick = async () => {
     
     try {
-      const isUserValid = await isAuthenticatedForCurrentSite();
-      
       const selectedElement = await webflow.getSelectedElement() as { type?: string };
-
       const isInvalidElement = !selectedElement || selectedElement.type === "Body";
 
-      if (isUserValid && !isInvalidElement) {
+      if (isInvalidElement) {
+        tooltips.setShowTooltip(true);
+        return;
+      }
+
+      // Wait a moment before checking to ensure element selection is stable
+      await new Promise(resolve => setTimeout(resolve, 300)); // 300ms delay
+      
+      // Re-get the selected element after delay to ensure it's still selected
+      const currentSelectedElement = await webflow.getSelectedElement() as { type?: string };
+      if (!currentSelectedElement) {
+        tooltips.setShowTooltip(true);
+        return;
+      }
+
+      // Check if the selected element is a child of consentbit-container FIRST (before authentication)
+      // This matches the exact logic from CustomizationTab "Publish your changes" button
+      try {
+        const isChildOfContainer = await isSelectedElementChildOfContainer(currentSelectedElement);
+        
+        if (isChildOfContainer) {
+          tooltips.setShowTooltip(false);
+          setShowChildContainerErrorPopup(true);
+          return; // Exit early - don't proceed to authentication or banner creation
+        }
+      } catch (checkError) {
+        // If check fails, allow to proceed (fail-safe)
+      }
+
+      // Try authentication check with fallback (matching CustomizationTab pattern)
+      let isUserValid = false;
+      try {
+        isUserValid = await isAuthenticatedForCurrentSite();
+      } catch (authError) {
+        // If auth check fails, open OAuth window (matching CustomizationTab behavior)
+        tooltips.setShowTooltip(false);
+        openAuthScreen();
+        return;
+      }
+
+      if (isUserValid) {
         tooltips.setShowTooltip(false);
 
         // Create banner configuration using actual state values
@@ -254,10 +410,30 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
     return <ChoosePlan onClose={() => setShowChoosePlan(false)} />;
   }
   return (
-
+ 
     <div className="publish-container">
 
       <div className="publish-c">
+        {/* Success popup after banner creation */}
+        {showSuccessPublish && (
+          <div className="popup-overlay">
+            <div className="success-popup">
+              <p>To make the banner live, click the 'Publish' button in the top-right corner of the Webflow interface and publish your site.</p>
+              <button onClick={handleSuccessPublishProceed}>Close</button>
+            </div>
+          </div>
+        )}
+
+        {/* Child container error popup */}
+        {showChildContainerErrorPopup && (
+          <div className="popup-overlay">
+            <div className="success-popup">
+              <p>Please select the ConsentBit container to update the banner.</p>
+              <button onClick={() => setShowChildContainerErrorPopup(false)}>Close</button>
+            </div>
+          </div>
+        )}
+
         {/* Loading overlay with pulse animation */}
         {isCreating && !hideLoading && (
           <div className="popup">

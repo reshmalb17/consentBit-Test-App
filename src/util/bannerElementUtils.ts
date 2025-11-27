@@ -8,6 +8,91 @@ export interface BannerElementConfig {
   customAttributes?: Record<string, string>;
 }
 
+// Helper function to check if an element is a child/descendant of consentbit-container
+const isElementChildOfContainer = async (element: any): Promise<boolean> => {
+  console.log("🔍 [isElementChildOfContainer] Checking if element is child of container:", element);
+  try {
+    if (!element) {
+      console.log("⚠️ [isElementChildOfContainer] No element provided, returning false");
+      return false;
+    }
+
+    // First, check if the element itself is the container
+    try {
+      if (typeof (element as any).getDomId === 'function') {
+        const elementId = await (element as any).getDomId();
+        if (elementId === 'consentbit-container') {
+          console.log("✅ [isElementChildOfContainer] Element IS the container - not a child");
+          return false; // Element is the container itself, not a child
+        }
+      }
+    } catch (e) {
+      console.log("⚠️ [isElementChildOfContainer] Error getting element DOM ID:", e);
+    }
+
+    // Use getAllElements to find the container and check if element is inside it
+    const allElements = await webflow.getAllElements();
+    let consentBitContainer: any = null;
+
+    // Find the consentbit-container
+    for (const el of allElements) {
+      try {
+        if (typeof (el as any).getDomId === 'function') {
+          const domId = await (el as any).getDomId();
+          if (domId === 'consentbit-container') {
+            consentBitContainer = el;
+            console.log("🔍 [isElementChildOfContainer] Found consentbit-container");
+            break;
+          }
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+
+    if (!consentBitContainer) {
+      console.log("ℹ️ [isElementChildOfContainer] No consentbit-container found - element is not a child");
+      return false; // No container exists, so element can't be a child
+    }
+
+    // Check if element is inside the container by traversing up the parent chain
+    const checkIfElementIsChild = async (parent: any, target: any, checked: Set<any>): Promise<boolean> => {
+      if (checked.has(parent) || checked.has(target)) return false;
+      checked.add(parent);
+
+      try {
+        if (parent === target) {
+          return true;
+        }
+
+        const children = await parent.getChildren();
+        if (children && children.length > 0) {
+          for (const child of children) {
+            if (child === target) {
+              return true;
+            }
+            const isDescendant = await checkIfElementIsChild(child, target, checked);
+            if (isDescendant) {
+              return true;
+            }
+          }
+        }
+      } catch (e) {
+        // Continue
+      }
+      return false;
+    };
+
+    const isInside = await checkIfElementIsChild(consentBitContainer, element, new Set());
+    console.log(`🔍 [isElementChildOfContainer] Element is ${isInside ? 'INSIDE' : 'NOT inside'} container`);
+    return isInside;
+  } catch (error) {
+    console.error("❌ [isElementChildOfContainer] Error checking if element is child of container:", error);
+    // Return false on error to be safe (don't block deletion if check fails)
+    return false;
+  }
+};
+
 export const cleanupExistingBanners = async (idsToCheck: string[]) => {
   try {
     const allElements = await webflow.getAllElements();
@@ -25,9 +110,17 @@ export const cleanupExistingBanners = async (idsToCheck: string[]) => {
       .filter(({ domId }) => domId && idsToCheck.includes(domId))
       .map(({ el, domId }) => el);
 
-    // Remove matching elements and children
+    // Remove matching elements and children - ONLY if they are children of consentbit-container
     await Promise.all(matchingElements.map(async (el) => {
       try {
+        // Check if element is a child of consentbit-container before deleting
+        const isChild = await isElementChildOfContainer(el);
+        if (!isChild) {
+          console.log(`⚠️ [cleanupExistingBanners] Skipping deletion - element is not a child of consentbit-container`);
+          return; // Skip deletion if not a child of container
+        }
+
+        console.log(`✅ [cleanupExistingBanners] Deleting element - confirmed it's a child of container`);
         const domId = await el.getDomId?.();
         const children = await el.getChildren?.();
 
