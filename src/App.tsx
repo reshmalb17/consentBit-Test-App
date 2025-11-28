@@ -308,40 +308,93 @@ const App: React.FC = () => {
 
   // Call postInstallationCall only once on first launch, after authentication is ready
   useEffect(() => {
+    console.log("[POSTINSTALLATION] useEffect triggered", {
+      isAuthenticated,
+      hasSessionToken: !!sessionToken,
+      timestamp: new Date().toISOString()
+    });
+
     // Only proceed if authentication is ready
     if (!isAuthenticated || !sessionToken) {
+      console.log("[POSTINSTALLATION] Skipping - authentication not ready", {
+        isAuthenticated,
+        hasSessionToken: !!sessionToken
+      });
       return;
     }
 
     // Check if we've already called this (prevent multiple calls)
     const hasCalled = getAuthStorageItem("postInstallationCalled");
+    console.log("[POSTINSTALLATION] Check if already called", {
+      hasCalled,
+      storageValue: getAuthStorageItem("postInstallationCalled")
+    });
+    
     if (hasCalled === "true") {
+      console.log("[POSTINSTALLATION] Already called - skipping");
       return;
     }
 
     const callPostInstallation = async () => {
+      console.log("[POSTINSTALLATION] Starting postinstallation call");
       try {
         const token = getSessionTokenFromLocalStorage();
+        console.log("[POSTINSTALLATION] Token retrieved", {
+          hasToken: !!token,
+          tokenLength: token?.length
+        });
         
         if (token) {
+          console.log("[POSTINSTALLATION] Fetching site info");
           const siteInfo = await webflow.getSiteInfo();
+          console.log("[POSTINSTALLATION] Site info retrieved", {
+            hasSiteInfo: !!siteInfo,
+            siteId: siteInfo?.siteId,
+            siteName: siteInfo?.siteName
+          });
           
           if (siteInfo?.siteId) {
             // Call the API - it will handle checking if already processed
             try {
-              await customCodeApi.postInstalltionCall(token, siteInfo.siteId);
+              console.log("[POSTINSTALLATION] Calling API", {
+                siteId: siteInfo.siteId,
+                endpoint: `/api/postinstallation/${siteInfo.siteId}`
+              });
+              
+              const result = await customCodeApi.postInstalltionCall(token, siteInfo.siteId);
+              
+              console.log("[POSTINSTALLATION] API call successful", {
+                result,
+                success: result?.success,
+                message: result?.message
+              });
               
               // Mark as called to prevent duplicate calls
               setAuthStorageItem("postInstallationCalled", "true");
+              console.log("[POSTINSTALLATION] Marked as called in storage");
               
               // API returns { success: true, message: 'Already processed' } if already called
               // or { success: true, message: 'Successfully processed' } if just processed
             } catch (apiError: any) {
+              console.error("[POSTINSTALLATION] API call failed", {
+                error: apiError,
+                message: apiError?.message,
+                stack: apiError?.stack
+              });
               // Handle CORS and other API errors gracefully - don't throw
             }
+          } else {
+            console.warn("[POSTINSTALLATION] No siteId available", { siteInfo });
           }
+        } else {
+          console.warn("[POSTINSTALLATION] No token available");
         }
       } catch (error) {
+        console.error("[POSTINSTALLATION] Error in callPostInstallation", {
+          error,
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
+        });
         // Silently handle error - don't block app
       }
     };

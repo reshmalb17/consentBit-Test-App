@@ -9,7 +9,7 @@ import PulseAnimation from "./PulseAnimation";
 // without downloading the data or changing month/year. This resolves the issue
 // where users couldn't revert back to the initial state after generating a CSV.
 
-const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
+const base_url = "https://app.consentbit.com";
 
 const closePDFIcon = new URL("../assets/Close-icon.png", import.meta.url).href;
 const emptyIcon = new URL("../assets/emptybox.svg", import.meta.url).href;

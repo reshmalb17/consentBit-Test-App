@@ -2,7 +2,7 @@
 import { ScriptCategory } from '../types/types';
 import { EncryptionUtils } from '../util/Encryption-Utils';
 
-const BASE_URL = "https://consentbit-test-server.web-8fb.workers.dev";
+const BASE_URL = "https://app.consentbit.com";
 const SAVE_TIMEOUT_MS = 2000; // 2 seconds
 
 export const scriptCategorizationService = {

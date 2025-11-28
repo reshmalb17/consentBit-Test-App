@@ -12,7 +12,7 @@ import pkg from '../../package.json';
 import { c } from 'framer-motion/dist/types.d-Cjd591yU';
 
 const appVersion = pkg.version;
-const base_url = "https://consentbit-test-server.web-8fb.workers.dev"
+const base_url = "https://app.consentbit.com"
 
 
 export interface BannerConfig {

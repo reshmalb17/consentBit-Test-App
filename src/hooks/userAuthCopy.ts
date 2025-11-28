@@ -4,7 +4,7 @@ import { User, DecodedToken } from "../types/types";
 import webflow from "../types/webflowtypes";
 import { setAuthData, setSiteInfo, getAuthData, getSiteInfo, isAuthenticated, migrateAuthDataToSessionStorage, clearAuthData, setAuthStorageItem, removeAuthStorageItem, getAuthStorageItem } from "../util/authStorage";
 
-const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
+const base_url = "https://app.consentbit.com";
 
 interface AuthState {
   user: User;

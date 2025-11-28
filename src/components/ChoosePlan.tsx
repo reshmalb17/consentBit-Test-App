@@ -10,7 +10,7 @@ const COUPON_DISCOUNT = "20%";
 
 const cross = new URL("../assets/cross mark.svg", import.meta.url).href;
 const arrow = new URL("../assets/→.svg", import.meta.url).href;
-const couponImage = new URL("../assets/CouponImage.svg", import.meta.url).href;
+const couponImage = new URL("../assets/CouponImage.webp", import.meta.url).href;
 
 type ChoosePlanProps = {
   onClose: () => void;

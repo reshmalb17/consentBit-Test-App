@@ -1,4 +1,4 @@
-const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
+const base_url = "https://app.consentbit.com";
 import { ScriptCategory, SaveCategoriesResponse, AppData } from '../types/types';
 import { scriptCategorizationService } from './script-categorization-service';
 import { ClientEncryption } from '../util/Secure-Data';
@@ -392,25 +392,75 @@ downloadPDFFromUrl: async (token: string, pdfUrl: string, filename: string) => {
     }
   },
    postInstalltionCall:async (token: string, siteId: string) => {
+   console.log("[POSTINSTALLATION API] Starting API call", {
+     siteId,
+     endpoint: `${base_url}/api/postinstallation/${siteId}`,
+     hasToken: !!token,
+     tokenLength: token?.length
+   });
+   
    try {
-     const response = await fetch(`${base_url}/api/postinstallation/${siteId}`, {
+     const url = `${base_url}/api/postinstallation/${siteId}`;
+     console.log("[POSTINSTALLATION API] Making fetch request", {
+       url,
+       method: 'POST'
+     });
+     
+     const response = await fetch(url, {
        method: 'POST',
        headers: { 
          'Content-Type': 'application/json',
          'Authorization': `Bearer ${token}`
        },
      });
+     
+     const headersObj: Record<string, string> = {};
+     response.headers.forEach((value, key) => {
+       headersObj[key] = value;
+     });
+     
+     console.log("[POSTINSTALLATION API] Response received", {
+       status: response.status,
+       statusText: response.statusText,
+       ok: response.ok,
+       headers: headersObj
+     });
+     
      if (!response.ok) {
-       throw new Error(`HTTP error! status: ${response.status}`);
+       const errorText = await response.text();
+      console.error("[POSTINSTALLATION API] HTTP error", {
+        status: response.status,
+        statusText: response.statusText,
+        errorText
+      });
+       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
      }
+     
      const result = await response.json();
+     console.log("[POSTINSTALLATION API] Response data", {
+       result,
+       all_P: result.all_P,
+       success: result.success,
+       message: result.message
+     });
+     
       if (result.all_P === true) {
+        console.log("[POSTINSTALLATION API] Already processed");
         return { success: true, message: 'Already processed' };
      } else if (result.success === true) {
+       console.log("[POSTINSTALLATION API] Successfully processed");
        return { success: true, message: 'Successfully processed' };
      }
+     
+     console.warn("[POSTINSTALLATION API] Unexpected response format", { result });
+     return result;
    
-   } catch (error) {   
+   } catch (error) {
+     console.error("[POSTINSTALLATION API] Error caught", {
+       error,
+       message: error instanceof Error ? error.message : 'Unknown error',
+       stack: error instanceof Error ? error.stack : undefined
+     });
      throw error;
    }
  },

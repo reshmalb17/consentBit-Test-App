@@ -8,7 +8,7 @@ import { usePersistentState } from '../hooks/usePersistentState';
 import { getAuthStorageItem, setAuthStorageItem, removeAuthStorageItem, setCurrentSiteId } from '../util/authStorage';
 import webflow from '../types/webflowtypes';
 
-const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
+const base_url = "https://app.consentbit.com";
 
 const questionmark = new URL("../assets/blue question.svg", import.meta.url).href;
 const settings = new URL("../assets/setting-2.svg", import.meta.url).href;

@@ -1287,6 +1287,9 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
                     if ((imageElement as any).setCustomAttribute) {
 
                         await (imageElement as any).setCustomAttribute("data-consent-toggle", "true");
+                        // Optimize for LCP: remove lazy loading and set high fetch priority
+                        await (imageElement as any).setCustomAttribute("loading", "eager");
+                        await (imageElement as any).setCustomAttribute("fetchpriority", "high");
 
                     }
 

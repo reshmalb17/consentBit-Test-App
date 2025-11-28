@@ -794,6 +794,9 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
           // Set custom attributes for the image
           if ((imageElement as any).setCustomAttribute) {
             await (imageElement as any).setCustomAttribute("data-consent-toggle", "true");
+            // Optimize for LCP: remove lazy loading and set high fetch priority
+            await (imageElement as any).setCustomAttribute("loading", "eager");
+            await (imageElement as any).setCustomAttribute("fetchpriority", "high");
           }
         }
       }

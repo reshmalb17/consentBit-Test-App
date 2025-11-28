@@ -24,7 +24,7 @@ const whitearrow = new URL("../assets/→.svg", import.meta.url).href;
 const logo = new URL("../assets/icon.svg", import.meta.url).href;
 const errorsheild = new URL("../assets/warning-2.svg", import.meta.url).href;
 const crossmark = new URL("../assets/group.svg", import.meta.url).href;
-const couponCodeBg = new URL("../assets/Couponcode.svg", import.meta.url).href;
+const couponCodeBg = new URL("../assets/Couponcode.webp", import.meta.url).href;
 
 const tickSVG =
   "data:image/svg+xml;utf8," +

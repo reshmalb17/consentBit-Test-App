@@ -492,7 +492,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
 
 
-  const base_url = "https://consentbit-test-server.web-8fb.workers.dev"
+  const base_url = "https://app.consentbit.com"
 
   // Welcome screen handlers - removed since this component is accessed via Customize link
   const handleWelcomeAuthorize = () => {
