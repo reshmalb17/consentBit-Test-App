@@ -12,8 +12,8 @@ import CustomizationTab from "./CustomizationTab";
 import ChoosePlan from "./ChoosePlan";
 import { customCodeApi } from "../services/api";
 
-// Coupon code and discount - update these values to change the displayed text
-const COUPON_CODE = "BlackFriday2025";
+// Coupon code and discount - update these valUse Coupon Code:ues to change the displayed text
+const COUPON_CODE = "ENDOFYEAR";
 const COUPON_DISCOUNT = "20%";
 
 const confirmIcon = new URL("../assets/confirmicon.svg", import.meta.url).href;
@@ -24,7 +24,7 @@ const whitearrow = new URL("../assets/→.svg", import.meta.url).href;
 const logo = new URL("../assets/icon.svg", import.meta.url).href;
 const errorsheild = new URL("../assets/warning-2.svg", import.meta.url).href;
 const crossmark = new URL("../assets/group.svg", import.meta.url).href;
-const couponCodeBg = new URL("../assets/Couponcode.webp", import.meta.url).href;
+const couponCodeBg = new URL("../assets/Endofyear.svg", import.meta.url).href;
 
 const tickSVG =
   "data:image/svg+xml;utf8," +
@@ -469,8 +469,8 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
                        }}
                      >
                       <div style={{ display: "flex", flexDirection: "column", padding: "10px" ,justifyContent: "center",marginLeft: "75px"}}>
-                        <span style={{color: "black",fontSize: "8px",marginLeft: "5px",fontWeight: "600"}}>Use Coupon Code:</span>
-                        <span style={{color: "black",fontWeight: "600",fontSize: "10px"}}>{COUPON_CODE}</span>
+                        <span style={{color: "black",fontSize: "8px",marginLeft: "0px",fontWeight: "600"}}>Use Coupon Code:</span>
+                        <span style={{color: "black",fontWeight: "600",fontSize: "12px"}}>{COUPON_CODE}</span>
                       </div>
 
                        <img

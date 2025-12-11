@@ -2971,7 +2971,8 @@ input:checked+.toggle::before {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: linear-gradient(14deg, #0B091D 18.17%, #6007E6 127.91%);
+  background: linear-gradient(40.02deg, #0B091D -19.82%, #6007E6 115.34%);
+  /* background: linear-gradient(14deg, #0B091D 18.17%, #6007E6 127.91%); */
   border-radius: 4px;
   padding: 24px;
   text-align: center;
@@ -3014,7 +3015,7 @@ text-align: center;
   text-align: center;
   vertical-align: middle;
   margin-top: 10px;
-  background-image: url('../assets/Purchase\ line.svg');
+  /* background-image: url('../assets/Purchase\ line.svg'); */
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
