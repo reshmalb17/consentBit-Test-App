@@ -10,7 +10,7 @@ const COUPON_DISCOUNT = "20%";
 
 const cross = new URL("../assets/cross mark.svg", import.meta.url).href;
 const arrow = new URL("../assets/→.svg", import.meta.url).href;
-const couponImage = new URL("../assets/CouponImage.webp", import.meta.url).href;
+const couponImage = new URL("../assets/CouponImage1.svg", import.meta.url).href;
 
 type ChoosePlanProps = {
   onClose: () => void;
@@ -52,8 +52,10 @@ const ChoosePlan: React.FC<ChoosePlanProps> = ({ onClose }) => {
               alt="Coupon" 
               style={{
                 position: "absolute",
-                top: "3%",
-                left: "3%",
+                top: "2%",
+                left: "2%",
+                width: "120px",
+                height: "auto",
                 zIndex: 1
               }}
             />

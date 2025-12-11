@@ -10,10 +10,8 @@ export interface BannerElementConfig {
 
 // Helper function to check if an element is a child/descendant of consentbit-container
 const isElementChildOfContainer = async (element: any): Promise<boolean> => {
-  console.log("🔍 [isElementChildOfContainer] Checking if element is child of container:", element);
   try {
     if (!element) {
-      console.log("⚠️ [isElementChildOfContainer] No element provided, returning false");
       return false;
     }
 
@@ -22,12 +20,10 @@ const isElementChildOfContainer = async (element: any): Promise<boolean> => {
       if (typeof (element as any).getDomId === 'function') {
         const elementId = await (element as any).getDomId();
         if (elementId === 'consentbit-container') {
-          console.log("✅ [isElementChildOfContainer] Element IS the container - not a child");
           return false; // Element is the container itself, not a child
         }
       }
     } catch (e) {
-      console.log("⚠️ [isElementChildOfContainer] Error getting element DOM ID:", e);
     }
 
     // Use getAllElements to find the container and check if element is inside it
@@ -41,7 +37,6 @@ const isElementChildOfContainer = async (element: any): Promise<boolean> => {
           const domId = await (el as any).getDomId();
           if (domId === 'consentbit-container') {
             consentBitContainer = el;
-            console.log("🔍 [isElementChildOfContainer] Found consentbit-container");
             break;
           }
         }
@@ -51,7 +46,6 @@ const isElementChildOfContainer = async (element: any): Promise<boolean> => {
     }
 
     if (!consentBitContainer) {
-      console.log("ℹ️ [isElementChildOfContainer] No consentbit-container found - element is not a child");
       return false; // No container exists, so element can't be a child
     }
 
@@ -84,10 +78,8 @@ const isElementChildOfContainer = async (element: any): Promise<boolean> => {
     };
 
     const isInside = await checkIfElementIsChild(consentBitContainer, element, new Set());
-    console.log(`🔍 [isElementChildOfContainer] Element is ${isInside ? 'INSIDE' : 'NOT inside'} container`);
     return isInside;
   } catch (error) {
-    console.error("❌ [isElementChildOfContainer] Error checking if element is child of container:", error);
     // Return false on error to be safe (don't block deletion if check fails)
     return false;
   }
@@ -116,11 +108,9 @@ export const cleanupExistingBanners = async (idsToCheck: string[]) => {
         // Check if element is a child of consentbit-container before deleting
         const isChild = await isElementChildOfContainer(el);
         if (!isChild) {
-          console.log(`⚠️ [cleanupExistingBanners] Skipping deletion - element is not a child of consentbit-container`);
           return; // Skip deletion if not a child of container
         }
 
-        console.log(`✅ [cleanupExistingBanners] Deleting element - confirmed it's a child of container`);
         const domId = await el.getDomId?.();
         const children = await el.getChildren?.();
 

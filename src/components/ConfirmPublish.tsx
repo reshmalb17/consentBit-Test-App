@@ -192,7 +192,6 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
             break;
           }
         } catch (e) {
-          console.error(`❌ [ConfirmPublish.isSelectedElementChildOfContainer] Error at depth ${depth}:`, e);
           break;
         }
       }
@@ -203,7 +202,6 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
       
       return isChildOfContainer;
     } catch (checkError) {
-      console.error("❌ [ConfirmPublish.isSelectedElementChildOfContainer] Error checking if selected element is child of container:", checkError);
       // Return false on error to allow banner creation (fail-safe)
       return false;
     }

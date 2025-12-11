@@ -958,7 +958,7 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
                             }
                         }
                     } catch (error) {
-                        console.error('Error creating close icon image element:', error);
+                        // Error creating close icon image element
                     }
                 }
 
@@ -1214,10 +1214,6 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
 
                     await mainDivBlock.setDomId("toggle-consent-btn");
 
-                } else {
-
-                    console.error("ccpa banner id setteled");
-
                 }
 
                 // Add image to the skip div
@@ -1287,15 +1283,12 @@ const createCookieccpaPreferences = async (language: string = "English", color: 
                     if ((imageElement as any).setCustomAttribute) {
 
                         await (imageElement as any).setCustomAttribute("data-consent-toggle", "true");
-                        // Optimize for LCP: remove lazy loading and set high fetch priority
-                        await (imageElement as any).setCustomAttribute("loading", "eager");
-                        await (imageElement as any).setCustomAttribute("fetchpriority", "high");
 
                     }
 
                 }
             } catch (error) {
-                console.error("Error creating consentbit-change-preference:", error);
+                // Error creating consentbit-change-preference
             }
         }
 

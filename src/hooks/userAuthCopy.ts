@@ -28,7 +28,7 @@ interface AuthState {
  *    - Automatically checks for existing valid session
  *    - Handles token expiration
  *    - Manages loading states
- *
+ *s
  * @returns {Object} Authentication utilities and state
  * - user: Current user information
  * - sessionToken: Active session token

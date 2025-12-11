@@ -221,11 +221,24 @@ const App: React.FC = () => {
               setIsAuthenticated(!!token);
             }
             setIsBannerStatusLoading(false);
-          } catch (error) {
+          } catch (error: any) {
             clearTimeout(authTimeout);
             setSkipWelcomeScreen(false);
             bannerBooleans.setIsBannerAdded(false);
-            setIsAuthenticated(!!token);
+            
+            // Check if it's a 401 Unauthorized error (expired/invalid token)
+            const isUnauthorized = error?.status === 401 || 
+                                   error?.message?.includes('401') || 
+                                   error?.message?.includes('Unauthorized');
+            
+            if (isUnauthorized) {
+              // Token is expired or invalid - clear auth data and show authorize
+              clearAuthData();
+              setIsAuthenticated(false);
+            } else {
+              // For other errors, still check if we have token
+              setIsAuthenticated(!!token);
+            }
             setIsBannerStatusLoading(false);
           }
         } else {
@@ -252,7 +265,14 @@ const App: React.FC = () => {
   }, []); // Only run once on app launch
 
   // Update isAuthenticated state when user authentication changes
+  // Skip this during welcome screen auth flow to prevent conflicts
   useEffect(() => {
+    // Don't update if we're in the middle of welcome screen authorization
+    // The auth completion useEffect will handle it
+    if (globalAuthStartTime) {
+      return;
+    }
+    
     // Check if we have a session token (either from hook or storage)
     const tokenFromStorage = getSessionTokenFromLocalStorage();
     const hasToken = !!(sessionToken || tokenFromStorage);
@@ -263,8 +283,11 @@ const App: React.FC = () => {
     
     const isUserAuthenticated = hasToken && hasEmail;
     
-    setIsAuthenticated(isUserAuthenticated);
-  }, [user, sessionToken]);
+    // Only update if the value actually changed to prevent unnecessary re-renders
+    if (isAuthenticated !== isUserAuthenticated) {
+      setIsAuthenticated(isUserAuthenticated);
+    }
+  }, [user, sessionToken, globalAuthStartTime, isAuthenticated]);
 
   // Script injection using injectScript API (replaces old script registration)
   useEffect(() => {
@@ -291,8 +314,7 @@ const App: React.FC = () => {
           }
         }
       } catch (error) {
-        console.error("Error injecting script:", error);
-        // Continue even if script injection fails
+        // Error handling
       }
     };
 
@@ -308,93 +330,50 @@ const App: React.FC = () => {
 
   // Call postInstallationCall only once on first launch, after authentication is ready
   useEffect(() => {
-    console.log("[POSTINSTALLATION] useEffect triggered", {
-      isAuthenticated,
-      hasSessionToken: !!sessionToken,
-      timestamp: new Date().toISOString()
-    });
+    
 
     // Only proceed if authentication is ready
     if (!isAuthenticated || !sessionToken) {
-      console.log("[POSTINSTALLATION] Skipping - authentication not ready", {
-        isAuthenticated,
-        hasSessionToken: !!sessionToken
-      });
+   
       return;
     }
 
     // Check if we've already called this (prevent multiple calls)
     const hasCalled = getAuthStorageItem("postInstallationCalled");
-    console.log("[POSTINSTALLATION] Check if already called", {
-      hasCalled,
-      storageValue: getAuthStorageItem("postInstallationCalled")
-    });
     
     if (hasCalled === "true") {
-      console.log("[POSTINSTALLATION] Already called - skipping");
       return;
     }
 
     const callPostInstallation = async () => {
-      console.log("[POSTINSTALLATION] Starting postinstallation call");
       try {
         const token = getSessionTokenFromLocalStorage();
-        console.log("[POSTINSTALLATION] Token retrieved", {
-          hasToken: !!token,
-          tokenLength: token?.length
-        });
-        
+       
         if (token) {
-          console.log("[POSTINSTALLATION] Fetching site info");
           const siteInfo = await webflow.getSiteInfo();
-          console.log("[POSTINSTALLATION] Site info retrieved", {
-            hasSiteInfo: !!siteInfo,
-            siteId: siteInfo?.siteId,
-            siteName: siteInfo?.siteName
-          });
+        
           
           if (siteInfo?.siteId) {
             // Call the API - it will handle checking if already processed
             try {
-              console.log("[POSTINSTALLATION] Calling API", {
-                siteId: siteInfo.siteId,
-                endpoint: `/api/postinstallation/${siteInfo.siteId}`
-              });
+             
               
               const result = await customCodeApi.postInstalltionCall(token, siteInfo.siteId);
               
-              console.log("[POSTINSTALLATION] API call successful", {
-                result,
-                success: result?.success,
-                message: result?.message
-              });
+             
               
               // Mark as called to prevent duplicate calls
               setAuthStorageItem("postInstallationCalled", "true");
-              console.log("[POSTINSTALLATION] Marked as called in storage");
               
               // API returns { success: true, message: 'Already processed' } if already called
               // or { success: true, message: 'Successfully processed' } if just processed
             } catch (apiError: any) {
-              console.error("[POSTINSTALLATION] API call failed", {
-                error: apiError,
-                message: apiError?.message,
-                stack: apiError?.stack
-              });
               // Handle CORS and other API errors gracefully - don't throw
             }
-          } else {
-            console.warn("[POSTINSTALLATION] No siteId available", { siteInfo });
           }
-        } else {
-          console.warn("[POSTINSTALLATION] No token available");
         }
       } catch (error) {
-        console.error("[POSTINSTALLATION] Error in callPostInstallation", {
-          error,
-          message: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : undefined
-        });
+        // Error handling
         // Silently handle error - don't block app
       }
     };
@@ -577,13 +556,104 @@ const App: React.FC = () => {
 
 
   // Welcome screen handlers
-  const handleWelcomeAuthorize = () => {
+  const handleWelcomeAuthorize = async () => {
     const authStartTime = performance.now();
     setGlobalAuthStartTime(authStartTime);
-    openAuthScreen();
+    
+    try {
+      // Force window to open, bypassing silent auth
+      await openAuthScreen(true);
+    } catch (error: any) {
+      // Handle any errors that occur during auth screen opening
+      const errorMessage = error?.message || "Failed to open authorization window";
+      webflow.notify({ 
+        type: "error", 
+        message: errorMessage 
+      });
+    }
     // The authentication state will be updated when the user completes authorization
     // through the useEffect that depends on user?.email and sessionToken
   };
+
+  // Watch for auth completion after welcome screen authorization
+  useEffect(() => {
+    // Only trigger if we just completed authorization (user and token become available)
+    if (user?.email && sessionToken && globalAuthStartTime) {
+      // Wait a bit for token exchange to fully complete
+      const checkAuthComplete = setTimeout(async () => {
+        const token = getSessionTokenFromLocalStorage();
+        
+        if (token) {
+          try {
+            const siteInfo = await webflow.getSiteInfo();
+            
+            if (siteInfo?.siteId) {
+              // Check banner status and update authentication state (similar to installation flow)
+              setIsCheckingAuth(true);
+              setIsBannerStatusLoading(true);
+              
+              const response = await customCodeApi.getBannerStyles(token, siteInfo.siteId);
+              
+              // Check if response indicates authentication failure
+              if (response && (response.error || response.success === false)) {
+                // Clear auth data if we get unauthorized error
+                clearAuthData();
+                setIsAuthenticated(false);
+                bannerBooleans.setIsBannerAdded(false);
+                setIsCheckingAuth(false);
+                setIsBannerStatusLoading(false);
+                return;
+              }
+              
+              if (response && response.isBannerAdded === true) {
+                bannerBooleans.setIsBannerAdded(true);
+                setIsAuthenticated(true);
+              } else {
+                bannerBooleans.setIsBannerAdded(false);
+                setIsAuthenticated(true);
+              }
+              setIsBannerStatusLoading(false);
+              setIsCheckingAuth(false);
+            } else {
+              setIsAuthenticated(!!token);
+              setIsCheckingAuth(false);
+              setIsBannerStatusLoading(false);
+            }
+          } catch (error: any) {
+            // Check if it's a 401 Unauthorized error
+            const isUnauthorized = error?.status === 401 || 
+                                   error?.message?.includes('401') || 
+                                   error?.message?.includes('Unauthorized') ||
+                                   error?.errorText?.includes('Unauthorized');
+            
+            if (isUnauthorized) {
+              clearAuthData();
+              setIsAuthenticated(false);
+              bannerBooleans.setIsBannerAdded(false);
+              // Clear the global auth start time to allow retry
+              setGlobalAuthStartTime(null);
+            } else {
+              // For other errors, still check if we have token
+              setIsAuthenticated(!!token);
+            }
+            setIsCheckingAuth(false);
+            setIsBannerStatusLoading(false);
+          }
+        } else {
+          setIsAuthenticated(false);
+          setIsCheckingAuth(false);
+          setIsBannerStatusLoading(false);
+        }
+        
+        // Clear the global auth start time to prevent re-triggering
+        setGlobalAuthStartTime(null);
+      }, 1500); // Wait 1.5 seconds for token exchange to complete
+      
+      return () => {
+        clearTimeout(checkAuthComplete);
+      };
+    }
+  }, [user?.email, sessionToken, globalAuthStartTime]);
 
   const handleWelcomeNeedHelp = () => {
     // Open help modal or redirect to help page
