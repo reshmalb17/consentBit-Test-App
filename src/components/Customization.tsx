@@ -289,7 +289,6 @@ const Customization: React.FC<CustomizationProps> = ({
         const svgDataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgContent)))}`;
         setCloseIconSvg(svgDataUrl);
       } catch (error) {
-        console.error('Error generating close icon:', error);
         // Fallback to a simple X SVG
         const iconColor = getCloseIconColor(color);
         const fallbackSvg = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4L12 12M12 4L4 12" stroke="${iconColor}" stroke-width="2" stroke-linecap="round"/></svg>`;

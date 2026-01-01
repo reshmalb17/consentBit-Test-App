@@ -1,9 +1,10 @@
-const base_url = "https://app.consentbit.com";
 import { ScriptCategory, SaveCategoriesResponse, AppData } from '../types/types';
 import { scriptCategorizationService } from './script-categorization-service';
 import { ClientEncryption } from '../util/Secure-Data';
 
 import { ScriptRegistrationRequest, CodeApplication } from "../types/types";
+
+const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
 
 export const customCodeApi = {
   // Register a new script
@@ -150,7 +151,11 @@ export const customCodeApi = {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const error = new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        // Add status code to error for easier checking
+        (error as any).status = response.status;
+        (error as any).errorText = errorText;
+        throw error;
       }
 
       const data = await response.json();
@@ -392,19 +397,8 @@ downloadPDFFromUrl: async (token: string, pdfUrl: string, filename: string) => {
     }
   },
    postInstalltionCall:async (token: string, siteId: string) => {
-   console.log("[POSTINSTALLATION API] Starting API call", {
-     siteId,
-     endpoint: `${base_url}/api/postinstallation/${siteId}`,
-     hasToken: !!token,
-     tokenLength: token?.length
-   });
-   
    try {
      const url = `${base_url}/api/postinstallation/${siteId}`;
-     console.log("[POSTINSTALLATION API] Making fetch request", {
-       url,
-       method: 'POST'
-     });
      
      const response = await fetch(url, {
        method: 'POST',
@@ -414,53 +408,22 @@ downloadPDFFromUrl: async (token: string, pdfUrl: string, filename: string) => {
        },
      });
      
-     const headersObj: Record<string, string> = {};
-     response.headers.forEach((value, key) => {
-       headersObj[key] = value;
-     });
-     
-     console.log("[POSTINSTALLATION API] Response received", {
-       status: response.status,
-       statusText: response.statusText,
-       ok: response.ok,
-       headers: headersObj
-     });
-     
      if (!response.ok) {
        const errorText = await response.text();
-      console.error("[POSTINSTALLATION API] HTTP error", {
-        status: response.status,
-        statusText: response.statusText,
-        errorText
-      });
        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
      }
      
      const result = await response.json();
-     console.log("[POSTINSTALLATION API] Response data", {
-       result,
-       all_P: result.all_P,
-       success: result.success,
-       message: result.message
-     });
      
       if (result.all_P === true) {
-        console.log("[POSTINSTALLATION API] Already processed");
         return { success: true, message: 'Already processed' };
      } else if (result.success === true) {
-       console.log("[POSTINSTALLATION API] Successfully processed");
        return { success: true, message: 'Successfully processed' };
      }
      
-     console.warn("[POSTINSTALLATION API] Unexpected response format", { result });
      return result;
    
    } catch (error) {
-     console.error("[POSTINSTALLATION API] Error caught", {
-       error,
-       message: error instanceof Error ? error.message : 'Unknown error',
-       stack: error instanceof Error ? error.stack : undefined
-     });
      throw error;
    }
  },
@@ -503,6 +466,206 @@ downloadPDFFromUrl: async (token: string, pdfUrl: string, filename: string) => {
      return data;
    } catch (error) {
      throw error;
+   }
+ },
+
+ // Activate License API
+ activateLicense: async (licenseKey: string, siteDomain: string, email?: string, token?: string) => {
+   const dashboardBaseUrl = "https://consentbit-dashboard-test.web-8fb.workers.dev";
+   
+   // Ensure we always send "staging" if domain is not available
+   const domainToUse = siteDomain && siteDomain.trim() && siteDomain !== "" ? siteDomain : "staging";
+   
+   console.log('[API] activateLicense called', {
+     licenseKey: licenseKey.substring(0, 8) + '...',
+     siteDomain,
+     domainToUse,
+     email,
+     hasToken: !!token,
+     url: `${dashboardBaseUrl}/activate-license`
+   });
+   
+   try {
+     const requestBody = {
+       license_key: licenseKey,
+       site_domain: domainToUse,
+       ...(email && { email }),
+     };
+     
+     console.log('[API] activateLicense request body:', { ...requestBody, license_key: requestBody.license_key.substring(0, 8) + '...' });
+     
+     const response = await fetch(`${dashboardBaseUrl}/activate-license`, {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+         ...(token && { Authorization: `Bearer ${token}` }),
+       },
+       body: JSON.stringify(requestBody),
+     });
+     
+     console.log('[API] activateLicense response status:', response.status, response.statusText);
+     
+     const data = await response.json();
+     console.log('[API] activateLicense response data:', data);
+     
+     if (!response.ok) {
+       console.log('[API] activateLicense failed:', {
+         error: data.error,
+         message: data.message,
+         statusCode: response.status
+       });
+       // Return error data with status code
+       return {
+         success: false,
+         error: data.error || 'activation_failed',
+         message: data.message || 'Failed to activate license',
+         statusCode: response.status,
+         ...data
+       };
+     }
+     
+     console.log('[API] activateLicense SUCCESS:', data);
+     return {
+       success: true,
+       ...data
+     };
+   } catch (error: any) {
+     console.error('[API] activateLicense network error:', error);
+     return {
+       success: false,
+       error: 'network_error',
+       message: error.message || 'Network error occurred',
+       statusCode: 0
+     };
+   }
+ },
+
+ // Check License Status API - Uses dedicated license status endpoint
+ checkLicenseStatus: async (siteDomain: string, email?: string, token?: string) => {
+   const dashboardBaseUrl = "https://consentbit-dashboard-test.web-8fb.workers.dev";
+   
+   // Ensure we always send "staging" if domain is not available
+   const domainToUse = siteDomain && siteDomain.trim() && siteDomain !== "" ? siteDomain : "staging";
+   
+   console.log('[License Check] Starting license status check', {
+     siteDomain,
+     domainToUse,
+     email,
+     hasToken: !!token,
+     url: `${dashboardBaseUrl}/check-license-status`
+   });
+   
+   try {
+     if (!domainToUse) {
+       console.log('[License Check] No site domain provided, returning false');
+       return {
+         success: false,
+         hasActiveLicense: false,
+         available: false
+       };
+     }
+
+     const requestBody: any = {
+       site: domainToUse
+     };
+     
+     if (email) {
+       requestBody.email = email;
+     }
+     
+     console.log('[License Check] Making API request to:', `${dashboardBaseUrl}/check-license-status`, {
+       method: 'POST',
+       body: requestBody
+     });
+     
+     const response = await fetch(`${dashboardBaseUrl}/check-license-status`, {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json',
+         ...(token && { Authorization: `Bearer ${token}` }),
+       },
+       credentials: 'include',
+       body: JSON.stringify(requestBody),
+     });
+
+     console.log('[License Check] Response status:', response.status, response.statusText);
+
+     if (!response.ok) {
+       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+       console.log('[License Check] Response not OK:', errorData);
+       return {
+         success: false,
+         hasActiveLicense: false,
+         available: false,
+         error: errorData.message || errorData.error || 'Failed to check license status',
+         ...errorData
+       };
+     }
+
+     const data = await response.json();
+     console.log('[License Check] Response data:', JSON.stringify(data, null, 2));
+
+     // Handle "no license found" case
+     // Response format: { success: false, available: false, message: "No active license found for this site", license: null }
+     // or: { success: true, available: false, message: "No license found", license: null }
+     if (data.available === false || !data.license || data.license === null) {
+       console.log('[License Check] ❌ No license found for this site', {
+         success: data.success,
+         available: data.available,
+         message: data.message,
+         hasLicense: !!data.license,
+         licenseValue: data.license
+       });
+       return {
+         success: data.success || false,
+         hasActiveLicense: false,
+         available: false,
+         message: data.message || 'No active license found for this site',
+         license: null,
+         site: data.site,
+         ...data
+       };
+     }
+
+     // Check if license is available and active
+     // Response structure: { success: true, available: true, license: { status: "active"|"used", ... } }
+     const hasActiveLicense = data.success === true && 
+                             data.available === true && 
+                             data.license &&
+                             (data.license.status === "active" || 
+                              data.license.status === "used" ||
+                              data.license.is_used === true ||
+                              false);
+     
+     console.log('[License Check] License status determined:', {
+       hasActiveLicense: Boolean(hasActiveLicense),
+       success: data.success,
+       available: data.available,
+       licenseStatus: data.license?.status,
+       licenseExists: !!data.license,
+       subscriptionStatus: data.license?.subscription?.status,
+       message: data.message,
+       license: data.license,
+       allResponseKeys: Object.keys(data)
+     });
+     
+     return {
+       success: data.success || false,
+       hasActiveLicense: Boolean(hasActiveLicense),
+       available: data.available || false,
+       license: data.license,
+       message: data.message,
+       ...data
+     };
+   } catch (error: any) {
+     console.error('[License Check] Error checking license status:', error);
+     // On error, assume no license
+     return {
+       success: false,
+       hasActiveLicense: false,
+       available: false,
+       error: error.message || 'Failed to check license status'
+     };
    }
  }
  

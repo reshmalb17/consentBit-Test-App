@@ -4,7 +4,7 @@ import { User, DecodedToken } from "../types/types";
 import webflow from "../types/webflowtypes";
 import { setAuthData, setSiteInfo, getAuthData, getSiteInfo, isAuthenticated, migrateAuthDataToSessionStorage, clearAuthData, setAuthStorageItem, removeAuthStorageItem, getAuthStorageItem } from "../util/authStorage";
 
-const base_url = "https://app.consentbit.com";
+const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
 
 interface AuthState {
   user: User;
@@ -28,7 +28,7 @@ interface AuthState {
  *    - Automatically checks for existing valid session
  *    - Handles token expiration
  *    - Manages loading states
- *
+ *s
  * @returns {Object} Authentication utilities and state
  * - user: Current user information
  * - sessionToken: Active session token

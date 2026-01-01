@@ -126,7 +126,6 @@ export const getOrCreateCloseIconAsset = async (backgroundColor: string): Promis
     const newAsset = await (webflow as any).createAsset(file);
     return newAsset;
   } catch (error) {
-    console.error('Error getting or creating close icon asset:', error);
     throw error;
   }
 };
@@ -176,7 +175,7 @@ export const createCloseButton = async (contentConfig: ContentConfig) => {
       
       await (imageElement as any).setStyles?.([imageStyle]);
     } catch (error) {
-      console.error('Failed to set SVG icon for close button:', error);
+      // Failed to set SVG icon for close button
     }
   }
 

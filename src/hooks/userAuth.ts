@@ -4,7 +4,7 @@ import { User, DecodedToken } from "../types/types";
 import webflow from "../types/webflowtypes";
 import { setAuthData, setSiteInfo, getAuthData, getSiteInfo, isAuthenticated, migrateAuthDataToSessionStorage, clearAuthData, setAuthStorageItem, removeAuthStorageItem, getAuthStorageItem } from "../util/authStorage";
 
-const base_url = "https://app.consentbit.com";
+const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
 
 interface AuthState {
   user: User;
@@ -362,13 +362,16 @@ export function useAuth() {
     queryClient.clear();
   };
   // 🔧 IMPROVED: OAuth screen opening with site context
-  const openAuthScreen = async () => {
+  const openAuthScreen = async (forceWindowOpen: boolean = false) => {
     try {
-      // First, try silent authentication
-      const silentAuthSuccess = await attemptSilentAuth();
-      
-      if (silentAuthSuccess) {
-        return;
+      // Only try silent authentication if not forcing window open
+      if (!forceWindowOpen) {
+        const silentAuthSuccess = await attemptSilentAuth();
+        
+        if (silentAuthSuccess) {
+          // Silent auth succeeded, no need to open window
+          return;
+        }
       }
 
       // 🔧 IMPROVED: Get site ID before opening auth window
@@ -379,6 +382,7 @@ export function useAuth() {
         siteInfo = await ensureSiteContext();
         siteId = siteInfo.siteId;
       } catch (error) {
+        // Continue even if site info fails
       }
 
       // 🔧 IMPROVED: Include site ID in OAuth URL
@@ -394,7 +398,8 @@ export function useAuth() {
       );
 
       if (!authWindow) {
-        return;
+        // Window was blocked by popup blocker
+        throw new Error("Popup window was blocked. Please allow popups for this site.");
       }
 
       const onAuth = async () => {
@@ -425,7 +430,9 @@ export function useAuth() {
           onAuth();
         }
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
+      // Re-throw error so caller can handle it
+      throw error;
     }
   };
 

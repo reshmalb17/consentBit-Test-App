@@ -10,9 +10,10 @@ import { useAuth } from '../hooks/userAuth';
 import { usePersistentState, getCurrentSiteId } from './usePersistentState';
 import pkg from '../../package.json';
 import { c } from 'framer-motion/dist/types.d-Cjd591yU';
+import { getOrCreateCloseIconAsset } from '../util/bannerContentUtils';
 
 const appVersion = pkg.version;
-const base_url = "https://app.consentbit.com"
+const base_url = "https://consentbit-test-server.web-8fb.workers.dev"
 
 
 export interface BannerConfig {
@@ -60,10 +61,8 @@ export const useBannerCreation = () => {
   // Helper function to check if an element is part of a banner structure
   // Helper function to check if an element is a child/descendant of consentbit-container
   const isElementChildOfContainer = async (element: any): Promise<boolean> => {
-    console.log("🔍 [useBannerCreation.isElementChildOfContainer] Checking if element is child of container:", element);
     try {
       if (!element) {
-        console.log("⚠️ [useBannerCreation.isElementChildOfContainer] No element provided, returning false");
         return false;
       }
 
@@ -72,12 +71,10 @@ export const useBannerCreation = () => {
         if (typeof (element as any).getDomId === 'function') {
           const elementId = await (element as any).getDomId();
           if (elementId === 'consentbit-container') {
-            console.log("✅ [useBannerCreation.isElementChildOfContainer] Element IS the container - not a child");
             return false; // Element is the container itself, not a child
           }
         }
       } catch (e) {
-        console.log("⚠️ [useBannerCreation.isElementChildOfContainer] Error getting element DOM ID:", e);
       }
 
       // Use getAllElements to find the container and check if element is inside it
@@ -91,7 +88,6 @@ export const useBannerCreation = () => {
             const domId = await (el as any).getDomId();
             if (domId === 'consentbit-container') {
               consentBitContainer = el;
-              console.log("🔍 [useBannerCreation.isElementChildOfContainer] Found consentbit-container");
               break;
             }
           }
@@ -101,7 +97,6 @@ export const useBannerCreation = () => {
       }
 
       if (!consentBitContainer) {
-        console.log("ℹ️ [useBannerCreation.isElementChildOfContainer] No consentbit-container found - element is not a child");
         return false; // No container exists, so element can't be a child
       }
 
@@ -134,10 +129,8 @@ export const useBannerCreation = () => {
       };
 
       const isInside = await checkIfElementIsChild(consentBitContainer, element, new Set());
-      console.log(`🔍 [useBannerCreation.isElementChildOfContainer] Element is ${isInside ? 'INSIDE' : 'NOT inside'} container`);
       return isInside;
     } catch (error) {
-      console.error("❌ [useBannerCreation.isElementChildOfContainer] Error checking if element is child of container:", error);
       // Return false on error to be safe (don't block deletion if check fails)
       return false;
     }
@@ -328,7 +321,6 @@ export const useBannerCreation = () => {
                 await (selectedElement as any).setAttribute("id", "consentbit-container");
               }
             } catch (domIdError) {
-              console.error("Failed to set DOM ID on element with ConsentBit style:", domIdError);
             }
           }
         } catch (error) {
@@ -363,60 +355,43 @@ export const useBannerCreation = () => {
       // Setup the selected element as ConsentBit container
       setCreationInProgress(true);
 
-      // Set DOM ID for the container - match the pattern used elsewhere in codebase
-      console.log("Attempting to set DOM ID 'consentbit-container' on selected element");
-      console.log("Element type:", selectedElement?.type || "unknown");
-      console.log("Element has setDomId:", typeof (selectedElement as any).setDomId);
+      // Set DOM ID for the container - match the pattern used elsewhere in codebase.setDomId);
       
       try {
         // Try calling setDomId directly (matching pattern from other parts of codebase)
         // First check if method exists
         const hasSetDomId = typeof (selectedElement as any).setDomId === 'function';
-        console.log("hasSetDomId:", hasSetDomId);
-        
         if (hasSetDomId) {
-          console.log("Calling setDomId('consentbit-container')...");
           await (selectedElement as any).setDomId("consentbit-container");
-          console.log("setDomId call completed");
-          
           // Wait a bit for the ID to be processed
           await new Promise(resolve => setTimeout(resolve, 500));
           
           // Verify the ID was set
           try {
             const verifyId = await (selectedElement as any).getDomId();
-            console.log("Verification - getDomId returned:", verifyId);
             if (verifyId === "consentbit-container") {
               // Success - ID is set correctly
-              console.log("✓ DOM ID 'consentbit-container' set successfully");
             } else if (verifyId) {
-              console.warn(`✗ DOM ID verification failed. Expected 'consentbit-container', but element has '${verifyId}'.`);
               webflow.notify({ 
                 type: "info", 
                 message: `DOM ID verification: Expected 'consentbit-container', but element has '${verifyId}'.` 
               });
             } else {
-              console.warn("✗ DOM ID verification returned null/undefined. ID may not have been set.");
               // Try fallback
               if (selectedElement.setCustomAttribute) {
                 await selectedElement.setCustomAttribute("id", "consentbit-container");
-                console.log("Tried setCustomAttribute as fallback");
               }
             }
           } catch (verifyError) {
-            console.warn("Could not verify DOM ID:", verifyError);
           }
         } else {
           // setDomId doesn't exist, try fallback methods
-          console.warn("setDomId method not found on element, trying fallback methods...");
           let fallbackUsed = false;
           if (selectedElement.setCustomAttribute) {
             await selectedElement.setCustomAttribute("id", "consentbit-container");
-            console.log("Used setCustomAttribute as fallback");
             fallbackUsed = true;
           } else if ((selectedElement as any).setAttribute) {
             await (selectedElement as any).setAttribute("id", "consentbit-container");
-            console.log("Used setAttribute as fallback");
             fallbackUsed = true;
           }
           
@@ -428,11 +403,6 @@ export const useBannerCreation = () => {
           }
         }
       } catch (domIdError) {
-        console.error("Error setting DOM ID:", domIdError);
-        console.error("Error details:", {
-          message: domIdError instanceof Error ? domIdError.message : 'Unknown error',
-          stack: domIdError instanceof Error ? domIdError.stack : undefined
-        });
         webflow.notify({ 
           type: "error", 
           message: `Failed to set DOM ID: ${domIdError instanceof Error ? domIdError.message : 'Unknown error'}` 
@@ -487,7 +457,6 @@ export const useBannerCreation = () => {
   const createSimpleGDPRBanner = async (consentBitContainer: any, config: BannerConfig, animationAttribute: string) => {
     try {
       // Final double-check: Ensure no duplicate consent-banner exists right before creating (check by ID and class names)
-      console.log("🔍 [useBannerCreation.createSimpleGDPRBanner] Final check for duplicate GDPR banner elements...");
       const allElementsFinalCheck = await webflow.getAllElements();
       const finalCheckIds = ["consent-banner"];
       const finalCheckStyleNames = [
@@ -507,8 +476,6 @@ export const useBannerCreation = () => {
         .map(({ el }) => el);
       
       if (existingGDPRBanners.length > 0) {
-        console.log(`⚠️ [useBannerCreation.createSimpleGDPRBanner] Final check: Found ${existingGDPRBanners.length} existing GDPR banner element(s), removing before creating new one`);
-        
         // Process removals sequentially to avoid race conditions
         for (const el of existingGDPRBanners) {
           try {
@@ -518,14 +485,11 @@ export const useBannerCreation = () => {
               domId = await el.getDomId?.().catch(() => null);
             } catch (checkErr: any) {
               if (checkErr?.message?.includes("Missing element")) {
-                console.log(`ℹ️ [useBannerCreation.createSimpleGDPRBanner] Element already removed, skipping`);
                 continue;
               }
             }
             
             const identifier = domId || 'element-with-banner-class';
-            console.log(`✅ [useBannerCreation.createSimpleGDPRBanner] Final check: Removing banner element: ${identifier}`);
-            
             // Remove children one by one with individual error handling
             try {
               const children = await el.getChildren?.().catch(() => []);
@@ -535,37 +499,28 @@ export const useBannerCreation = () => {
                     await child.remove();
                   } catch (childErr: any) {
                     if (childErr?.message?.includes("Missing element")) {
-                      console.log(`ℹ️ [useBannerCreation.createSimpleGDPRBanner] Child already removed, continuing`);
                     } else {
-                      console.warn(`⚠️ [useBannerCreation.createSimpleGDPRBanner] Error removing child:`, childErr);
                     }
                   }
                 }
               }
             } catch (childErr: any) {
               if (childErr?.message?.includes("Missing element")) {
-                console.log(`ℹ️ [useBannerCreation.createSimpleGDPRBanner] Element or children already removed`);
               } else {
-                console.warn(`⚠️ [useBannerCreation.createSimpleGDPRBanner] Error getting/removing children:`, childErr);
               }
             }
             
             // Remove the element itself
             try {
               await el.remove();
-              console.log(`✓ [useBannerCreation.createSimpleGDPRBanner] Final check: Successfully removed banner element: ${identifier}`);
             } catch (removeErr: any) {
               if (removeErr?.message?.includes("Missing element")) {
-                console.log(`ℹ️ [useBannerCreation.createSimpleGDPRBanner] Element already removed: ${identifier}`);
               } else {
-                console.error(`⚠️ [useBannerCreation.createSimpleGDPRBanner] Final check: Error removing element:`, removeErr);
               }
             }
           } catch (err: any) {
             if (err?.message?.includes("Missing element")) {
-              console.log(`ℹ️ [useBannerCreation.createSimpleGDPRBanner] Element already removed or invalid`);
             } else {
-              console.error(`⚠️ [useBannerCreation.createSimpleGDPRBanner] Final check: Error processing banner:`, err);
             }
           }
         }
@@ -909,6 +864,60 @@ export const useBannerCreation = () => {
       }
      
       await acceptButton.setTextContent('Accept');
+
+      // Step 12: Create close button as child of newDiv (if enabled)
+      if (config.toggleStates?.closebutton) {
+        const Closebuttons = await newDiv.append(webflow.elementPresets.DivBlock);
+        if (Closebuttons && Closebuttons.setStyles) {
+          await Closebuttons.setStyles([closebutton]);
+          await Closebuttons.setCustomAttribute("consentbit", "close");
+          
+          // Create Image element and set close icon as asset
+          try {
+            const imageElement = await Closebuttons.append(webflow.elementPresets.Image);
+            if (imageElement) {
+              // Create the asset in Webflow
+              const asset = await getOrCreateCloseIconAsset(config.color);
+              
+              // Set the asset to the image element
+              await (imageElement as any).setAsset(asset);
+              
+              // Style the image to match close button size
+              const imageStyle =
+                (await webflow.getStyleByName("consentCloseIcon")) ||
+                (await webflow.createStyle("consentCloseIcon"));
+              
+              await imageStyle.setProperties({
+                "width": "16px",
+                "height": "16px",
+                "display": "block"
+              });
+              
+              await (imageElement as any).setStyles?.([imageStyle]);
+              
+              // Set DOM ID for close button
+              try {
+                if ((imageElement as any).setDomId) {
+                  await (imageElement as any).setDomId("close-consent-banner");
+                } else if ((Closebuttons as any).setDomId) {
+                  await (Closebuttons as any).setDomId("close-consent-banner");
+                }
+              } catch (idError) {
+                // Try setting on parent container as fallback
+                try {
+                  if ((Closebuttons as any).setDomId) {
+                    await (Closebuttons as any).setDomId("close-consent-banner");
+                  }
+                } catch (fallbackError) {
+                  // Ignore fallback errors
+                }
+              }
+            }
+          } catch (error) {
+            // Error creating close icon image element - continue without icon
+          }
+        }
+      }
     } catch (error) {
       throw error;
     }
@@ -1300,8 +1309,7 @@ export const useBannerCreation = () => {
   //       };
   //       
   //       const applyResult = await customCodeApi.applyV2Script(params, token);
-  //       console.log(`✓ ConsentBit script registered globally with data-site-id: ${siteId}`, applyResult);
-  //       
+  ////       
   //       // Also add it immediately to current page as fallback
   //       try {
   //         if (!document.querySelector(`script[src="https://script-5qu.pages.dev/script.js"]`)) {
@@ -1310,17 +1318,14 @@ export const useBannerCreation = () => {
   //           script.setAttribute('data-site-id', siteId);
   //           script.defer = true;
   //           document.head.appendChild(script);
-  //           console.log(`✓ ConsentBit script also added to current page`);
-  //         }
+  ////         }
   //       } catch (immediateError) {
-  //         console.warn("Could not add script to current page:", immediateError);
-  //       }
+  ////       }
   //     } else {
   //       throw new Error("Script registration failed - no result returned");
   //     }
   //   } catch (error) {
-  //     console.error("Error registering ConsentBit script globally:", error);
-  //     // Fallback to DOM manipulation if API fails
+  ////     // Fallback to DOM manipulation if API fails
   //     try {
   //       if (!document.querySelector(`script[src="https://script-5qu.pages.dev/script.js"]`)) {
   //         const script = document.createElement('script');
@@ -1328,11 +1333,9 @@ export const useBannerCreation = () => {
   //         script.setAttribute('data-site-id', siteId);
   //         script.defer = true;
   //         document.head.appendChild(script);
-  //         console.log(`✓ ConsentBit script added via fallback with data-site-id: ${siteId}`);
-  //       }
+  ////       }
   //     } catch (fallbackError) {
-  //       console.error("Fallback script addition also failed:", fallbackError);
-  //     }
+  ////     }
   //   }
   // };
 
@@ -1390,8 +1393,7 @@ export const useBannerCreation = () => {
   //               const applyScriptResponse = await customCodeApi.applyV2Script(params, token);
   //             }
   //           } catch (fetchError) {
-  //             console.error("Error fetching script content or registering inline script:", fetchError);
-  //             // Fallback to original hosted script registration
+  ////             // Fallback to original hosted script registration
   //             const params: CodeApplication = {
   //               targetType: 'site',
   //               targetId: siteIdinfo.siteId,
@@ -1441,8 +1443,7 @@ export const useBannerCreation = () => {
   //         await addConsentBitScriptGlobally(siteIdinfo.siteId, token);
   //       }
   //     } catch (e) {
-  //       console.error("Error registering ConsentBit script after error:", e);
-  //     }
+  ////     }
   //   }
   // };
 
@@ -1550,7 +1551,6 @@ export const useBannerCreation = () => {
       setCreationInProgress(true);
 
       // Comprehensive check and removal of ALL banner-related elements before creating new ones
-      console.log("🔍 [useBannerCreation] Checking for existing banner elements before creation...");
       const allElements = await webflow.getAllElements();
       
       // Include all possible banner element IDs
@@ -1608,8 +1608,6 @@ export const useBannerCreation = () => {
 
       // Remove ALL matching elements to prevent duplicates
       if (matchingElements.length > 0) {
-        console.log(`🔍 [useBannerCreation] Found ${matchingElements.length} existing banner element(s) to remove (checked by ID and class names)`);
-        
         // Process removals sequentially to avoid race conditions with "Missing element" errors
         for (const el of matchingElements) {
           try {
@@ -1620,14 +1618,11 @@ export const useBannerCreation = () => {
             } catch (checkErr: any) {
               // If element is already missing/invalid, skip it
               if (checkErr?.message?.includes("Missing element")) {
-                console.log(`ℹ️ [useBannerCreation] Element already removed or invalid, skipping`);
                 continue;
               }
             }
             
             const identifier = domId || 'element-with-banner-class';
-            console.log(`✅ [useBannerCreation] Deleting duplicate banner element: ${identifier}`);
-            
             // Remove all children first - handle each child individually
             try {
               const children = await el.getChildren?.().catch(() => []);
@@ -1640,9 +1635,7 @@ export const useBannerCreation = () => {
                   } catch (childErr: any) {
                     // Handle "Missing element" errors gracefully - element may have been removed already
                     if (childErr?.message?.includes("Missing element")) {
-                      console.log(`ℹ️ [useBannerCreation] Child element already removed, continuing`);
                     } else {
-                      console.warn(`⚠️ [useBannerCreation] Error removing child:`, childErr);
                     }
                     // Continue with next child even if this one fails
                   }
@@ -1651,36 +1644,28 @@ export const useBannerCreation = () => {
             } catch (childErr: any) {
               // Handle "Missing element" errors gracefully
               if (childErr?.message?.includes("Missing element")) {
-                console.log(`ℹ️ [useBannerCreation] Element or its children already removed, continuing`);
               } else {
-                console.warn(`⚠️ [useBannerCreation] Error getting/removing children:`, childErr);
               }
             }
 
             // Remove the element itself - check if it's still valid
             try {
               await el.remove();
-              console.log(`✓ [useBannerCreation] Successfully removed element: ${identifier}`);
             } catch (removeErr: any) {
               // Handle "Missing element" errors gracefully - element may have been removed already
               if (removeErr?.message?.includes("Missing element")) {
-                console.log(`ℹ️ [useBannerCreation] Element already removed: ${identifier}`);
               } else {
-                console.error(`⚠️ [useBannerCreation] Error removing element ${identifier}:`, removeErr);
               }
             }
           } catch (err: any) {
             // Handle "Missing element" errors gracefully
             if (err?.message?.includes("Missing element")) {
-              console.log(`ℹ️ [useBannerCreation] Element already removed or invalid, skipping`);
             } else {
-              console.error(`⚠️ [useBannerCreation] Error processing duplicate banner:`, err);
             }
             // Continue with next element even if this one fails
           }
         }
       } else {
-        console.log(`✅ [useBannerCreation] No existing banner elements found - safe to create new banner`);
       }
 
       // Get selected element
@@ -1820,24 +1805,17 @@ export const useBannerCreation = () => {
                     await new Promise(resolve => setTimeout(resolve, 300));
                     const verifyId = await (consentBitContainer as any).getDomId();
                     if (verifyId === "consentbit-container") {
-                      console.log("DOM ID 'consentbit-container' set successfully on existing container");
                     } else {
-                      console.warn(`DOM ID verification failed. Expected 'consentbit-container', got '${verifyId}'`);
                     }
                   } else if (consentBitContainer.setCustomAttribute) {
                     await consentBitContainer.setCustomAttribute("id", "consentbit-container");
-                    console.log("Used setCustomAttribute to set DOM ID on existing container");
                   } else if ((consentBitContainer as any).setAttribute) {
                     await (consentBitContainer as any).setAttribute("id", "consentbit-container");
-                    console.log("Used setAttribute to set DOM ID on existing container");
                   } else {
-                    console.error("No method available to set DOM ID on existing container");
                   }
                 } catch (domIdError) {
-                  console.error("Failed to set DOM ID on existing container:", domIdError);
                 }
               } else {
-                console.log("Existing container already has DOM ID 'consentbit-container'");
               }
 
           // Verify it has ConsentBit style
@@ -1901,24 +1879,17 @@ export const useBannerCreation = () => {
                     await new Promise(resolve => setTimeout(resolve, 300));
                     const verifyId = await (existingContainer as any).getDomId();
                     if (verifyId === "consentbit-container") {
-                      console.log("DOM ID 'consentbit-container' set successfully on found container");
                     } else {
-                      console.warn(`DOM ID verification failed. Expected 'consentbit-container', got '${verifyId}'`);
                     }
                   } else if (existingContainer.setCustomAttribute) {
                     await existingContainer.setCustomAttribute("id", "consentbit-container");
-                    console.log("Used setCustomAttribute to set DOM ID on found container");
                   } else if ((existingContainer as any).setAttribute) {
                     await (existingContainer as any).setAttribute("id", "consentbit-container");
-                    console.log("Used setAttribute to set DOM ID on found container");
                   } else {
-                    console.error("No method available to set DOM ID on found container");
                   }
                 } catch (domIdError) {
-                  console.error("Failed to set DOM ID on found container:", domIdError);
                 }
               } else {
-                console.log("Found container already has DOM ID 'consentbit-container'");
               }
             } catch (e) {
               // Continue
@@ -1968,7 +1939,6 @@ export const useBannerCreation = () => {
             // Verify element is actually a child of the container before deleting
             const isChild = await isElementChildOfContainer(element);
             if (!isChild) {
-              console.log(`⚠️ [useBannerCreation] Skipping deletion - element is not a child of consentbit-container`);
               continue; // Skip deletion if not a child of container
             }
 
@@ -1979,7 +1949,6 @@ export const useBannerCreation = () => {
                 if (domId && (domId === 'consent-banner' || domId === 'initial-consent-banner' || 
                              domId === 'main-banner' || domId === 'main-consent-banner' || 
                              domId === 'toggle-consent-btn')) {
-                  console.log(`✅ [useBannerCreation] Deleting element (${domId}) - confirmed it's a child of container`);
                   if (typeof element.remove === 'function') {
                     await element.remove();
                   }
@@ -2021,19 +1990,13 @@ export const useBannerCreation = () => {
           if (token && siteInfo?.siteId) {
             const injectResponse = await customCodeApi.injectScript(token, siteInfo.siteId);
             if (injectResponse && injectResponse.success) {
-              console.log(`✓ Script injected successfully for site: ${siteInfo.siteId}`);
-              console.log(`  Script ID: ${injectResponse.scriptId}`);
-              console.log(`  Message: ${injectResponse.message}`);
             } else {
-              console.warn("Script injection response indicates failure:", injectResponse);
             }
           }
         } catch (injectError) {
-          console.error("Error injecting script:", injectError);
           // Continue even if script injection fails
         }
       } catch (bannerCreationError) {
-        console.error("Banner creation error:", bannerCreationError);
         webflow.notify({ 
           type: "error", 
           message: `Failed to create banner: ${bannerCreationError instanceof Error ? bannerCreationError.message : 'Unknown error'}` 
@@ -2053,8 +2016,6 @@ export const useBannerCreation = () => {
       
       // Show success popup after banner creation completes
       setShowSuccessPublish(true);
-      console.log("✓ [useBannerCreation] Banner creation completed successfully - showing success popup");
-      
     } catch (error) {
       throw error;
     }

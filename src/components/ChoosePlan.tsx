@@ -8,9 +8,10 @@ import "../style/styless.css";
 const COUPON_CODE = "BlackFriday2025";
 const COUPON_DISCOUNT = "20%";
 
+
 const cross = new URL("../assets/cross mark.svg", import.meta.url).href;
 const arrow = new URL("../assets/→.svg", import.meta.url).href;
-const couponImage = new URL("../assets/CouponImage.webp", import.meta.url).href;
+const couponImage = new URL("../assets/CouponImage.png", import.meta.url).href;
 
 type ChoosePlanProps = {
   onClose: () => void;
@@ -52,8 +53,10 @@ const ChoosePlan: React.FC<ChoosePlanProps> = ({ onClose }) => {
               alt="Coupon" 
               style={{
                 position: "absolute",
-                top: "3%",
-                left: "3%",
+                top: "0%",
+                left: "0%",
+                width: "170px",
+                height: "auto",
                 zIndex: 1
               }}
             />
@@ -85,9 +88,6 @@ const ChoosePlan: React.FC<ChoosePlanProps> = ({ onClose }) => {
               </div>
 
             </div>
-           {isAnnual &&( <div className="anually-text">
-              you save 20%
-            </div>)}
 
             <div className="center">
               <button

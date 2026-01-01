@@ -116,7 +116,7 @@
 
 .copy-icon {
   position: absolute;
-  right: 25px;
+  right: 39px;
   top: 68%;
   transform: translateY(-50%);
   width: 8px;
@@ -127,7 +127,7 @@
 .pay-container {
   padding: 0px 10px 0px 10px;
   display: flex;
-  justify-content: space-between;
+  gap: 59%;
   width: 100%;
 }
 

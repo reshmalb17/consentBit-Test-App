@@ -11,20 +11,23 @@ import SuccessPublish from "../components/SuccessPublish";
 import CustomizationTab from "./CustomizationTab";
 import ChoosePlan from "./ChoosePlan";
 import { customCodeApi } from "../services/api";
+import { getSessionTokenFromLocalStorage } from "../util/Session";
 
-// Coupon code and discount - update these values to change the displayed text
-const COUPON_CODE = "BlackFriday2025";
+// Coupon code and discount - update these valUse Coupon Code:ues to change the displayed text
+const COUPON_CODE = "ENDOFYEAR";
 const COUPON_DISCOUNT = "20%";
 
 const confirmIcon = new URL("../assets/confirmicon.svg", import.meta.url).href;
-const CopyContent = new URL("../assets/copy-small.svg", import.meta.url).href;
+//const CopyContent = new URL("../assets/copy-small.svg", import.meta.url).href;
+const CopyContent = new URL("../assets/copy-white.svg", import.meta.url).href;
+
 const Previewtab = new URL("../assets/Previewtab.svg", import.meta.url).href;
 const arrow = new URL("../assets/bluearrow.svg", import.meta.url).href;
 const whitearrow = new URL("../assets/→.svg", import.meta.url).href;
 const logo = new URL("../assets/icon.svg", import.meta.url).href;
 const errorsheild = new URL("../assets/warning-2.svg", import.meta.url).href;
 const crossmark = new URL("../assets/group.svg", import.meta.url).href;
-const couponCodeBg = new URL("../assets/Couponcode.webp", import.meta.url).href;
+const couponCodeBg = new URL("../assets/Endofyear.svg", import.meta.url).href;
 
 const tickSVG =
   "data:image/svg+xml;utf8," +
@@ -54,6 +57,14 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
   const [showChoosePlan, setShowChoosePlan] = useState(false);
   const [hideLoading, setHideLoading] = useState(false);
   const [showChildContainerErrorPopup, setShowChildContainerErrorPopup] = useState(false);
+  const [showLicensePopup, setShowLicensePopup] = useState(false);
+  const [licenseKey, setLicenseKey] = useState("");
+  const [siteDomain, setSiteDomain] = useState("staging");
+  const [isActivatingLicense, setIsActivatingLicense] = useState(false);
+  const [licenseError, setLicenseError] = useState("");
+  const [hasActiveLicense, setHasActiveLicense] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   const { sessionToken } = useAuth();
 
   
@@ -94,6 +105,337 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
       };
     }
   }, [tooltips.showTooltip]);
+
+  // Track if domain has been fetched to avoid checking license with "staging" before real domain is loaded
+  const [domainFetched, setDomainFetched] = useState(false);
+
+  // Get site domain from webflow siteInfo
+  useEffect(() => {
+    const fetchSiteDomain = async () => {
+      try {
+        const siteInfo = await webflow.getSiteInfo();
+        if (siteInfo?.domains && siteInfo.domains.length > 0) {
+          // Find custom domain (not staging)
+          const customDomain = siteInfo.domains.find(
+            (domain) => !domain.stage || domain.stage !== "staging"
+          );
+          if (customDomain?.url) {
+            // Remove protocol if present
+            const domain = customDomain.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+            setSiteDomain(domain);
+            setDomainFetched(true);
+          } else {
+            // Use staging domain if available
+            const stagingDomain = siteInfo.domains.find(
+              (domain) => domain.stage === "staging"
+            );
+            if (stagingDomain?.url) {
+              const domain = stagingDomain.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+              setSiteDomain(domain);
+              setDomainFetched(true);
+            } else {
+              setSiteDomain("staging");
+              setDomainFetched(true);
+            }
+          }
+        } else {
+          setSiteDomain("staging");
+          setDomainFetched(true);
+        }
+      } catch (error) {
+        setSiteDomain("staging");
+        setDomainFetched(true);
+      }
+    };
+    fetchSiteDomain();
+  }, []);
+
+  // Check for active license from server on mount and when dependencies change
+  useEffect(() => {
+    console.log('[ConfirmPublish] License check useEffect triggered', {
+      hasSessionToken: !!sessionToken,
+      sessionTokenValue: sessionToken ? sessionToken.substring(0, 20) + '...' : 'null',
+      siteDomain,
+      siteDomainType: typeof siteDomain,
+      userEmail: user?.email
+    });
+    
+    const checkActiveLicenseFromServer = async () => {
+      try {
+        // Wait for sessionToken and siteDomain to be available
+        // siteDomain defaults to "staging" so it should always be available
+        if (!sessionToken) {
+          console.log('[ConfirmPublish] ❌ Missing sessionToken for license check', {
+            hasSessionToken: !!sessionToken,
+            siteDomain
+          });
+          setHasActiveLicense(false);
+          return;
+        }
+        
+        // Ensure siteDomain is not empty (should default to "staging")
+        const domainToCheck = siteDomain && siteDomain.trim() ? siteDomain : "staging";
+        
+        if (!domainToCheck) {
+          console.log('[ConfirmPublish] ❌ Missing siteDomain for license check', {
+            hasSessionToken: !!sessionToken,
+            siteDomain
+          });
+          setHasActiveLicense(false);
+          return;
+        }
+
+        console.log('[ConfirmPublish] ✅ All required data available, checking license status from server...', {
+          hasSessionToken: !!sessionToken,
+          domainToCheck
+        });
+        const result = await customCodeApi.checkLicenseStatus(
+          domainToCheck,
+          user?.email,
+          sessionToken
+        );
+
+        console.log('[ConfirmPublish] License check result:', result);
+
+        // Handle "no license found" case
+        // Response format: { success: false, available: false, message: "No active license found for this site", license: null }
+        if (result.available === false || !result.license || result.license === null) {
+          console.log('[ConfirmPublish] ❌ No license found for this site', {
+            message: result.message,
+            available: result.available,
+            success: result.success,
+            hasLicense: !!result.license,
+            licenseValue: result.license
+          });
+          setHasActiveLicense(false);
+          return;
+        }
+
+        // Check license status from response
+        // Response format: { success: true, available: true, license: { status: "active"|"used", ... } }
+        const hasActiveLicense = (result.success === true && 
+                                 result.available === true && 
+                                 result.license &&
+                                 (result.license.status === "active" || 
+                                  result.license.status === "used" ||
+                                  result.license.is_used === true)) ||
+                                result.hasActiveLicense === true ||
+                                false;
+
+        console.log('[ConfirmPublish] Determined hasActiveLicense:', hasActiveLicense, {
+          resultKeys: Object.keys(result),
+          hasActiveLicense: result.hasActiveLicense,
+          available: result.available,
+          licenseStatus: result.license?.status,
+          message: result.message
+        });
+
+        if (result.success && hasActiveLicense) {
+          console.log('[ConfirmPublish] ✅ License is ACTIVE - setting hasActiveLicense to true');
+          setHasActiveLicense(true);
+        } else {
+          console.log('[ConfirmPublish] ❌ License is NOT active - setting hasActiveLicense to false', {
+            success: result.success,
+            hasActiveLicense,
+            licenseStatus: result.license?.status
+          });
+          setHasActiveLicense(false);
+        }
+      } catch (error) {
+        console.error('[ConfirmPublish] Error in license check:', error);
+        setHasActiveLicense(false);
+      }
+    };
+    
+    // Only check if we have required data
+    // Wait for domain to be fetched to avoid checking with "staging" before real domain loads
+    if (sessionToken && domainFetched) {
+      checkActiveLicenseFromServer();
+    } else {
+      console.log('[ConfirmPublish] ⏭️ Skipping license check', {
+        hasSessionToken: !!sessionToken,
+        domainFetched,
+        siteDomain
+      });
+    }
+  }, [siteDomain, sessionToken, user?.email, domainFetched]);
+
+  // Check subscription status
+  useEffect(() => {
+    const base_url = "https://consentbit-test-server.web-8fb.workers.dev";
+    
+    const checkSubscription = async (accessToken: string) => {
+      try {
+        const siteInfo = await webflow.getSiteInfo();
+        const siteId = siteInfo?.siteId;
+        
+        if (!siteId) {
+          throw new Error('No site ID available');
+        }
+
+        const response = await fetch(`${base_url}/api/payment/subscription?siteId=${siteId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.details || data.error || 'Failed to check subscription');
+        }
+
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    };
+
+    const accessToken = getSessionTokenFromLocalStorage();
+    const fetchSubscription = async () => {
+      try {
+        if (!accessToken) {
+          setSubscriptionChecked(true);
+          return;
+        }
+        
+        const result = await checkSubscription(accessToken);
+
+        // Check if any domain has isSubscribed === true
+        const hasSubscription = result.subscriptionStatuses?.some(
+          (status: { isSubscribed: boolean }) => status.isSubscribed === true
+        );
+
+        setIsSubscribed(Boolean(hasSubscription));
+      } catch (error) {
+        // Error handling - assume no subscription on error
+        setIsSubscribed(false);
+      } finally {
+        setSubscriptionChecked(true);
+      }
+    };
+
+    fetchSubscription();
+  }, []);
+
+  // Handle license activation
+  const handleActivateLicense = async () => {
+    console.log('[ConfirmPublish] License activation initiated', {
+      hasLicenseKey: !!licenseKey.trim(),
+      siteDomain,
+      userEmail: user?.email,
+      hasSessionToken: !!sessionToken
+    });
+    
+    if (!licenseKey.trim()) {
+      console.log('[ConfirmPublish] ❌ No license key provided');
+      setLicenseError("Please enter a license key");
+      return;
+    }
+
+    setIsActivatingLicense(true);
+    setLicenseError("");
+
+    try {
+      console.log('[ConfirmPublish] Calling activateLicense API...');
+      const result = await customCodeApi.activateLicense(
+        licenseKey.trim(),
+        siteDomain,
+        user?.email,
+        sessionToken
+      );
+      
+      console.log('[ConfirmPublish] Activate license API response:', result);
+
+      if (result.success) {
+        console.log('[ConfirmPublish] ✅ License activation SUCCESS:', result);
+        // Immediately set license as active
+        setHasActiveLicense(true);
+        setShowLicensePopup(false);
+        setLicenseKey("");
+        setLicenseError("");
+        
+        // Re-check license status from server after a short delay to ensure it's saved
+        console.log('[ConfirmPublish] Scheduling re-check of license status in 1 second...');
+        setTimeout(async () => {
+          try {
+            console.log('[ConfirmPublish] Re-checking license status after activation...');
+            const checkResult = await customCodeApi.checkLicenseStatus(
+              siteDomain,
+              user?.email,
+              sessionToken
+            );
+            console.log('[ConfirmPublish] Re-check result:', checkResult);
+            // Check license status from response
+            // Response format: { success: true, available: true, license: { status: "active"|"used", ... } }
+            const recheckHasActiveLicense = (checkResult.success === true && 
+                                             checkResult.available === true && 
+                                             checkResult.license &&
+                                             (checkResult.license.status === "active" || 
+                                              checkResult.license.status === "used" ||
+                                              checkResult.license.is_used === true)) ||
+                                            checkResult.hasActiveLicense === true ||
+                                            false;
+            
+            if (recheckHasActiveLicense) {
+              console.log('[ConfirmPublish] ✅ Re-check confirmed license is active');
+              setHasActiveLicense(true);
+            } else {
+              console.log('[ConfirmPublish] ⚠️ Re-check did not confirm license, but keeping as active since activation succeeded');
+            }
+          } catch (error) {
+            console.error('[ConfirmPublish] Error in re-check:', error);
+            // Keep hasActiveLicense as true since activation was successful
+          }
+        }, 1000);
+        
+        if (typeof webflow !== 'undefined' && webflow.notify) {
+          webflow.notify({
+            type: "Success",
+            message: result.message || "License activated successfully"
+          });
+        }
+      } else {
+        // Handle different error types
+        let errorMessage = result.message || "Failed to activate license";
+        
+        switch (result.error) {
+          case "license_not_found":
+            errorMessage = "License key not found. Please check the license key and try again.";
+            break;
+          case "subscription_ended":
+            errorMessage = `This license key's subscription has ended on ${result.subscription_end_date_formatted || "the end date"}. Please renew your subscription.`;
+            break;
+          case "subscription_cancelled":
+            errorMessage = `This license key's subscription has been cancelled. It will end on ${result.subscription_cancel_date_formatted || "the end date"}. Please reactivate your subscription.`;
+            break;
+          case "subscription_inactive":
+            errorMessage = `This license key's subscription is ${result.subscription_status || "inactive"}. Please ensure your subscription is active.`;
+            break;
+          case "inactive_license":
+            errorMessage = "This license is not active.";
+            break;
+          case "unauthorized":
+            errorMessage = "This license key does not belong to your account.";
+            break;
+          case "unauthenticated":
+          case "invalid_session":
+            errorMessage = "Please log in to activate your license.";
+            break;
+          default:
+            errorMessage = result.message || "Failed to activate license";
+        }
+        
+        setLicenseError(errorMessage);
+      }
+    } catch (error: any) {
+      setLicenseError(error.message || "Network error occurred. Please try again.");
+    } finally {
+      setIsActivatingLicense(false);
+    }
+  };
 
 
   // Helper function to check if selected element is a child of consentbit-container
@@ -192,7 +534,6 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
             break;
           }
         } catch (e) {
-          console.error(`❌ [ConfirmPublish.isSelectedElementChildOfContainer] Error at depth ${depth}:`, e);
           break;
         }
       }
@@ -203,7 +544,6 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
       
       return isChildOfContainer;
     } catch (checkError) {
-      console.error("❌ [ConfirmPublish.isSelectedElementChildOfContainer] Error checking if selected element is child of container:", checkError);
       // Return false on error to allow banner creation (fail-safe)
       return false;
     }
@@ -434,6 +774,116 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
           </div>
         )}
 
+        {/* License key popup */}
+        {showLicensePopup && (
+          <div className="popup-overlay" onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowLicensePopup(false);
+              setLicenseKey("");
+              setLicenseError("");
+            }
+          }}>
+            <div className="success-popup" style={{ textAlign: "left", maxWidth: "500px" }}>
+              <h3 style={{ margin: "0 0 20px 0", fontSize: "16px", fontWeight: "500", color: "#fff" }}>
+                Activate License
+              </h3>
+              
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ 
+                  display: "block", 
+                  marginBottom: "8px", 
+                  fontSize: "12px",
+                  color: "rgba(255, 255, 255, 0.7)"
+                }}>
+                  Site Domain
+                </label>
+                <input
+                  type="text"
+                  value={siteDomain}
+                  onChange={(e) => setSiteDomain(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    background: "rgba(10, 8, 27, 1)",
+                    border: "1px solid rgba(140, 121, 255, 0.3)",
+                    borderRadius: "6px",
+                    color: "#fff",
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "20px" }}>
+                <label style={{ 
+                  display: "block", 
+                  marginBottom: "8px", 
+                  fontSize: "12px",
+                  color: "rgba(255, 255, 255, 0.7)"
+                }}>
+                  License Key
+                </label>
+                <input
+                  type="text"
+                  value={licenseKey}
+                  onChange={(e) => {
+                    setLicenseKey(e.target.value);
+                    setLicenseError("");
+                  }}
+                  placeholder="Enter your license key"
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    background: "rgba(10, 8, 27, 1)",
+                    border: licenseError ? "1px solid #ef4444" : "1px solid rgba(140, 121, 255, 0.3)",
+                    borderRadius: "6px",
+                    color: "#fff",
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}
+                />
+                {licenseError && (
+                  <p style={{ 
+                    color: "#ef4444", 
+                    fontSize: "12px", 
+                    marginTop: "8px",
+                    marginBottom: 0
+                  }}>
+                    {licenseError}
+                  </p>
+                )}
+              </div>
+
+              <div className="popup-buttons">
+                <button
+                  className="cancel-btn"
+                  onClick={() => {
+                    setShowLicensePopup(false);
+                    setLicenseKey("");
+                    setLicenseError("");
+                  }}
+                  disabled={isActivatingLicense}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="authorize-btn"
+                  onClick={handleActivateLicense}
+                  disabled={isActivatingLicense || !licenseKey.trim()}
+                  style={{
+                    opacity: (isActivatingLicense || !licenseKey.trim()) ? 0.5 : 1,
+                    cursor: (isActivatingLicense || !licenseKey.trim()) ? "not-allowed" : "pointer"
+                  }}
+                >
+                  {isActivatingLicense ? "Activating..." : "Save"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Loading overlay with pulse animation */}
         {isCreating && !hideLoading && (
           <div className="popup">
@@ -465,21 +915,20 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
                        className="coupon-strip"
                        style={{
                          backgroundImage: `url(${couponCodeBg})`,
-                         backgroundSize: "cover",
+                         backgroundSize: "100% 100%",
                          backgroundPosition: "center",
                          backgroundRepeat: "no-repeat"
                        }}
                      >
                       <div style={{ display: "flex", flexDirection: "column", padding: "10px" ,justifyContent: "center",marginLeft: "75px"}}>
-                        <span style={{color: "black",fontSize: "8px",marginLeft: "5px",fontWeight: "600"}}>Use Coupon Code:</span>
-                        <span style={{color: "black",fontWeight: "600",fontSize: "10px"}}>{COUPON_CODE}</span>
+                        <span style={{color: "white",fontSize: "8px",marginLeft: "0px",fontWeight: "600"}}>Use Coupon Code:</span>
+                        <span style={{color: "white",fontWeight: "400",fontSize: "12px"}}>{COUPON_CODE}</span>
                       </div>
 
                        <img
                         src={iconSrc}   // ✅ use state here
                         alt="Copy"
                         className="copy-icon"
-                        style={{ filter: "brightness(0)" }}
                         onClick={() => {
                           navigator.clipboard.writeText(COUPON_CODE)
                             .then(() => {
@@ -504,13 +953,90 @@ const ConfirmPublish: React.FC<ConfirmPublishProps> = ({ onGoBack, handleConfirm
                     </div>  
                   </div>
 
-                  <div style={{ width: "100%", borderTop: "1px solid rgba(140, 121, 255, 1)", display: "flex", justifyContent: "space-between" }}><div className="pay-container"> <a href="https://billing.stripe.com/p/login/00gbIJclf5nz4Hm8ww" target="_blank" onClick={(e) => {
-                    e.preventDefault();
-                    setShowChoosePlan(true);
-                  }} rel="noopener noreferrer" className="pay-now-btn" style={{ textDecoration: 'none' }}>Pay now</a><img onClick={(e) => {
-                    e.preventDefault();
-                    setShowChoosePlan(true);
-                  }} src={arrow} alt="" /></div></div>
+                  <div style={{ width: "100%", borderTop: "1px solid rgba(140, 121, 255, 1)" }}>
+                    {(() => {
+                      const shouldShowPayNow = subscriptionChecked && !hasActiveLicense && !isSubscribed;
+                      console.log('[ConfirmPublish] Pay Now button visibility check:', {
+                        subscriptionChecked,
+                        hasActiveLicense,
+                        isSubscribed,
+                        shouldShowPayNow
+                      });
+                      return shouldShowPayNow;
+                    })() && (
+                      <div className="pay-container"> 
+                        <a 
+                          href="https://billing.stripe.com/p/login/00gbIJclf5nz4Hm8ww" 
+                          target="_blank" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setShowChoosePlan(true);
+                          }} 
+                          rel="noopener noreferrer" 
+                          className="pay-now-btn" 
+                          style={{ 
+                            textDecoration: 'none'
+                          }}
+                        >
+                          Pay now
+                        </a>
+                        <img 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setShowChoosePlan(true);
+                          }} 
+                          src={arrow} 
+                          alt="" 
+                        />
+                      </div>
+                    )}
+                    {subscriptionChecked && !hasActiveLicense && !isSubscribed && (
+                      <div style={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: "8px",                       
+                        width: "100%",                       
+                      }}>
+                        <div style={{ 
+                          flex: "0.9 0 0%",
+                          height: "1px", 
+                          background: "rgba(140, 121, 255, 0.3)" 
+                        }}></div>
+                        <div style={{
+                          color: "#a78bfa",
+                          fontSize: "10px",
+                          fontWeight: "600",
+                          fontFamily: "'DM Sans', sans-serif",
+                          whiteSpace: "nowrap"
+                        }}>
+                          OR
+                        </div>
+                        <div style={{ 
+                          flex: "5 0 0%",
+                          height: "1px", 
+                          background: "rgba(140, 121, 255, 0.3)" 
+                        }}></div>
+                      </div>
+                    )}
+                    <div style={{ padding: "4px 10px 0px 10px", display: "flex", justifyContent: "center" }}>
+                      <button
+                        onClick={() => setShowLicensePopup(true)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: "#a78bfa",
+                          padding: "6px 0px",
+                          fontSize: "11px",
+                          fontWeight: "400",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}
+                      >
+                        {hasActiveLicense ? "License activated" : "Activate licence key"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
 

@@ -3,7 +3,7 @@
   "version": "2.0.1",
   "scripts": {
     "dev": "concurrently \"webflow extension serve\" \"npm run watch-webpack\"",
-    "build": "npm run build-webpack && webflow extension bundle && node scripts/clean-bundle-after-bundle.js",
+    "build": "node scripts/clean-public-folder.js && npm run build-webpack && webflow extension bundle && node scripts/clean-bundle-after-bundle.js",
     "verify": "node scripts/verify-bundle.js",
     "watch-webpack": "webpack --config webpack.config.mjs --mode development --watch",
     "build-webpack": "webpack --config webpack.config.mjs --mode production",
@@ -26,6 +26,7 @@
     "file-loader": "^6.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "sharp": "^0.34.5",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",

@@ -46,7 +46,6 @@ const getOrCreateAsset = async (): Promise<any> => {
     const newAsset = await (webflow as any).createAsset(file);
     return newAsset;
   } catch (error) {
-    console.error('Error getting or creating asset:', error);
     throw error;
   }
 };
@@ -186,7 +185,6 @@ const getOrCreateCloseIconAsset = async (backgroundColor: string): Promise<any> 
     const newAsset = await (webflow as any).createAsset(file);
     return newAsset;
   } catch (error) {
-    console.error('Error getting or creating close icon asset:', error);
     throw error;
   }
 };
@@ -746,8 +744,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
         if ((mainDivBlock as any).setDomId) {
           await mainDivBlock.setCustomAttribute("scroll-control", "true");
           await (mainDivBlock as any).setDomId("toggle-consent-btn");
-        } else {
-          console.error("ccpa banner id setteled");
         }
 
         // Add image to the skip div
@@ -794,9 +790,6 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
           // Set custom attributes for the image
           if ((imageElement as any).setCustomAttribute) {
             await (imageElement as any).setCustomAttribute("data-consent-toggle", "true");
-            // Optimize for LCP: remove lazy loading and set high fetch priority
-            await (imageElement as any).setCustomAttribute("loading", "eager");
-            await (imageElement as any).setCustomAttribute("fetchpriority", "high");
           }
         }
       }
@@ -867,7 +860,7 @@ const createCookiePreferences = async (selectedPreferences: string[], language: 
               }
             }
           } catch (error) {
-            console.error('Error creating close icon image element:', error);
+            // Error creating close icon image element
           }
         }
       }
