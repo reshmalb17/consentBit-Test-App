@@ -6,6 +6,68 @@ import fs from "fs";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+// Plugin to clean old chunk files and assets before building
+class CleanOldChunksPlugin {
+  apply(compiler) {
+    compiler.hooks.beforeRun.tap("CleanOldChunksPlugin", (compilation) => {
+      const outputPath = compiler.options.output.path;
+      if (!fs.existsSync(outputPath)) return;
+      
+      const files = fs.readdirSync(outputPath);
+      const filesToKeep = ['bundle.js', 'index.html', 'styles.css', 'assets'];
+      let cleanedCount = 0;
+      
+      files.forEach(file => {
+        // Skip files/directories we want to keep
+        if (filesToKeep.includes(file)) return;
+        
+        const filePath = path.join(outputPath, file);
+        const stat = fs.statSync(filePath);
+        
+        // Remove old chunk files (JS files with hashes that aren't bundle.js)
+        if (file.endsWith('.js') && 
+            file !== 'bundle.js' && 
+            !file.includes('node_modules') &&
+            !file.endsWith('.LICENSE.txt')) {
+          try {
+            fs.unlinkSync(filePath);
+            cleanedCount++;
+          } catch (err) {
+            // Ignore errors
+          }
+        }
+        // Remove old asset files (SVG, PNG, JPG, WEBP with hash patterns)
+        // Webpack generates assets with hashes, old ones should be cleaned
+        else if (/\.(svg|png|jpg|jpeg|webp|gif)$/i.test(file) && stat.isFile()) {
+          // Remove files that are:
+          // 1. Pure hash filenames (like "020f7028ee30a97ff82d.svg")
+          // 2. Files with hash patterns (like "name.abc12345.svg")
+          // 3. Files in root that aren't explicitly kept (assets should be in assets/ folder)
+          const isHashedAsset = /^[a-f0-9]{16,}\.(svg|png|jpg|jpeg|webp|gif)$/i.test(file) ||
+                                 /\.([a-f0-9]{8,})\.(svg|png|jpg|jpeg|webp|gif)$/i.test(file);
+          
+          // Keep only specific known files (like message-icon.png, warning-2.png if they exist)
+          const keepFiles = ['message-icon.png', 'warning-2.png'];
+          const shouldKeep = keepFiles.includes(file.toLowerCase());
+          
+          if (!shouldKeep && (isHashedAsset || !file.startsWith('assets'))) {
+            try {
+              fs.unlinkSync(filePath);
+              cleanedCount++;
+            } catch (err) {
+              // Ignore errors
+            }
+          }
+        }
+      });
+      
+      if (cleanedCount > 0) {
+        console.log(`✓ Cleaned ${cleanedCount} old files from public folder`);
+      }
+    });
+  }
+}
+
 // Plugin to safely replace new Function patterns for marketplace compliance
 // This runs AFTER bundling to ensure we don't break functionality
 class SafeNewFunctionReplacerPlugin {
@@ -19,7 +81,8 @@ class SafeNewFunctionReplacerPlugin {
         if (!fs.existsSync(dir)) return;
         
         const bundleFiles = fs.readdirSync(dir).filter(file => 
-          file.endsWith('.bundle.js') || file === 'bundle.js'
+          file.endsWith('.bundle.js') || file === 'bundle.js' ||
+          (file.endsWith('.js') && !file.includes('node_modules')) // Process all webpack-generated JS files
         );
         
         bundleFiles.forEach(filename => {
@@ -29,8 +92,10 @@ class SafeNewFunctionReplacerPlugin {
       };
       
       // Clean public directory (webpack output)
+      // Process main bundle and all chunk files (lazy-loaded components)
       const bundleFiles = fs.readdirSync(outputPath).filter(file => 
-        file.endsWith('.bundle.js') || file === 'bundle.js'
+        file.endsWith('.bundle.js') || file === 'bundle.js' || 
+        (file.endsWith('.js') && !file.includes('node_modules')) // Process all webpack-generated JS files
       );
       
       bundleFiles.forEach(filename => {
@@ -137,6 +202,9 @@ export default {
   entry: "./src/index.tsx",
   output: {
     filename: "bundle.js",
+    // Use chunkFilename for async chunks (lazy-loaded components)
+    // This prevents filename conflicts when code splitting is enabled
+    chunkFilename: "[name].[contenthash:8].js",
     path: path.resolve(dirname, "public"),
     // Prevent webpack from using eval/new Function for runtime
     // Use "window" instead of "this" to avoid new Function("return this")
@@ -170,13 +238,72 @@ export default {
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
-        type: "asset/resource",
+        type: "asset",
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8 * 1024, // 8kb - inline small images as base64
+          },
+        },
+        generator: {
+          filename: "assets/[name].[hash:8][ext]",
+        },
       },
     ],
   },
   optimization: {
-    // Disable code splitting to prevent eval/new Function usage
-    splitChunks: false,
+    // Enable code splitting for lazy-loaded components
+    // Split vendors only from async chunks to avoid filename conflicts with main bundle
+    splitChunks: {
+      chunks: 'async', // Only split async chunks (lazy-loaded components)
+      minSize: 20000, // Only create chunks larger than 20KB
+      maxSize: 250000, // Try to keep chunks under 250KB
+      cacheGroups: {
+        default: false,
+        // Split vendor code from lazy-loaded components into separate chunks
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            // Extract package name for better chunk naming
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)?.[1];
+            if (packageName) {
+              // For large packages, create separate chunks
+              if (packageName.startsWith('react') || packageName.startsWith('react-dom')) {
+                return 'react-vendor';
+              }
+              if (packageName.startsWith('@tanstack')) {
+                return 'tanstack-vendor';
+              }
+              if (packageName.startsWith('framer-motion')) {
+                return 'framer-vendor';
+              }
+            }
+            return 'vendor';
+          },
+          chunks: 'async',
+          priority: 20,
+          reuseExistingChunk: true,
+        },
+        // Create separate chunks for lazy-loaded components
+        components: {
+          name(module) {
+            // Extract component name from the module path for better chunk naming
+            const match = module.resource?.match(/[\\/]components[\\/]([^\\/]+)\.tsx?$/);
+            return match ? match[1].toLowerCase() : 'component';
+          },
+          test: /[\\/]src[\\/]components[\\/]/,
+          chunks: 'async',
+          priority: 10,
+          reuseExistingChunk: true,
+        },
+        // Split shared code between components
+        common: {
+          minChunks: 2, // Code used in 2+ chunks
+          chunks: 'async',
+          priority: 5,
+          reuseExistingChunk: true,
+        },
+      },
+    },
     // Disable runtime chunk to prevent webpack runtime from using new Function
     runtimeChunk: false,
     // Minimize without using eval or new Function
@@ -220,6 +347,7 @@ export default {
     topLevelAwait: false,
   },
   plugins: [
+    new CleanOldChunksPlugin(),
     new SafeNewFunctionReplacerPlugin(),
   ],
   devServer: {

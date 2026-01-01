@@ -175,7 +175,7 @@ const getOrCreateCloseIconAsset = async (backgroundColor: string): Promise<any> 
   }
 };
 
-const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActiveTab = "Settings", isAuthenticated = false, initialBannerStyles }) => {
+const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActiveTab = "Customization", isAuthenticated = false, initialBannerStyles }) => {
   // Use initial values if provided, otherwise use defaults
   const [color, setColor] = usePersistentState("color", initialBannerStyles?.color || "#ffffff");
   
@@ -242,7 +242,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   useEffect(() => {
     const validTabs = ["Settings", "Customization", "Script"];
     if (!validTabs.includes(activeTab)) {
-      setActiveTab("Settings");
+      setActiveTab("Customization");
     }
   }, [activeTab]);
   
@@ -468,6 +468,12 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   const [isBannerAdded, setIsBannerAdded] = useState(false);
+  const [hasActiveLicense, setHasActiveLicense] = useState(false);
+  const [showLicensePopup, setShowLicensePopup] = useState(false);
+  const [licenseKey, setLicenseKey] = useState("");
+  const [licenseSiteDomain, setLicenseSiteDomain] = useState("staging");
+  const [isActivatingLicense, setIsActivatingLicense] = useState(false);
+  const [licenseError, setLicenseError] = useState("");
   
   // Update button text based on whether scripts have been fetched
   useEffect(() => {
@@ -491,7 +497,7 @@ const CustomizationTab: React.FC<CustomizationTabProps> = ({ onAuth, initialActi
 
 
 
-  const base_url = "https://app.consentbit.com"
+  const base_url = "https://consentbit-test-server.web-8fb.workers.dev"
 
   // Welcome screen handlers - removed since this component is accessed via Customize link
   const handleWelcomeAuthorize = () => {
@@ -805,6 +811,265 @@ const handleToggles = (option) => {
 
     fetchPages();
   }, [webflow]);
+
+  // Check for active license from server on mount and when dependencies change
+  useEffect(() => {
+    console.log('[CustomizationTab] License check useEffect triggered', {
+      licenseSiteDomain
+    });
+    
+    const checkActiveLicenseFromServer = async () => {
+      try {
+        const userinfo = getAuthStorageItem('consentbit-userinfo');
+        const user = userinfo ? JSON.parse(userinfo) : null;
+        const token = getSessionTokenFromLocalStorage();
+        
+        console.log('[CustomizationTab] License check data:', {
+          hasToken: !!token,
+          licenseSiteDomain,
+          userEmail: user?.email
+        });
+        
+        // Wait for token and siteDomain to be available
+        if (!token || !licenseSiteDomain) {
+          console.log('[CustomizationTab] Missing required data for license check', {
+            hasToken: !!token,
+            licenseSiteDomain
+          });
+          setHasActiveLicense(false);
+          return;
+        }
+
+        console.log('[CustomizationTab] Checking license status from server...');
+        const result = await customCodeApi.checkLicenseStatus(
+          licenseSiteDomain,
+          user?.email,
+          token
+        );
+
+        console.log('[CustomizationTab] License check result:', result);
+
+        // Handle "no license found" case
+        // Response format: { success: false, available: false, message: "No active license found for this site", license: null }
+        if (result.available === false || !result.license || result.license === null) {
+          console.log('[CustomizationTab] ❌ No license found for this site', {
+            message: result.message,
+            available: result.available,
+            success: result.success,
+            hasLicense: !!result.license,
+            licenseValue: result.license
+          });
+          setHasActiveLicense(false);
+          return;
+        }
+
+        // Check license status from response
+        // Response format: { success: true, available: true, license: { status: "active"|"used", ... } }
+        const hasActiveLicense = (result.success === true && 
+                                 result.available === true && 
+                                 result.license &&
+                                 (result.license.status === "active" || 
+                                  result.license.status === "used" ||
+                                  result.license.is_used === true)) ||
+                                result.hasActiveLicense === true ||
+                                false;
+
+        console.log('[CustomizationTab] Determined hasActiveLicense:', hasActiveLicense, {
+          resultKeys: Object.keys(result),
+          hasActiveLicense: result.hasActiveLicense,
+          available: result.available,
+          licenseStatus: result.license?.status,
+          message: result.message
+        });
+
+        if (result.success && hasActiveLicense) {
+          console.log('[CustomizationTab] ✅ License is ACTIVE - setting hasActiveLicense to true');
+          setHasActiveLicense(true);
+        } else {
+          console.log('[CustomizationTab] ❌ License is NOT active - setting hasActiveLicense to false', {
+            success: result.success,
+            hasActiveLicense,
+            licenseStatus: result.license?.status
+          });
+          setHasActiveLicense(false);
+        }
+      } catch (error) {
+        console.error('[CustomizationTab] Error in license check:', error);
+        setHasActiveLicense(false);
+      }
+    };
+    
+    // Only check if we have required data
+    if (licenseSiteDomain) {
+      checkActiveLicenseFromServer();
+    } else {
+      console.log('[CustomizationTab] Skipping license check - missing licenseSiteDomain');
+    }
+  }, [licenseSiteDomain]);
+
+  // Get site domain from webflow siteInfo
+  useEffect(() => {
+    const fetchSiteDomain = async () => {
+      try {
+        const siteInfo = await webflow.getSiteInfo();
+        if (siteInfo?.domains && siteInfo.domains.length > 0) {
+          // Find custom domain (not staging)
+          const customDomain = siteInfo.domains.find(
+            (domain) => !domain.stage || domain.stage !== "staging"
+          );
+          if (customDomain?.url) {
+            // Remove protocol if present
+            const domain = customDomain.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+            setLicenseSiteDomain(domain);
+          } else {
+            // Use staging domain if available
+            const stagingDomain = siteInfo.domains.find(
+              (domain) => domain.stage === "staging"
+            );
+            if (stagingDomain?.url) {
+              const domain = stagingDomain.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+              setLicenseSiteDomain(domain);
+            } else {
+              setLicenseSiteDomain("staging");
+            }
+          }
+        } else {
+          setLicenseSiteDomain("staging");
+        }
+      } catch (error) {
+        setLicenseSiteDomain("staging");
+      }
+    };
+    fetchSiteDomain();
+  }, []);
+
+  // Handle license activation
+  const handleActivateLicense = async () => {
+    console.log('[CustomizationTab] License activation initiated', {
+      hasLicenseKey: !!licenseKey.trim(),
+      licenseSiteDomain,
+      hasToken: !!getSessionTokenFromLocalStorage()
+    });
+    
+    if (!licenseKey.trim()) {
+      console.log('[CustomizationTab] ❌ No license key provided');
+      setLicenseError("Please enter a license key");
+      return;
+    }
+
+    setIsActivatingLicense(true);
+    setLicenseError("");
+
+    try {
+      const userinfo = getAuthStorageItem('consentbit-userinfo');
+      const user = userinfo ? JSON.parse(userinfo) : null;
+      const token = getSessionTokenFromLocalStorage();
+
+      console.log('[CustomizationTab] Calling activateLicense API...');
+      const result = await customCodeApi.activateLicense(
+        licenseKey.trim(),
+        licenseSiteDomain,
+        user?.email,
+        token
+      );
+      
+      console.log('[CustomizationTab] Activate license API response:', result);
+
+      if (result.success) {
+        console.log('[CustomizationTab] ✅ License activation SUCCESS:', result);
+        // Immediately set license as active
+        setHasActiveLicense(true);
+        setShowLicensePopup(false);
+        setLicenseKey("");
+        setLicenseError("");
+        
+        // Re-check license status from server after a short delay to ensure it's saved
+        console.log('[CustomizationTab] Scheduling re-check of license status in 1 second...');
+        setTimeout(async () => {
+          try {
+            console.log('[CustomizationTab] Re-checking license status after activation...');
+            const userinfo = getAuthStorageItem('consentbit-userinfo');
+            const user = userinfo ? JSON.parse(userinfo) : null;
+            const token = getSessionTokenFromLocalStorage();
+            
+            if (token && licenseSiteDomain) {
+              const checkResult = await customCodeApi.checkLicenseStatus(
+                licenseSiteDomain,
+                user?.email,
+                token
+              );
+              
+              console.log('[CustomizationTab] Re-check result:', checkResult);
+              
+              // Check license status from response
+              // Response format: { success: true, available: true, license: { status: "active"|"used", ... } }
+              const recheckHasActiveLicense = (checkResult.success === true && 
+                                               checkResult.available === true && 
+                                               checkResult.license &&
+                                               (checkResult.license.status === "active" || 
+                                                checkResult.license.status === "used" ||
+                                                checkResult.license.is_used === true)) ||
+                                              checkResult.hasActiveLicense === true ||
+                                              false;
+              
+              if (recheckHasActiveLicense) {
+                console.log('[CustomizationTab] ✅ Re-check confirmed license is active');
+                setHasActiveLicense(true);
+              } else {
+                console.log('[CustomizationTab] ⚠️ Re-check did not confirm license, but keeping as active since activation succeeded');
+              }
+            }
+          } catch (error) {
+            console.error('[CustomizationTab] Error in re-check:', error);
+            // Keep hasActiveLicense as true since activation was successful
+          }
+        }, 1000);
+        
+        if (typeof webflow !== 'undefined' && webflow.notify) {
+          webflow.notify({
+            type: "Success",
+            message: result.message || "License activated successfully"
+          });
+        }
+      } else {
+        // Handle different error types
+        let errorMessage = result.message || "Failed to activate license";
+        
+        switch (result.error) {
+          case "license_not_found":
+            errorMessage = "License key not found. Please check the license key and try again.";
+            break;
+          case "subscription_ended":
+            errorMessage = `This license key's subscription has ended on ${result.subscription_end_date_formatted || "the end date"}. Please renew your subscription.`;
+            break;
+          case "subscription_cancelled":
+            errorMessage = `This license key's subscription has been cancelled. It will end on ${result.subscription_cancel_date_formatted || "the end date"}. Please reactivate your subscription.`;
+            break;
+          case "subscription_inactive":
+            errorMessage = `This license key's subscription is ${result.subscription_status || "inactive"}. Please ensure your subscription is active.`;
+            break;
+          case "inactive_license":
+            errorMessage = "This license is not active.";
+            break;
+          case "unauthorized":
+            errorMessage = "This license key does not belong to your account.";
+            break;
+          case "unauthenticated":
+          case "invalid_session":
+            errorMessage = "Please log in to activate your license.";
+            break;
+          default:
+            errorMessage = result.message || "Failed to activate license";
+        }
+        
+        setLicenseError(errorMessage);
+      }
+    } catch (error: any) {
+      setLicenseError(error.message || "Network error occurred. Please try again.");
+    } finally {
+      setIsActivatingLicense(false);
+    }
+  };
 
   // Banner details are now fetched in App.tsx and passed as initialBannerStyles prop
   // No need to fetch here - values come from API via props
@@ -3530,7 +3795,34 @@ const handleToggles = (option) => {
           <p className="hello">Hello{user?.firstName ? `, ${user.firstName}` : ''}!</p>
         </div>
 
-        <NeedHelp />
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <button
+            onClick={() => setShowLicensePopup(true)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#a78bfa",
+              padding: "0",
+              fontSize: "12px",
+              fontWeight: "400",
+              cursor: "pointer",
+              textDecoration: hasActiveLicense ? "none" : "underline",
+              fontFamily: "'DM Sans', sans-serif",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}
+          >
+            {hasActiveLicense ? (
+              <>
+                <span style={{ color: "#4ade80" }}>✓</span> License activated
+              </>
+            ) : (
+              "Activate Licence Key"
+            )}
+          </button>
+          <NeedHelp />
+        </div>
       </div>
 
                                          {/* Tab Navigation Section */}
@@ -3538,18 +3830,18 @@ const handleToggles = (option) => {
            <div className="tabs">
              <div className="tab-button-wrapper">
                <button
-                 className={`tab-button ${activeTab === "Settings" ? "active" : ""}`}
-                 onClick={() => handleSetActiveTab("Settings")}
-               >
-                 Settings
-               </button>
-             </div>
-             <div className="tab-button-wrapper">
-               <button
                  className={`tab-button ${activeTab === "Customization" ? "active" : ""}`}
                  onClick={() => handleSetActiveTab("Customization")}
                >
                  Customization
+               </button>
+             </div>
+             <div className="tab-button-wrapper">
+               <button
+                 className={`tab-button ${activeTab === "Settings" ? "active" : ""}`}
+                 onClick={() => handleSetActiveTab("Settings")}
+               >
+                 Settings
                </button>
              </div>
              <div className="tab-button-wrapper">
@@ -3565,11 +3857,15 @@ const handleToggles = (option) => {
           {!subscriptionChecked ? (
             <div className="subscribe">
             </div>
+          ) : hasActiveLicense ? (
+            <div className="subscribe">
+              You have active subscription, <a className="link" href="https://billing.stripe.com/p/login/00gbIJclf5nz4Hm8ww" target="_blank">Cancel Subscription <img src={uparrow} alt="" /> </a>
+            </div>
           ) : !isSubscribed ? (
             <div className="subscribe">
               <a className="link" href="#" onClick={(e) => {
                 e.preventDefault();
-                setShowChoosePlan(true);
+                setShowLicensePopup(true);
               }}>
                 You need a subscription to publish the production <i><img src={uparrow} alt="" /></i>
               </a>
@@ -4067,7 +4363,7 @@ const handleToggles = (option) => {
 
                         <div className="tooltip-containers">
                           <img src={questionmark} alt="info" className="tooltip-icon" />
-                          <span className="tooltip-text"> Enables a toggle switch. Off = standard checkbox.</span>
+                          <span className="tooltip-text">When enabled, displays a toggle switch. When disabled, shows a standard checkbox.</span>
                         </div>
                       </div>
 
@@ -4090,7 +4386,7 @@ const handleToggles = (option) => {
 
                       <div className="tooltip-containers">
                         <img src={questionmark} alt="info" className="tooltip-icons" />
-                        <span className="tooltip-text">this will reset the interactions that you have added.</span>
+                        <span className="tooltip-text">This will reset the interactions that you have added.</span>
                       </div>
                     </div>
 
@@ -4467,6 +4763,116 @@ const handleToggles = (option) => {
       {/* ChoosePlan Modal */}
       {showChoosePlan && (
         <ChoosePlan onClose={() => setShowChoosePlan(false)} />
+      )}
+
+      {/* License key popup */}
+      {showLicensePopup && (
+        <div className="popup-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowLicensePopup(false);
+            setLicenseKey("");
+            setLicenseError("");
+          }
+        }}>
+          <div className="success-popup" style={{ textAlign: "left", maxWidth: "500px" }}>
+            <h3 style={{ margin: "0 0 20px 0", fontSize: "16px", fontWeight: "500", color: "#fff" }}>
+              Activate License
+            </h3>
+            
+            <div style={{ marginBottom: "16px" }}>
+              <label style={{ 
+                display: "block", 
+                marginBottom: "8px", 
+                fontSize: "12px",
+                color: "rgba(255, 255, 255, 0.7)"
+              }}>
+                Site Domain
+              </label>
+              <input
+                type="text"
+                value={licenseSiteDomain}
+                onChange={(e) => setLicenseSiteDomain(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  background: "rgba(10, 8, 27, 1)",
+                  border: "1px solid rgba(140, 121, 255, 0.3)",
+                  borderRadius: "6px",
+                  color: "#fff",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ 
+                display: "block", 
+                marginBottom: "8px", 
+                fontSize: "12px",
+                color: "rgba(255, 255, 255, 0.7)"
+              }}>
+                License Key
+              </label>
+              <input
+                type="text"
+                value={licenseKey}
+                onChange={(e) => {
+                  setLicenseKey(e.target.value);
+                  setLicenseError("");
+                }}
+                placeholder="Enter your license key"
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  background: "rgba(10, 8, 27, 1)",
+                  border: licenseError ? "1px solid #ef4444" : "1px solid rgba(140, 121, 255, 0.3)",
+                  borderRadius: "6px",
+                  color: "#fff",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              />
+              {licenseError && (
+                <p style={{ 
+                  color: "#ef4444", 
+                  fontSize: "12px", 
+                  marginTop: "8px",
+                  marginBottom: 0
+                }}>
+                  {licenseError}
+                </p>
+              )}
+            </div>
+
+            <div className="popup-buttons">
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setShowLicensePopup(false);
+                  setLicenseKey("");
+                  setLicenseError("");
+                }}
+                disabled={isActivatingLicense}
+              >
+                Cancel
+              </button>
+              <button
+                className="authorize-btn"
+                onClick={handleActivateLicense}
+                disabled={isActivatingLicense || !licenseKey.trim()}
+                style={{
+                  opacity: (isActivatingLicense || !licenseKey.trim()) ? 0.5 : 1,
+                  cursor: (isActivatingLicense || !licenseKey.trim()) ? "not-allowed" : "pointer"
+                }}
+              >
+                {isActivatingLicense ? "Activating..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       
     </div>

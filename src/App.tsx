@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "./style/styless.css";
 import WelcomeScreen from "./components/WelcomeScreen";
 import SetupStep from "./components/SetupStep";
@@ -9,7 +9,6 @@ import SuccessPublish from "./components/SuccessPublish";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAppState } from "./hooks/useAppState";  
 import { useAuth } from "./hooks/userAuth";
-import { serialize } from "v8";
 import { getCurrentSiteId, listCurrentSiteData, clearCurrentSiteData, clearAllData, clearAuthData, clearAuthIfNotAuthorized, checkMigrationStatus, forceMigration, usePersistentState, debugAuthStatus, forceClearAuthData, clearAllDataIncludingAuth, cleanBannerDetailsFromStorage } from "./hooks/usePersistentState";
 import { customCodeApi } from "./services/api";
 import { CodeApplication } from "./types/types";
@@ -793,36 +792,36 @@ useEffect(() => {
         />
       ) : componentStates.isCustomizationTab ? (
         <CustomizationTab 
-          onAuth={handleBackToWelcome} 
-          isAuthenticated={isAuthenticated} 
-          initialActiveTab={customizationInitialTab}
-          initialBannerStyles={bannerDetailsFromApi ? {
-            color: bannerDetailsFromApi.color,
-            btnColor: bannerDetailsFromApi.btnColor,
-            paraColor: bannerDetailsFromApi.paraColor,
-            secondcolor: bannerDetailsFromApi.secondcolor,
-            bgColors: bannerDetailsFromApi.bgColors || bannerDetailsFromApi.bgColor,
-            headColor: bannerDetailsFromApi.headColor,
-            secondbuttontext: bannerDetailsFromApi.secondbuttontext,
-            primaryButtonText: bannerDetailsFromApi.primaryButtonText,
-            Font: bannerDetailsFromApi.Font,
-            style: bannerDetailsFromApi.style,
-            selected: bannerDetailsFromApi.selected,
-            borderRadius: bannerDetailsFromApi.borderRadius,
-            buttonRadius: bannerDetailsFromApi.buttonRadius,
-            animation: bannerDetailsFromApi.animation,
-            easing: bannerDetailsFromApi.easing,
-            language: bannerDetailsFromApi.language,
-            weight: bannerDetailsFromApi.weight,
-            cookieExpiration: bannerDetailsFromApi.cookieExpiration,
-            privacyUrl: bannerDetailsFromApi.privacyUrl,
-            toggleStates: bannerDetailsFromApi.toggleStates ? {
-              customToggle: bannerDetailsFromApi.toggleStates.customToggle,
-              disableScroll: bannerDetailsFromApi.toggleStates.disableScroll,
-              closebutton: bannerDetailsFromApi.toggleStates.closebutton,
-            } : undefined
-          } : undefined}
-        />
+            onAuth={handleBackToWelcome} 
+            isAuthenticated={isAuthenticated} 
+            initialActiveTab={customizationInitialTab}
+            initialBannerStyles={bannerDetailsFromApi ? {
+              color: bannerDetailsFromApi.color,
+              btnColor: bannerDetailsFromApi.btnColor,
+              paraColor: bannerDetailsFromApi.paraColor,
+              secondcolor: bannerDetailsFromApi.secondcolor,
+              bgColors: bannerDetailsFromApi.bgColors || bannerDetailsFromApi.bgColor,
+              headColor: bannerDetailsFromApi.headColor,
+              secondbuttontext: bannerDetailsFromApi.secondbuttontext,
+              primaryButtonText: bannerDetailsFromApi.primaryButtonText,
+              Font: bannerDetailsFromApi.Font,
+              style: bannerDetailsFromApi.style,
+              selected: bannerDetailsFromApi.selected,
+              borderRadius: bannerDetailsFromApi.borderRadius,
+              buttonRadius: bannerDetailsFromApi.buttonRadius,
+              animation: bannerDetailsFromApi.animation,
+              easing: bannerDetailsFromApi.easing,
+              language: bannerDetailsFromApi.language,
+              weight: bannerDetailsFromApi.weight,
+              cookieExpiration: bannerDetailsFromApi.cookieExpiration,
+              privacyUrl: bannerDetailsFromApi.privacyUrl,
+              toggleStates: bannerDetailsFromApi.toggleStates ? {
+                customToggle: bannerDetailsFromApi.toggleStates.customToggle,
+                disableScroll: bannerDetailsFromApi.toggleStates.disableScroll,
+                closebutton: bannerDetailsFromApi.toggleStates.closebutton,
+              } : undefined
+            } : undefined}
+          />
       ) : (
         <WelcomeScreen 
           onAuthorize={handleWelcomeAuthorize}

@@ -13,7 +13,7 @@ import { c } from 'framer-motion/dist/types.d-Cjd591yU';
 import { getOrCreateCloseIconAsset } from '../util/bannerContentUtils';
 
 const appVersion = pkg.version;
-const base_url = "https://app.consentbit.com"
+const base_url = "https://consentbit-test-server.web-8fb.workers.dev"
 
 
 export interface BannerConfig {

@@ -54,8 +54,8 @@ const ChoosePlan: React.FC<ChoosePlanProps> = ({ onClose }) => {
               style={{
                 position: "absolute",
                 top: "0%",
-                left: "2%",
-                width: "165px",
+                left: "0%",
+                width: "170px",
                 height: "auto",
                 zIndex: 1
               }}
